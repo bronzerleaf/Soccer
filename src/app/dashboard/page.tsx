@@ -17,9 +17,27 @@ export default async function DashboardPage() {
     .eq("id", userData.user.id)
     .single();
 
+  let coachStatusCopy = "";
+  if (profile?.role === "coach") {
+    const { data: verification } = await supabase
+      .from("coach_verifications")
+      .select("status")
+      .eq("coach_id", userData.user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    coachStatusCopy =
+      verification?.status === "approved"
+        ? "You're verified. You can now search players and message families about open roster spots."
+        : verification?.status === "pending"
+          ? "Your club verification is under review."
+          : "Verify your club affiliation to start searching the player pool and messaging families.";
+  }
+
   const roleCopy =
     profile?.role === "coach"
-      ? "Once a club affiliation is confirmed, you'll be able to search the player pool and message families about open roster spots."
+      ? coachStatusCopy
       : "Add a player profile, verify parental consent, then flag them open to opportunities so coaches can find them.";
 
   return (
@@ -52,6 +70,14 @@ export default async function DashboardPage() {
             className="mt-4 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
           >
             Your players
+          </Link>
+        ) : null}
+        {profile?.role === "coach" ? (
+          <Link
+            href="/coach/verify"
+            className="mt-4 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            Club verification
           </Link>
         ) : null}
       </div>

@@ -8,6 +8,11 @@ insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-0000000000b1', 'parent-b1@example.com'),
   ('00000000-0000-0000-0000-0000000000b2', 'parent-b2@example.com');
 
+-- b1 submits a coach_verifications row further down, which (correctly,
+-- as of the coach-verification-lockdown migration) requires the caller's
+-- own profile to actually be role = 'coach'.
+update public.profiles set role = 'coach' where id = '00000000-0000-0000-0000-0000000000b1';
+
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "00000000-0000-0000-0000-0000000000b1", "role": "authenticated"}';
 

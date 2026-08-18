@@ -49,3 +49,17 @@ for f in supabase/tests/database/*.sql; do psql -d openroster_test -f "$f"; done
 - Deleting a player is a hard delete (`ON DELETE CASCADE` takes its `consent_records` with it) — no soft-delete, no orphaned trace of the minor's data.
 
 See `supabase/tests/database/consent_gate_rls.sql` for the proof, including the two bugs this caught while it was being written: a parent could otherwise insert a player row with consent pre-set to `true`, and `REVOKE UPDATE (col) ... FROM role` silently does nothing when that role still holds the table-level grant (fixed by revoking the table-level grant and re-granting only the columns a parent may edit — same pattern as `profiles.role`).
+
+## Coach verification
+
+A coach account can't search players or message anyone until an admin approves a `coach_verifications` row for them (`public.is_verified_coach()`, used throughout the player-visibility policies). The submission itself is locked down the same way as the consent gate: a coach's own `INSERT` policy requires `status = 'pending'` and `reviewed_by`/`reviewed_at` to be null, so a coach can't self-approve by just inserting a row that already claims to be reviewed. Only an admin's own authenticated session can move `status` — no service role needed for that path, since migration 1 already grants admins `UPDATE` on this table directly.
+
+**Bootstrapping the first admin.** There is deliberately no self-serve way to become an admin — `profiles.role` can only be set at signup (defaulting to `parent`/`coach`) or changed by a query that bypasses RLS. To promote a user, run this once against the database with the service role (e.g. the Supabase SQL Editor, or `psql` using the service-role/postgres connection string — never the anon/authenticated one):
+
+```sql
+update public.profiles set role = 'admin' where id = '<their auth.users uuid>';
+```
+
+## Admin queue
+
+`/admin/coaches` lists pending `coach_verifications` for an admin to approve or reject. It's gated by checking `profiles.role = 'admin'` server-side and redirecting otherwise — there's no separate admin subdomain or deploy, just a route ordinary users are redirected away from.

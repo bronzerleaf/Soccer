@@ -37,6 +37,16 @@ as $$
   select (nullif(current_setting('request.jwt.claims', true), '')::json ->> 'sub')::uuid;
 $$;
 
+-- Every prior RLS policy in this project called auth.uid() only from
+-- inside a USING/WITH CHECK expression, which Postgres resolves once
+-- (as the policy owner) at CREATE POLICY time and re-checks only
+-- EXECUTE-on-function afterward — so this grant's absence went
+-- unnoticed for a while. Ad-hoc SQL text that calls auth.uid() directly
+-- (as application code and some tests do) is parsed fresh under the
+-- calling role each time, which does need USAGE on the schema to even
+-- resolve the name. Real Supabase grants this by default.
+grant usage on schema auth to anon, authenticated, service_role;
+
 -- Minimal stand-in for Supabase Storage's schema: just enough of
 -- storage.buckets/storage.objects/storage.foldername() for the
 -- player-photos bucket policies to be testable locally.
