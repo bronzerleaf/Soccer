@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { startConversationWithCoach } from "@/app/messages/actions";
 
 export default async function RosterPostDetailPage({
   params,
@@ -26,6 +27,12 @@ export default async function RosterPostDetailPage({
   if (!post) {
     notFound();
   }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", userData.user.id)
+    .single();
 
   const club = post.club as unknown as { name: string; city: string } | null;
 
@@ -57,6 +64,32 @@ export default async function RosterPostDetailPage({
       <p className="mt-4 text-sm leading-6 text-slate-700">
         {post.description}
       </p>
+
+      {profile?.role === "parent" ? (
+        <div className="mt-8 border-t border-slate-200 pt-6">
+          <h2 className="text-sm font-medium text-slate-900">
+            Message the club
+          </h2>
+          <form
+            action={startConversationWithCoach.bind(null, post.id)}
+            className="mt-3 flex gap-2"
+          >
+            <textarea
+              name="body"
+              rows={2}
+              required
+              placeholder="Introduce your player and ask about this spot..."
+              className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="shrink-0 self-start rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              Send
+            </button>
+          </form>
+        </div>
+      ) : null}
     </main>
   );
 }

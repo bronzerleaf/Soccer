@@ -4,11 +4,49 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireVerifiedCoach } from "@/lib/coach";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
+import { sendEmail } from "@/lib/resend/server";
 
 const POST_LIFETIME_DAYS = 30;
 
+// The match query reuses the *coach's own* authenticated session — the
+// existing players RLS policy already lets a verified coach see every
+// open + consented row for this birth year, so no service role is
+// needed to find who matches. It's only needed for the next step:
+// looking up each matching parent's email, which the coach's own
+// session can't do (no conversation exists between them yet).
+async function notifyMatchingParents(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  birthYear: number,
+  clubName: string
+) {
+  const { data: matches } = await supabase
+    .from("players")
+    .select("parent_id")
+    .eq("birth_year", birthYear)
+    .eq("open_to_opportunities", true)
+    .eq("consent_completed", true);
+
+  const parentIds = [...new Set((matches ?? []).map((m) => m.parent_id))];
+  if (parentIds.length === 0) return;
+
+  const serviceRole = createServiceRoleClient();
+  const { data: parents } = await serviceRole
+    .from("profiles")
+    .select("email, full_name")
+    .in("id", parentIds);
+
+  for (const parent of parents ?? []) {
+    await sendEmail({
+      to: parent.email,
+      subject: "A new roster spot matches your player",
+      text: `${clubName} just posted an open roster spot for the ${birthYear} age group. Log in to OpenRoster to see the details and reach out: https://openroster.app/roster-posts`,
+    });
+  }
+}
+
 export async function createRosterPost(formData: FormData) {
-  const { supabase, coachId, clubId } = await requireVerifiedCoach();
+  const { supabase, coachId, clubId, club } = await requireVerifiedCoach();
 
   const birthYear = Number(formData.get("birth_year"));
   const positions = formData.getAll("positions").map(String);
@@ -35,6 +73,8 @@ export async function createRosterPost(formData: FormData) {
   if (error) {
     throw new Error(error.message);
   }
+
+  await notifyMatchingParents(supabase, birthYear, club?.name ?? "A club");
 
   revalidatePath("/roster-posts");
   redirect("/roster-posts/mine");

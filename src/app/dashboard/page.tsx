@@ -79,6 +79,12 @@ export default async function DashboardPage() {
             >
               Open roster spots
             </Link>
+            <Link
+              href="/messages"
+              className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400"
+            >
+              Messages
+            </Link>
           </div>
         ) : null}
         {profile?.role === "coach" ? (
@@ -96,6 +102,12 @@ export default async function DashboardPage() {
                   className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400"
                 >
                   Your roster posts
+                </Link>
+                <Link
+                  href="/messages"
+                  className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400"
+                >
+                  Messages
                 </Link>
               </>
             ) : null}

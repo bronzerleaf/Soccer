@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireVerifiedCoach } from "@/lib/coach";
+import { startConversationWithParent } from "@/app/messages/actions";
 
 export default async function SearchPlayerDetailPage({
   params,
@@ -113,6 +114,30 @@ export default async function SearchPlayerDetailPage({
           </div>
         ) : null}
       </dl>
+
+      <div className="mt-8 border-t border-slate-200 pt-6">
+        <h2 className="text-sm font-medium text-slate-900">
+          Message the family
+        </h2>
+        <form
+          action={startConversationWithParent.bind(null, player.id)}
+          className="mt-3 flex gap-2"
+        >
+          <textarea
+            name="body"
+            rows={2}
+            required
+            placeholder={`Introduce yourself and the opportunity at your club...`}
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="shrink-0 self-start rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            Send
+          </button>
+        </form>
+      </div>
     </main>
   );
 }
