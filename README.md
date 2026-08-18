@@ -63,3 +63,9 @@ update public.profiles set role = 'admin' where id = '<their auth.users uuid>';
 ## Admin queue
 
 `/admin/coaches` lists pending `coach_verifications` for an admin to approve or reject. It's gated by checking `profiles.role = 'admin'` server-side and redirecting otherwise — there's no separate admin subdomain or deploy, just a route ordinary users are redirected away from.
+
+## Player search
+
+`/search` is gated to coaches with an `approved` `coach_verifications` row (`requireVerifiedCoach()`); anyone else is redirected to `/coach/verify` or `/dashboard`. There's no "open to opportunities" filter in the UI because it isn't a real filter from a coach's point of view — the RLS policy on `players` already means every row a coach can see has `open_to_opportunities = true`, full stop.
+
+Photos follow the same rule as everything else here: the `player-photos` storage bucket had no coach-facing `SELECT` policy at all until this milestone (deliberately — no feature needed it yet). The policy added for search mirrors the `players` table's own visibility check exactly (open + consented + an approved verification), rather than trusting that whatever the app queries for is what the storage layer will actually serve. `/players/[id]` and `/search/[id]` — the two actual player-profile routes — set `robots: noindex` in their layouts, per the "never publicly indexable" requirement.

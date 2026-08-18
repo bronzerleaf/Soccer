@@ -18,6 +18,7 @@ export default async function DashboardPage() {
     .single();
 
   let coachStatusCopy = "";
+  let coachIsApproved = false;
   if (profile?.role === "coach") {
     const { data: verification } = await supabase
       .from("coach_verifications")
@@ -27,12 +28,12 @@ export default async function DashboardPage() {
       .limit(1)
       .maybeSingle();
 
-    coachStatusCopy =
-      verification?.status === "approved"
-        ? "You're verified. You can now search players and message families about open roster spots."
-        : verification?.status === "pending"
-          ? "Your club verification is under review."
-          : "Verify your club affiliation to start searching the player pool and messaging families.";
+    coachIsApproved = verification?.status === "approved";
+    coachStatusCopy = coachIsApproved
+      ? "You're verified. You can now search players and message families about open roster spots."
+      : verification?.status === "pending"
+        ? "Your club verification is under review."
+        : "Verify your club affiliation to start searching the player pool and messaging families.";
   }
 
   const roleCopy =
@@ -73,12 +74,26 @@ export default async function DashboardPage() {
           </Link>
         ) : null}
         {profile?.role === "coach" ? (
-          <Link
-            href="/coach/verify"
-            className="mt-4 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
-          >
-            Club verification
-          </Link>
+          <div className="mt-4 flex gap-2">
+            {coachIsApproved ? (
+              <Link
+                href="/search"
+                className="inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Search players
+              </Link>
+            ) : null}
+            <Link
+              href="/coach/verify"
+              className={
+                coachIsApproved
+                  ? "inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400"
+                  : "inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+              }
+            >
+              Club verification
+            </Link>
+          </div>
         ) : null}
       </div>
     </main>
