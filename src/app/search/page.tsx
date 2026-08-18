@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireVerifiedCoach } from "./require-verified-coach";
+import { requireVerifiedCoach } from "@/lib/coach";
 import { POSITIONS } from "@/app/players/constants";
 
 const currentYear = new Date().getFullYear();

@@ -66,22 +66,38 @@ export default async function DashboardPage() {
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-600">{roleCopy}</p>
         {profile?.role === "parent" ? (
-          <Link
-            href="/players"
-            className="mt-4 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
-          >
-            Your players
-          </Link>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/players"
+              className="inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              Your players
+            </Link>
+            <Link
+              href="/roster-posts"
+              className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400"
+            >
+              Open roster spots
+            </Link>
+          </div>
         ) : null}
         {profile?.role === "coach" ? (
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             {coachIsApproved ? (
-              <Link
-                href="/search"
-                className="inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
-              >
-                Search players
-              </Link>
+              <>
+                <Link
+                  href="/search"
+                  className="inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+                >
+                  Search players
+                </Link>
+                <Link
+                  href="/roster-posts/mine"
+                  className="inline-block rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400"
+                >
+                  Your roster posts
+                </Link>
+              </>
             ) : null}
             <Link
               href="/coach/verify"

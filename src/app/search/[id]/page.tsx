@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireVerifiedCoach } from "../require-verified-coach";
+import { requireVerifiedCoach } from "@/lib/coach";
 
 export default async function SearchPlayerDetailPage({
   params,

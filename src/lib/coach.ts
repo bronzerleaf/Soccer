@@ -21,15 +21,25 @@ export async function requireVerifiedCoach() {
 
   const { data: verification } = await supabase
     .from("coach_verifications")
-    .select("status")
+    .select("status, claimed_club_id, clubs(name, city)")
     .eq("coach_id", userData.user.id)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  if (verification?.status !== "approved") {
+  if (verification?.status !== "approved" || !verification.claimed_club_id) {
     redirect("/coach/verify");
   }
 
-  return { supabase, coachId: userData.user.id };
+  const club = verification.clubs as unknown as {
+    name: string;
+    city: string;
+  } | null;
+
+  return {
+    supabase,
+    coachId: userData.user.id,
+    clubId: verification.claimed_club_id as string,
+    club,
+  };
 }
