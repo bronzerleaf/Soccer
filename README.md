@@ -4,17 +4,17 @@ Club soccer roster matching for Dallas–Fort Worth. See [`CLAUDE.md`](./CLAUDE.
 
 ## Stack
 
-Next.js (App Router, TypeScript), Supabase (Postgres, Auth, RLS, Storage), Tailwind CSS, Resend, Stripe (feature-flagged), Vercel.
+Next.js (App Router, TypeScript), Supabase (Postgres, Auth, RLS, Storage), Tailwind CSS, Resend, Stripe, Vercel. Stripe is live now for the $0.50 parental-consent card authorization (immediately voided, never captured); Stripe *subscriptions* for paid roster posts are separate and still feature-flagged off for the DFW launch.
 
 ## Getting started
 
 ```bash
 npm install
-cp .env.local.example .env.local   # fill in your Supabase project URL + anon key
+cp .env.local.example .env.local   # fill in Supabase + Stripe test-mode keys
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). `SUPABASE_SERVICE_ROLE_KEY` is server-only and used exclusively by the consent flow (`src/app/players/[id]/consent/actions.ts`) to write `consent_records` and flip `players.consent_completed` after a verified Stripe authorization — a parent's own session is never allowed to do either directly (see Database below).
 
 ## Database
 
@@ -28,15 +28,24 @@ npx supabase db reset   # applies migrations + supabase/seed.sql
 npx supabase test db
 ```
 
-If Docker/Supabase's image registry isn't reachable from your machine, the same migration, seed, and pgTAP tests can be run against a bare local Postgres install (16+, with the `postgresql-16-pgtap` package) instead:
+If Docker/Supabase's image registry isn't reachable from your machine, the same migrations, seed, and pgTAP tests can be run against a bare local Postgres install (16+, with the `postgresql-16-pgtap` package) instead:
 
 ```bash
 createdb openroster_test
-psql -d openroster_test -v ON_ERROR_STOP=1 -f supabase/tests/_local_bootstrap.sql   # stand-in for the auth schema/roles the hosted stack provides
-psql -d openroster_test -v ON_ERROR_STOP=1 -f supabase/migrations/20260101000000_roles_and_rls.sql
+psql -d openroster_test -v ON_ERROR_STOP=1 -f supabase/tests/_local_bootstrap.sql   # stand-in for the auth/storage schema + roles the hosted stack provides
+for f in supabase/migrations/*.sql; do psql -d openroster_test -v ON_ERROR_STOP=1 -f "$f"; done
 psql -d openroster_test -v ON_ERROR_STOP=1 -f supabase/seed.sql
-psql -d openroster_test -f supabase/tests/database/players_rls.sql
-psql -d openroster_test -f supabase/tests/database/profiles_and_verifications_rls.sql
+for f in supabase/tests/database/*.sql; do psql -d openroster_test -f "$f"; done
 ```
 
-`supabase/tests/_local_bootstrap.sql` is not a migration — it only exists to approximate the `auth` schema and `anon`/`authenticated`/`service_role` roles that the hosted/Dockerized Supabase stack already provides, so the RLS tests have something to run against locally.
+`supabase/tests/_local_bootstrap.sql` is not a migration — it only exists to approximate the `auth`/`storage` schemas and `anon`/`authenticated`/`service_role` roles that the hosted/Dockerized Supabase stack already provides, so the RLS tests have something to run against locally.
+
+## Consent gate
+
+`players.consent_completed` and `players.open_to_opportunities` are both locked down at the database layer, not just in the app:
+
+- A parent can never set `consent_completed` themselves — not via `UPDATE` (column-level grant excludes it) and not via `INSERT` (the insert policy requires it to be `false`). Only the service-role client can flip it, and only from the consent server action after Stripe confirms a real card authorization.
+- A `CHECK` constraint (`players_consent_gates_open_to_opportunities`) forbids `open_to_opportunities = true` while `consent_completed = false`, independent of any RLS policy or app-layer bug.
+- Deleting a player is a hard delete (`ON DELETE CASCADE` takes its `consent_records` with it) — no soft-delete, no orphaned trace of the minor's data.
+
+See `supabase/tests/database/consent_gate_rls.sql` for the proof, including the two bugs this caught while it was being written: a parent could otherwise insert a player row with consent pre-set to `true`, and `REVOKE UPDATE (col) ... FROM role` silently does nothing when that role still holds the table-level grant (fixed by revoking the table-level grant and re-granting only the columns a parent may edit — same pattern as `profiles.role`).

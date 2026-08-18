@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
@@ -19,7 +20,7 @@ export default async function DashboardPage() {
   const roleCopy =
     profile?.role === "coach"
       ? "Once a club affiliation is confirmed, you'll be able to search the player pool and message families about open roster spots."
-      : "Next up: add a player profile and flag them open to opportunities so coaches can find them.";
+      : "Add a player profile, verify parental consent, then flag them open to opportunities so coaches can find them.";
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col px-6 py-12">
@@ -45,6 +46,14 @@ export default async function DashboardPage() {
           {profile?.role === "coach" ? "Coach account" : "Parent account"}
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-600">{roleCopy}</p>
+        {profile?.role === "parent" ? (
+          <Link
+            href="/players"
+            className="mt-4 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            Your players
+          </Link>
+        ) : null}
       </div>
     </main>
   );

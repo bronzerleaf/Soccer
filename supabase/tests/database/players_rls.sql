@@ -28,12 +28,14 @@ insert into public.coach_verifications (coach_id, status) values
   ('00000000-0000-0000-0000-0000000000c2', 'approved');
 
 -- Parent A has two children: one open+consented, one still gated by
--- consent. Parent B has one open+consented child.
+-- consent (and therefore not open — the DB-level consent gate added in
+-- the next migration forbids open_to_opportunities without consent).
+-- Parent B has one open+consented child.
 insert into public.players
   (id, parent_id, first_name, last_initial, birth_year, city, open_to_opportunities, consent_completed)
 values
   ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-0000000000a1', 'Ava', 'S', 2014, 'Frisco', true, true),
-  ('10000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000a1', 'Ben', 'S', 2016, 'Frisco', true, false),
+  ('10000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000a1', 'Ben', 'S', 2016, 'Frisco', false, false),
   ('10000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-0000000000a2', 'Cora', 'T', 2013, 'Plano', true, true);
 
 -- ---------------------------------------------------------------------
