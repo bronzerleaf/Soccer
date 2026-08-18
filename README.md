@@ -91,3 +91,14 @@ Once a conversation exists, a new `profiles` policy lets the two participants re
 No message is ever deleted or edited — there's no `UPDATE`/`DELETE` policy on `messages` for any role, including admin. "Every message is logged and retained" is enforced by simply not offering a way to un-log one; milestone 7's moderation tools will read and flag, not erase.
 
 New-message and matching-roster-post notifications go through `src/lib/resend/server.ts`, which is deliberately best-effort: a missing `RESEND_API_KEY` (this sandbox has no real one) or any send failure is logged and swallowed, never thrown, since a notification failing should never take the underlying message or roster post down with it.
+
+## Admin moderation
+
+`/admin` is the hub for everything below; each page is gated by `requireAdmin()` (`src/lib/admin.ts`) redirecting non-admins to `/dashboard`.
+
+- **Coach queue** (`/admin/coaches`) — carried over from milestone 3.
+- **Flagged messages** (`/admin/messages`) — flagging is a separate, append-only `message_flags` table, not a column on `messages`. Messages stay immutable forever (milestone 6: no `UPDATE`/`DELETE` policy for anyone, admin included); dismissing a flag deletes the flag row and never touches the message it pointed at. A participant can only flag a message in a conversation they're actually part of — unlike the messaging insert-policy checks in milestone 6, this one didn't need a `security definer` wrapper, since "am I a participant on my own conversation" is exactly the access the flagger's ordinary RLS already grants them.
+- **Roster posts** (`/admin/roster-posts`) — remove any post regardless of which coach posted it, via the `roster_posts: admins manage all` policy that's existed since milestone 5.
+- **Club list** (`/admin/clubs`) — add/remove entries in the curated dropdown, via the `clubs: admins manage` policy from milestone 1.
+
+Two gaps this milestone had to close before "view flagged messages" actually worked: migration 6 gave admins `SELECT` on `message_flags` but never on `messages` or `conversations` themselves, so an admin could see *that* something was flagged but not *what it said* — fixed with read-only `messages: admins read all` / `conversations: admins read all` policies (still no write access). And the conversation thread page (`/messages/[id]`) assumed the viewer was always one of the two participants when picking which name to show and whether to render a reply box; an admin opening it from the flagged-messages list is neither, so it now detects that case, shows both participants' names, and hides the (otherwise RLS-rejected) reply form entirely.

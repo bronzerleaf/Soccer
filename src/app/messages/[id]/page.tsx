@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { sendMessage } from "../actions";
+import { FlagMessageButton } from "./flag-message-button";
 
 export default async function ConversationPage({
   params,
@@ -30,16 +31,35 @@ export default async function ConversationPage({
     notFound();
   }
 
-  const otherId =
-    conversation.parent_id === userId
-      ? conversation.coach_id
-      : conversation.parent_id;
+  const isParticipant =
+    conversation.parent_id === userId || conversation.coach_id === userId;
 
-  const { data: other } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", otherId)
-    .single();
+  // A non-participant who can still load this page is an admin viewing
+  // it for moderation (the only other SELECT grant on conversations) —
+  // show both names and no reply form, rather than guessing which side
+  // is "the other one" or offering a reply that RLS would just reject.
+  let headerName: string;
+  if (isParticipant) {
+    const otherId =
+      conversation.parent_id === userId
+        ? conversation.coach_id
+        : conversation.parent_id;
+    const { data: other } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", otherId)
+      .single();
+    headerName = other?.full_name ?? "Conversation";
+  } else {
+    const { data: participants } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", [conversation.parent_id, conversation.coach_id]);
+    const byId = new Map((participants ?? []).map((p) => [p.id, p.full_name]));
+    headerName = `${byId.get(conversation.parent_id) ?? "Parent"} & ${
+      byId.get(conversation.coach_id) ?? "Coach"
+    }`;
+  }
 
   const { data: messages } = await supabase
     .from("messages")
@@ -62,7 +82,7 @@ export default async function ConversationPage({
       </Link>
 
       <h1 className="mt-3 text-xl font-semibold text-slate-900">
-        {other?.full_name ?? "Conversation"}
+        {headerName}
       </h1>
       {player ? (
         <p className="mt-1 text-sm text-slate-500">
@@ -79,38 +99,44 @@ export default async function ConversationPage({
         {(messages ?? []).map((message) => {
           const isMine = message.sender_id === userId;
           return (
-            <div
-              key={message.id}
-              className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                isMine
-                  ? "ml-auto bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-900"
-              }`}
-            >
-              {message.body}
+            <div key={message.id} className={isMine ? "ml-auto max-w-[80%]" : "max-w-[80%]"}>
+              <div
+                className={`rounded-lg px-3 py-2 text-sm ${
+                  isMine
+                    ? "bg-slate-900 text-white"
+                    : "bg-slate-100 text-slate-900"
+                }`}
+              >
+                {message.body}
+              </div>
+              {!isMine && isParticipant ? (
+                <FlagMessageButton messageId={message.id} />
+              ) : null}
             </div>
           );
         })}
       </div>
 
-      <form
-        action={sendMessage.bind(null, id)}
-        className="mt-6 flex gap-2 border-t border-slate-200 pt-4"
-      >
-        <textarea
-          name="body"
-          rows={2}
-          required
-          placeholder="Write a reply..."
-          className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
-        />
-        <button
-          type="submit"
-          className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+      {isParticipant ? (
+        <form
+          action={sendMessage.bind(null, id)}
+          className="mt-6 flex gap-2 border-t border-slate-200 pt-4"
         >
-          Send
-        </button>
-      </form>
+          <textarea
+            name="body"
+            rows={2}
+            required
+            placeholder="Write a reply..."
+            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+          >
+            Send
+          </button>
+        </form>
+      ) : null}
     </main>
   );
 }

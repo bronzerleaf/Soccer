@@ -1,24 +1,9 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
+import { requireAdmin } from "@/lib/admin";
 import { approveCoachVerification, rejectCoachVerification } from "./actions";
 
 export default async function AdminCoachesPage() {
-  const supabase = await createClient();
-  const { data: userData } = await supabase.auth.getUser();
-
-  if (!userData.user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", userData.user.id)
-    .single();
-
-  if (profile?.role !== "admin") {
-    redirect("/dashboard");
-  }
+  const { supabase } = await requireAdmin();
 
   const { data: pending } = await supabase
     .from("coach_verifications")
@@ -30,7 +15,10 @@ export default async function AdminCoachesPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="text-xl font-semibold text-slate-900">
+      <Link href="/admin" className="text-sm text-slate-500 underline">
+        ← Admin
+      </Link>
+      <h1 className="mt-3 text-xl font-semibold text-slate-900">
         Coach verification queue
       </h1>
       <p className="mt-2 text-sm text-slate-600">

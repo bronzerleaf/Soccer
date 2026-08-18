@@ -8,6 +8,26 @@ import { sendEmail } from "@/lib/resend/server";
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
+export async function flagMessage(messageId: string, formData: FormData) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect("/login");
+  }
+
+  const reason = String(formData.get("reason") ?? "").trim();
+
+  const { error } = await supabase.from("message_flags").insert({
+    message_id: messageId,
+    flagged_by: userData.user.id,
+    reason: reason || null,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 async function notifyOtherParticipant(
   supabase: SupabaseClient,
   conversationId: string,

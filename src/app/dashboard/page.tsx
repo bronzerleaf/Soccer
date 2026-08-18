@@ -39,7 +39,9 @@ export default async function DashboardPage() {
   const roleCopy =
     profile?.role === "coach"
       ? coachStatusCopy
-      : "Add a player profile, verify parental consent, then flag them open to opportunities so coaches can find them.";
+      : profile?.role === "admin"
+        ? "Review coach verifications, flagged messages, roster posts, and the club list."
+        : "Add a player profile, verify parental consent, then flag them open to opportunities so coaches can find them.";
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col px-6 py-12">
@@ -62,7 +64,11 @@ export default async function DashboardPage() {
 
       <div className="mt-10 rounded-lg border border-slate-200 p-5">
         <p className="text-sm font-medium text-slate-900">
-          {profile?.role === "coach" ? "Coach account" : "Parent account"}
+          {profile?.role === "coach"
+            ? "Coach account"
+            : profile?.role === "admin"
+              ? "Admin account"
+              : "Parent account"}
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-600">{roleCopy}</p>
         {profile?.role === "parent" ? (
@@ -120,6 +126,16 @@ export default async function DashboardPage() {
               }
             >
               Club verification
+            </Link>
+          </div>
+        ) : null}
+        {profile?.role === "admin" ? (
+          <div className="mt-4">
+            <Link
+              href="/admin"
+              className="inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+            >
+              Admin dashboard
             </Link>
           </div>
         ) : null}
