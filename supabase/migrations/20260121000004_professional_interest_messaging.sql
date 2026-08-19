@@ -11,21 +11,6 @@ create unique index conversations_opportunity_interest_unique
   on public.conversations (opportunity_interest_id)
   where opportunity_interest_id is not null;
 
-create function public.is_verified_organization(check_user_id uuid)
-returns boolean
-language sql
-security definer
-set search_path = public
-stable
-as $$
-  select exists (
-    select 1 from public.organization_verifications ov
-    where ov.organization_id = check_user_id and ov.status = 'approved'
-  );
-$$;
-
-grant execute on function public.is_verified_organization(uuid) to authenticated;
-
 create function public.professional_can_contact_interest(
   check_professional_id uuid,
   check_parent_id uuid,
