@@ -5,18 +5,22 @@ import { createClient } from "@/lib/supabase/server";
 export default async function NewFeedPostChooserPage() {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) {
-    redirect("/login");
-  }
+  if (!userData.user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", userData.user.id)
-    .single();
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", userData.user.id).single();
 
-  if (profile?.role === "organization") {
-    redirect("/feed/new/org_event");
+  if (profile?.role === "organization") redirect("/feed/new/org_event");
+
+  if (profile?.role === "trainer") {
+    const { data: verification } = await supabase
+      .from("trainer_verifications")
+      .select("status")
+      .eq("trainer_id", userData.user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (verification?.status !== "approved") redirect("/trainer/verify");
+    redirect("/feed/new/training");
   }
 
   if (profile?.role === "coach") {
@@ -27,95 +31,45 @@ export default async function NewFeedPostChooserPage() {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (verification?.status !== "approved") {
-      redirect("/coach/verify");
-    }
+    if (verification?.status !== "approved") redirect("/coach/verify");
 
     return (
       <main className="mx-auto max-w-sm px-6 py-12">
-        <Link href="/feed" className="text-sm text-slate-500 underline">
-          ← Back to feed
-        </Link>
-        <h1 className="mt-3 text-xl font-semibold text-slate-900">
-          Post to the local feed
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">What are you posting?</p>
-
+        <Link href="/feed" className="text-sm font-semibold text-slate-500">← Back to feed</Link>
+        <h1 className="mt-4 text-2xl font-black text-[#0b1736]">Create a post</h1>
+        <p className="mt-2 text-sm text-slate-500">What does your team or club need?</p>
         <div className="mt-6 space-y-3">
-          <Link
-            href="/roster-posts/new"
-            className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
-          >
-            <p className="text-sm font-medium text-slate-900">Roster spot</p>
-            <p className="mt-1 text-sm text-slate-600">
-              Your club has an open spot for a specific age group.
-            </p>
-          </Link>
-          <Link
-            href="/feed/new/guest_play"
-            className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
-          >
-            <p className="text-sm font-medium text-slate-900">
-              Need a guest player
-            </p>
-            <p className="mt-1 text-sm text-slate-600">
-              Your team needs a one-off guest for an upcoming game.
-            </p>
-          </Link>
-          <Link
-            href="/feed/new/training"
-            className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
-          >
-            <p className="text-sm font-medium text-slate-900">
-              Training / event
-            </p>
-            <p className="mt-1 text-sm text-slate-600">
-              A clinic, camp, or training session families can sign up for.
-            </p>
-          </Link>
+          <PostChoice href="/roster-posts/new" title="Open roster spot" copy="Recruit for a specific age group or position." />
+          <PostChoice href="/feed/new/guest_play" title="Need a guest player" copy="Find a player for an upcoming game or tournament." />
+          <PostChoice href="/feed/new/training" title="Training / clinic" copy="Share a camp, clinic or training session." />
         </div>
       </main>
     );
   }
 
-  if (profile?.role !== "parent") {
-    redirect("/feed");
-  }
+  if (profile?.role !== "parent") redirect("/feed");
 
   return (
     <main className="mx-auto max-w-sm px-6 py-12">
-      <Link href="/feed" className="text-sm text-slate-500 underline">
-        ← Back to feed
-      </Link>
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
-        Post to the local feed
-      </h1>
-      <p className="mt-2 text-sm text-slate-600">
-        What are you looking for?
-      </p>
-
+      <Link href="/feed" className="text-sm font-semibold text-slate-500">← Back to feed</Link>
+      <h1 className="mt-4 text-2xl font-black text-[#0b1736]">Create a post</h1>
+      <p className="mt-2 text-sm text-slate-500">Share a specific need without changing the player&rsquo;s private search setting.</p>
       <div className="mt-6 space-y-3">
-        <Link
-          href="/feed/new/looking_for_team"
-          className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
-        >
-          <p className="text-sm font-medium text-slate-900">
-            Looking for a team
-          </p>
-          <p className="mt-1 text-sm text-slate-600">
-            Your player is open to joining a new club team.
-          </p>
-        </Link>
-        <Link
-          href="/feed/new/guest_play"
-          className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
-        >
-          <p className="text-sm font-medium text-slate-900">Guest play</p>
-          <p className="mt-1 text-sm text-slate-600">
-            Your player is available for a one-off guest appearance.
-          </p>
-        </Link>
+        <PostChoice href="/feed/new/looking_for_team" title="Looking for a team" copy="Tell the community what kind of team you are looking for." />
+        <PostChoice href="/feed/new/guest_play" title="Available for guest play" copy="Share availability for a specific guest-play opportunity." />
+        <PostChoice href="/players" title="Post a player clip" copy="Open the player profile, add a clip and choose Profile + feed." />
       </div>
     </main>
+  );
+}
+
+function PostChoice({ href, title, copy }: { href: string; title: string; copy: string }) {
+  return (
+    <Link href={href} className="pitch-card block p-4 transition-transform active:scale-[0.99]">
+      <div className="flex items-center justify-between gap-3">
+        <div><p className="text-sm font-black text-[#0b1736]">{title}</p><p className="mt-1 text-xs leading-5 text-slate-500">{copy}</p></div>
+        <span className="text-slate-300">→</span>
+      </div>
+    </Link>
   );
 }
