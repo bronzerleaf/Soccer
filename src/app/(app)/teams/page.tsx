@@ -5,6 +5,9 @@ import { ClaimTeamForm } from "./claim-team-form";
 import { startConversationWithTeamCoach } from "@/app/(app)/messages/actions";
 import { LocationSettings } from "@/app/(app)/feed/location-settings";
 import { haversineMiles } from "@/lib/geo";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { ClubCrest } from "@/components/ui/club-crest";
 
 export default async function TeamsPage({
   searchParams,
@@ -227,54 +230,61 @@ async function renderParentTeamBrowse(
               | undefined;
 
             return (
-              <li
-                key={team.id}
-                className="rounded-lg border border-slate-200 p-4"
-              >
-                <p className="text-sm font-medium text-slate-900">
-                  {team.name}
-                </p>
-                {city ? (
-                  <p className="text-xs text-slate-500">{city.name}</p>
-                ) : null}
-                {team.leagues && team.leagues.length > 0 ? (
-                  <p className="mt-1 text-xs text-slate-500">
-                    {team.leagues.join(", ")}
-                  </p>
-                ) : null}
+              <li key={team.id}>
+                <Card>
+                  <div className="flex items-center gap-3">
+                    <ClubCrest name={team.name} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <p className="truncate text-sm font-semibold text-slate-900">
+                          {team.name}
+                        </p>
+                        {coach ? <Badge tone="verified">Verified team</Badge> : null}
+                      </div>
+                      {city ? (
+                        <p className="text-xs text-slate-500">{city.name}</p>
+                      ) : null}
+                      {team.leagues && team.leagues.length > 0 ? (
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {team.leagues.join(", ")}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
 
-                {coach ? (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer text-sm font-medium text-slate-700 underline">
-                      Message {coach.full_name}
-                    </summary>
-                    <form
-                      action={startConversationWithTeamCoach.bind(
-                        null,
-                        team.id
-                      )}
-                      className="mt-2 flex gap-2"
-                    >
-                      <textarea
-                        name="body"
-                        rows={2}
-                        required
-                        placeholder={`Introduce yourself to ${coach.full_name}...`}
-                        className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
-                      />
-                      <button
-                        type="submit"
-                        className="shrink-0 self-start rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                  {coach ? (
+                    <details className="mt-3">
+                      <summary className="cursor-pointer text-sm font-medium text-slate-700 underline">
+                        Message {coach.full_name}
+                      </summary>
+                      <form
+                        action={startConversationWithTeamCoach.bind(
+                          null,
+                          team.id
+                        )}
+                        className="mt-2 flex gap-2"
                       >
-                        Send
-                      </button>
-                    </form>
-                  </details>
-                ) : (
-                  <p className="mt-2 text-xs text-slate-400">
-                    No verified coach yet.
-                  </p>
-                )}
+                        <textarea
+                          name="body"
+                          rows={2}
+                          required
+                          placeholder={`Introduce yourself to ${coach.full_name}...`}
+                          className="block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                        />
+                        <button
+                          type="submit"
+                          className="shrink-0 self-start rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                        >
+                          Send
+                        </button>
+                      </form>
+                    </details>
+                  ) : (
+                    <p className="mt-2 text-xs text-slate-400">
+                      No verified coach yet.
+                    </p>
+                  )}
+                </Card>
               </li>
             );
           })}
