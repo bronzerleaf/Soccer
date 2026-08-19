@@ -4,6 +4,8 @@ import { requireVerifiedCoach } from "@/lib/coach";
 import { startConversationWithParent } from "@/app/(app)/messages/actions";
 import { fetchOEmbedPreview, type OEmbedPreview } from "@/lib/oembed/server";
 import { LinkGallery, type Highlight } from "@/components/ui/link-gallery";
+import { ActionButton } from "@/components/ui/action-button";
+import { togglePlayerInterest } from "../actions";
 
 export default async function SearchPlayerDetailPage({
   params,
@@ -11,7 +13,7 @@ export default async function SearchPlayerDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const { supabase } = await requireVerifiedCoach();
+  const { supabase, coachId } = await requireVerifiedCoach();
 
   const { data: player } = await supabase
     .from("players")
@@ -27,6 +29,14 @@ export default async function SearchPlayerDetailPage({
   if (!player) {
     notFound();
   }
+
+  const { data: interest } = await supabase
+    .from("player_interest")
+    .select("player_id")
+    .eq("player_id", id)
+    .eq("coach_id", coachId)
+    .maybeSingle();
+  const hasMarkedInterest = !!interest;
 
   let photoUrl: string | null = null;
   if (player.photo_url) {
@@ -71,6 +81,21 @@ export default async function SearchPlayerDetailPage({
             {player.birth_year} · {player.city}
           </p>
         </div>
+      </div>
+
+      <div className="mt-4">
+        <ActionButton
+          action={togglePlayerInterest.bind(null, player.id)}
+          label={hasMarkedInterest ? "Marked as interested" : "Mark as interested"}
+          pendingLabel="Saving..."
+          successMessage={hasMarkedInterest ? "Removed from your interest list" : "Marked as interested"}
+          variant={hasMarkedInterest ? "primary" : "secondary"}
+          size="sm"
+        />
+        <p className="mt-1.5 text-xs text-slate-500">
+          Visible only to {player.first_name}&rsquo;s family — a lightweight
+          way to flag interest alongside messaging them directly.
+        </p>
       </div>
 
       <dl className="mt-8 space-y-4">

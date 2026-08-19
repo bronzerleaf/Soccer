@@ -43,6 +43,18 @@ export default async function PlayerDetailPage({
     notFound();
   }
 
+  // RLS already scopes this to the requesting parent's own player rows
+  // ("player_interest: parent reads own player's interest") — no other
+  // family's interest list is ever reachable this way.
+  const { data: interestRows } = await supabase
+    .from("player_interest")
+    .select("coach_id, created_at, coach:profiles(full_name)")
+    .eq("player_id", player.id)
+    .order("created_at", { ascending: false });
+  const interestedCoaches = (interestRows ?? []).map(
+    (row) => (row.coach as unknown as { full_name: string } | null)?.full_name ?? "A coach"
+  );
+
   let signedPhotoUrl: string | null = null;
   if (player.photo_url) {
     const { data } = await supabase.storage
@@ -128,6 +140,20 @@ export default async function PlayerDetailPage({
           </div>
         )}
       </div>
+
+      {interestedCoaches.length > 0 ? (
+        <div className="mt-6 rounded-lg border border-slate-200 p-5">
+          <p className="text-sm font-medium text-slate-900">
+            {interestedCoaches.length} coach
+            {interestedCoaches.length === 1 ? "" : "es"} interested
+          </p>
+          <p className="mt-1 text-sm text-slate-600">
+            {interestedCoaches.join(", ")} marked interest in{" "}
+            {player.first_name}&rsquo;s profile. Check your messages, or
+            reach out from theirs.
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-8">
         <h2 className="text-sm font-medium text-slate-900">Highlights</h2>

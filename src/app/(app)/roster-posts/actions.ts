@@ -100,6 +100,41 @@ export async function expireRosterPost(postId: string) {
   revalidatePath("/roster-posts/mine");
 }
 
+// A single toggle rather than separate like/unlike actions, same
+// pattern as toggleFeedPostLike — check server-side whether the caller
+// has already liked it and flip it.
+export async function toggleRosterPostLike(postId: string) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect("/login");
+  }
+
+  const { data: existing } = await supabase
+    .from("roster_post_likes")
+    .select("post_id")
+    .eq("post_id", postId)
+    .eq("profile_id", userData.user.id)
+    .maybeSingle();
+
+  if (existing) {
+    const { error } = await supabase
+      .from("roster_post_likes")
+      .delete()
+      .eq("post_id", postId)
+      .eq("profile_id", userData.user.id);
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase
+      .from("roster_post_likes")
+      .insert({ post_id: postId, profile_id: userData.user.id });
+    if (error) throw new Error(error.message);
+  }
+
+  revalidatePath("/feed");
+  revalidatePath(`/roster-posts/${postId}`);
+}
+
 export async function deleteRosterPost(postId: string) {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();

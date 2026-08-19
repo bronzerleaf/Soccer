@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { startConversationWithCoach } from "@/app/(app)/messages/actions";
+import { LikeButton } from "@/app/(app)/feed/like-button";
+import { toggleRosterPostLike } from "../actions";
 
 export default async function RosterPostDetailPage({
   params,
@@ -28,11 +30,13 @@ export default async function RosterPostDetailPage({
     notFound();
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", userData.user.id)
-    .single();
+  const [{ data: profile }, { data: likeRows }] = await Promise.all([
+    supabase.from("profiles").select("role").eq("id", userData.user.id).single(),
+    supabase.from("roster_post_likes").select("profile_id").eq("post_id", post.id),
+  ]);
+
+  const likeCount = likeRows?.length ?? 0;
+  const likedByMe = (likeRows ?? []).some((l) => l.profile_id === userData.user!.id);
 
   const club = post.club as unknown as { name: string; city: string } | null;
 
@@ -64,6 +68,15 @@ export default async function RosterPostDetailPage({
       <p className="mt-4 text-sm leading-6 text-slate-700">
         {post.description}
       </p>
+
+      <div className="mt-4">
+        <LikeButton
+          postId={post.id}
+          likedByMe={likedByMe}
+          likeCount={likeCount}
+          toggleAction={toggleRosterPostLike}
+        />
+      </div>
 
       {profile?.role === "parent" ? (
         <div className="mt-8 border-t border-slate-200 pt-6">

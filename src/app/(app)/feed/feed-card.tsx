@@ -3,6 +3,7 @@ import { LikeButton } from "./like-button";
 import { ShareButton } from "./share-button";
 import { ActionButton } from "@/components/ui/action-button";
 import { deleteFeedPost } from "./actions";
+import { toggleRosterPostLike } from "../roster-posts/actions";
 
 export type FeedItem =
   | {
@@ -13,6 +14,8 @@ export type FeedItem =
       clubName: string;
       clubCity: string;
       createdAt: string;
+      likeCount: number;
+      likedByMe: boolean;
     }
   | {
       kind: "looking_for_team" | "guest_play";
@@ -113,7 +116,13 @@ export function FeedCard({ item }: { item: FeedItem }) {
             {(item.positions ?? []).join(", ") || "Any position"}
           </p>
         </Link>
-        <div className="mt-3">
+        <div className="mt-3 flex gap-2">
+          <LikeButton
+            postId={item.id}
+            likedByMe={item.likedByMe}
+            likeCount={item.likeCount}
+            toggleAction={toggleRosterPostLike}
+          />
           <ShareButton href={`/roster-posts/${item.id}`} />
         </div>
       </div>

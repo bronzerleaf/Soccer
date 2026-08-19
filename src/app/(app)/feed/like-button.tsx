@@ -2,16 +2,20 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { toggleFeedPostLike } from "./actions";
+import { toggleFeedPostLike as defaultToggle } from "./actions";
 
 export function LikeButton({
   postId,
   likedByMe,
   likeCount,
+  toggleAction,
 }: {
   postId: string;
   likedByMe: boolean;
   likeCount: number;
+  // Defaults to feed_posts' own toggle; roster_spot cards pass
+  // toggleRosterPostLike instead — same optimistic-UI shell either way.
+  toggleAction?: (postId: string) => Promise<void>;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -24,7 +28,7 @@ export function LikeButton({
     setOptimisticCount((count) => count + (nextLiked ? 1 : -1));
     startTransition(async () => {
       try {
-        await toggleFeedPostLike(postId);
+        await (toggleAction ?? defaultToggle)(postId);
         router.refresh();
       } catch {
         setOptimisticLiked(!nextLiked);

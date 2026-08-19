@@ -99,7 +99,7 @@ export default async function FeedPage({
   // raw PostgREST filter string without risking injection. Data volumes
   // here are small enough that a plain in-memory filter is the safer bet,
   // same reasoning /roster-posts already documents for its city filter.
-  const [{ data: rosterPosts }, { data: feedPosts }, { data: myLikes }] =
+  const [{ data: rosterPosts }, { data: feedPosts }, { data: myLikes }, { data: myRosterLikes }] =
     await Promise.all([
       supabase
         .from("roster_posts")
@@ -119,9 +119,14 @@ export default async function FeedPage({
         .from("feed_post_likes")
         .select("post_id")
         .eq("profile_id", userData.user.id),
+      supabase
+        .from("roster_post_likes")
+        .select("post_id")
+        .eq("profile_id", userData.user.id),
     ]);
 
   const likedPostIds = new Set((myLikes ?? []).map((l) => l.post_id));
+  const likedRosterPostIds = new Set((myRosterLikes ?? []).map((l) => l.post_id));
 
   // roster_posts don't carry a city_id (clubs use a free-text city field,
   // not the curated cities table), so they're never radius-filtered --
@@ -136,6 +141,8 @@ export default async function FeedPage({
       clubName: club?.name ?? "Unknown club",
       clubCity: club?.city ?? "",
       createdAt: post.created_at,
+      likeCount: 0, // filled in below from a separate count query
+      likedByMe: likedRosterPostIds.has(post.id),
     };
   });
 
@@ -209,7 +216,7 @@ export default async function FeedPage({
       } satisfies FeedItem;
     });
 
-  // Like counts, one grouped query rather than N+1 per card.
+  // Like counts, one grouped query per table rather than N+1 per card.
   const feedPostIds = feedItems.map((item) => item.id);
   if (feedPostIds.length > 0) {
     const { data: likeRows } = await supabase
@@ -223,6 +230,23 @@ export default async function FeedPage({
     for (const item of feedItems) {
       if (item.kind !== "roster_spot") {
         item.likeCount = counts.get(item.id) ?? 0;
+      }
+    }
+  }
+
+  const rosterPostIds = rosterItems.map((item) => item.id);
+  if (rosterPostIds.length > 0) {
+    const { data: rosterLikeRows } = await supabase
+      .from("roster_post_likes")
+      .select("post_id")
+      .in("post_id", rosterPostIds);
+    const rosterCounts = new Map<string, number>();
+    for (const row of rosterLikeRows ?? []) {
+      rosterCounts.set(row.post_id, (rosterCounts.get(row.post_id) ?? 0) + 1);
+    }
+    for (const item of rosterItems) {
+      if (item.kind === "roster_spot") {
+        item.likeCount = rosterCounts.get(item.id) ?? 0;
       }
     }
   }
