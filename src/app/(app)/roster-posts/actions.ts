@@ -40,7 +40,7 @@ async function notifyMatchingParents(
     await sendEmail({
       to: parent.email,
       subject: "A new roster spot matches your player",
-      text: `${clubName} just posted an open roster spot for the ${birthYear} age group. Log in to OpenRoster to see the details and reach out: https://openroster.app/roster-posts`,
+      text: `${clubName} just posted an open roster spot for the ${birthYear} age group. Log in to OpenRoster to see the details and reach out: https://openroster.app/feed`,
     });
   }
 }
@@ -76,7 +76,7 @@ export async function createRosterPost(formData: FormData) {
 
   await notifyMatchingParents(supabase, birthYear, club?.name ?? "A club");
 
-  revalidatePath("/roster-posts");
+  revalidatePath("/feed");
   redirect("/roster-posts/mine");
 }
 
@@ -96,7 +96,7 @@ export async function expireRosterPost(postId: string) {
     throw new Error(error.message);
   }
 
-  revalidatePath("/roster-posts");
+  revalidatePath("/feed");
   revalidatePath("/roster-posts/mine");
 }
 
@@ -113,6 +113,6 @@ export async function deleteRosterPost(postId: string) {
     throw new Error(error.message);
   }
 
-  revalidatePath("/roster-posts");
+  revalidatePath("/feed");
   revalidatePath("/roster-posts/mine");
 }

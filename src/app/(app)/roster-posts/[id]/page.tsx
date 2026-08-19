@@ -38,8 +38,8 @@ export default async function RosterPostDetailPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/roster-posts" className="text-sm text-slate-500 underline">
-        ← Back to open roster spots
+      <Link href="/feed" className="text-sm text-slate-500 underline">
+        ← Back to feed
       </Link>
 
       <h1 className="mt-3 text-xl font-semibold text-slate-900">
