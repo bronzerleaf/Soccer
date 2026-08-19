@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireVerifiedCoach } from "@/lib/coach";
 import { startConversationWithParent } from "@/app/(app)/messages/actions";
 import { fetchOEmbedPreview } from "@/lib/oembed/server";
-import { VideoLinkPreview } from "@/components/ui/video-link-preview";
+import { LinkGallery } from "@/components/ui/link-gallery";
 
 export default async function SearchPlayerDetailPage({
   params,
@@ -102,13 +102,9 @@ export default async function SearchPlayerDetailPage({
         ) : null}
         {videoLinks.length > 0 ? (
           <div>
-            <dt className="text-sm font-medium text-slate-900">
-              Video links
-            </dt>
-            <dd className="mt-2 space-y-2">
-              {videoLinks.map((link, i) => (
-                <VideoLinkPreview key={link} url={link} preview={videoPreviews[i]} />
-              ))}
+            <dt className="text-sm font-medium text-slate-900">Highlights</dt>
+            <dd className="mt-2">
+              <LinkGallery links={videoLinks} previews={videoPreviews} />
             </dd>
           </div>
         ) : null}

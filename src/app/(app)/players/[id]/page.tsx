@@ -6,6 +6,8 @@ import { ActionButton } from "@/components/ui/action-button";
 import { PhotoUpload } from "./photo-upload";
 import { EditPlayerForm } from "./edit-player-form";
 import { DeletePlayerButton } from "./delete-player-button";
+import { fetchOEmbedPreview } from "@/lib/oembed/server";
+import { LinkGallery } from "@/components/ui/link-gallery";
 
 export default async function PlayerDetailPage({
   params,
@@ -42,6 +44,11 @@ export default async function PlayerDetailPage({
       .createSignedUrl(player.photo_url, 3600);
     signedPhotoUrl = data?.signedUrl ?? null;
   }
+
+  const videoLinks: string[] = player.video_links ?? [];
+  const videoPreviews = await Promise.all(
+    videoLinks.map((link) => fetchOEmbedPreview(link))
+  );
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
@@ -108,6 +115,22 @@ export default async function PlayerDetailPage({
             >
               Verify now
             </Link>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-sm font-medium text-slate-900">Highlights</h2>
+        {videoLinks.length > 0 ? (
+          <div className="mt-2">
+            <LinkGallery links={videoLinks} previews={videoPreviews} />
+          </div>
+        ) : (
+          <div className="mt-2 rounded-lg border border-dashed border-slate-300 p-4 text-center">
+            <p className="text-sm text-slate-600">
+              Add a Hudl, Veo, YouTube, or Instagram link below and it&rsquo;ll
+              show up here as a gallery for coaches to see.
+            </p>
           </div>
         )}
       </div>

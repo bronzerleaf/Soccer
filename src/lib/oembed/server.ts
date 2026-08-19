@@ -5,8 +5,9 @@
 // auto-discovery (a <link type="application/json+oembed"> tag on the
 // page). Any failure at any step — unknown provider, network error,
 // timeout, no thumbnail in the response — just means no preview; the
-// caller always falls back to a plain link. This never blocks or breaks
-// the page it's rendered on.
+// caller always falls back to a branded (but thumbnail-less) tile via
+// detectPlatform() in ./platform.ts. This never blocks or breaks the
+// page it's rendered on.
 
 export type OEmbedPreview = {
   thumbnailUrl: string;
@@ -22,11 +23,24 @@ const KNOWN_ENDPOINTS: Record<string, (url: string) => string> = {
   "vimeo.com": (url) => `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`,
 };
 
+// Instagram's oEmbed endpoint has required an authenticated Meta developer
+// token since 2020 — there's no public, unauthenticated way to fetch a real
+// thumbnail from an Instagram link anymore. Skip the network round trip
+// entirely rather than waiting out a guaranteed-401 timeout; the caller
+// falls back to a branded (not photo) tile via detectPlatform() instead.
+const NO_OEMBED_HOSTS = new Set(["instagram.com"]);
+
 const FETCH_TIMEOUT_MS = 4000;
 
 export async function fetchOEmbedPreview(videoUrl: string): Promise<OEmbedPreview | null> {
   try {
     const host = new URL(videoUrl).hostname.replace(/^www\./, "");
+    if (
+      Array.from(NO_OEMBED_HOSTS).some((h) => host === h || host.endsWith(`.${h}`))
+    ) {
+      return null;
+    }
+
     const knownKey = Object.keys(KNOWN_ENDPOINTS).find(
       (key) => host === key || host.endsWith(`.${key}`)
     );

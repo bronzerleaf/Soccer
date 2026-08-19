@@ -221,8 +221,12 @@ export function PlayerForm<T>({
 
       <div>
         <span className="block text-sm font-medium text-slate-900">
-          Video links (Hudl, Veo, YouTube...)
+          Highlight links (Hudl, Veo, YouTube, Instagram...)
         </span>
+        <p className="mt-1 text-xs text-slate-500">
+          These show up as a gallery on the profile — add as many as you
+          like.
+        </p>
         <div className="mt-2 space-y-2">
           {videoLinks.map((link, index) => (
             <input
