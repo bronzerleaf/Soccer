@@ -1,6 +1,8 @@
-import Link from "next/link";
 import { requireVerifiedCoach } from "@/lib/coach";
 import { POSITIONS } from "@/app/(app)/players/constants";
+import { Badge, VerifiedMark } from "@/components/ui/badge";
+import { CardLink } from "@/components/ui/card";
+import { PlayerAvatar } from "@/components/ui/player-avatar";
 
 const currentYear = new Date().getFullYear();
 const BIRTH_YEARS = Array.from(
@@ -149,33 +151,31 @@ export default async function SearchPage({
 
             return (
               <li key={player.id}>
-                <Link
-                  href={`/search/${player.id}`}
-                  className="flex items-center gap-4 rounded-lg border border-slate-200 p-4 hover:border-slate-300"
-                >
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-slate-100">
-                    {photoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={photoUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">
-                      {player.first_name} {player.last_initial}. ·{" "}
-                      {player.birth_year}
-                    </p>
+                <CardLink href={`/search/${player.id}`} className="flex items-center gap-4">
+                  <PlayerAvatar name={player.first_name} photoUrl={photoUrl} size={56} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="truncate text-sm font-semibold text-slate-900">
+                        {player.first_name} {player.last_initial}. ·{" "}
+                        {player.birth_year}
+                      </p>
+                      <VerifiedMark />
+                    </div>
                     <p className="mt-0.5 text-sm text-slate-500">
-                      {(player.positions ?? []).join(", ") || "Position not set"}
-                      {" · "}
                       {player.city}
                       {club ? ` · ${club.name}` : ""}
                     </p>
+                    {player.positions && player.positions.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {player.positions.map((position: string) => (
+                          <Badge key={position} tone="neutral">
+                            {position}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                </Link>
+                </CardLink>
               </li>
             );
           })}

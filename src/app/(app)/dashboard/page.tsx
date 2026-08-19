@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { PlayerAvatar } from "@/components/ui/player-avatar";
 import { signOut } from "./actions";
 
 export default async function DashboardPage() {
@@ -57,11 +59,14 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col px-6 py-12">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-slate-500">Signed in as</p>
-          <p className="text-base font-semibold text-slate-900">
-            {profile?.full_name || userData.user.email}
-          </p>
+        <div className="flex items-center gap-3">
+          <PlayerAvatar name={profile?.full_name || userData.user.email || "?"} size={44} />
+          <div>
+            <p className="text-sm text-slate-500">Signed in as</p>
+            <p className="text-base font-semibold text-slate-900">
+              {profile?.full_name || userData.user.email}
+            </p>
+          </div>
         </div>
         <form action={signOut}>
           <Button type="submit" variant="secondary" size="sm">
@@ -70,7 +75,7 @@ export default async function DashboardPage() {
         </form>
       </div>
 
-      <div className="mt-10 rounded-lg border border-slate-200 p-5">
+      <Card className="mt-10 p-5">
         <p className="text-sm font-medium text-slate-900">
           {profile?.role === "coach"
             ? "Coach account"
@@ -97,7 +102,7 @@ export default async function DashboardPage() {
             Browse teams and message a coach
           </Link>
         ) : null}
-      </div>
+      </Card>
     </main>
   );
 }

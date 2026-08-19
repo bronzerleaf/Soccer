@@ -3,6 +3,14 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { sendMessage } from "../actions";
 import { FlagMessageButton } from "./flag-message-button";
+import { PlayerAvatar } from "@/components/ui/player-avatar";
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 export default async function ConversationPage({
   params,
@@ -85,9 +93,10 @@ export default async function ConversationPage({
         ← Back to messages
       </Link>
 
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
-        {headerName}
-      </h1>
+      <div className="mt-3 flex items-center gap-3">
+        <PlayerAvatar name={headerName} size={40} />
+        <h1 className="text-lg font-semibold text-slate-900">{headerName}</h1>
+      </div>
       {player ? (
         <p className="mt-1 text-sm text-slate-500">
           About {player.first_name} {player.last_initial}.
@@ -113,14 +122,17 @@ export default async function ConversationPage({
           return (
             <div key={message.id} className={isMine ? "ml-auto max-w-[80%]" : "max-w-[80%]"}>
               <div
-                className={`rounded-lg px-3 py-2 text-sm ${
+                className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${
                   isMine
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-900"
+                    ? "rounded-br-sm bg-emerald-600 text-white"
+                    : "rounded-bl-sm border border-slate-200 bg-white text-slate-900"
                 }`}
               >
                 {message.body}
               </div>
+              <p className={`mt-1 text-[11px] text-slate-400 ${isMine ? "text-right" : ""}`}>
+                {formatTime(message.created_at)}
+              </p>
               {!isMine && isParticipant ? (
                 <FlagMessageButton messageId={message.id} />
               ) : null}
@@ -139,11 +151,11 @@ export default async function ConversationPage({
             rows={2}
             required
             placeholder="Write a reply..."
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
           />
           <button
             type="submit"
-            className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+            className="shrink-0 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
           >
             Send
           </button>

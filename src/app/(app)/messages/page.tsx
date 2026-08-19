@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { CardLink } from "@/components/ui/card";
+import { PlayerAvatar } from "@/components/ui/player-avatar";
 
 export default async function MessagesInboxPage() {
   const supabase = await createClient();
@@ -95,26 +96,26 @@ export default async function MessagesInboxPage() {
 
             return (
               <li key={conversation.id}>
-                <Link
-                  href={`/messages/${conversation.id}`}
-                  className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-medium text-slate-900">
-                      {other?.full_name ?? "Someone"}
-                    </p>
-                    {contextLabel ? (
-                      <span className="shrink-0 text-xs text-slate-500">
-                        {contextLabel}
-                      </span>
+                <CardLink href={`/messages/${conversation.id}`} className="flex items-center gap-3">
+                  <PlayerAvatar name={other?.full_name ?? "?"} size={44} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="truncate text-sm font-semibold text-slate-900">
+                        {other?.full_name ?? "Someone"}
+                      </p>
+                      {contextLabel ? (
+                        <span className="shrink-0 text-xs text-slate-500">
+                          {contextLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                    {latest ? (
+                      <p className="mt-1 truncate text-sm text-slate-600">
+                        {latest.body}
+                      </p>
                     ) : null}
                   </div>
-                  {latest ? (
-                    <p className="mt-1 truncate text-sm text-slate-600">
-                      {latest.body}
-                    </p>
-                  ) : null}
-                </Link>
+                </CardLink>
               </li>
             );
           })}
