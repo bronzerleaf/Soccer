@@ -227,6 +227,80 @@ export async function startConversationWithTeamCoach(
   redirect(`/messages/${conversationId}`);
 }
 
+// Parent -> coach, from a coach-authored guest_play/training feed post's
+// detail page. The post's author is looked up server-side (never trusted
+// from the client) and re-checked by feed_post_belongs_to_coach() at the
+// RLS layer -- same reasoning as startConversationWithTeamCoach. There is
+// deliberately no equivalent for org_event: an organization can never be
+// a conversation's coach_id, so this simply fails for one, same as
+// feed_post_belongs_to_coach itself never matches an org_event row.
+export async function startConversationWithFeedPostAuthor(
+  feedPostId: string,
+  formData: FormData
+) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect("/login");
+  }
+
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) {
+    throw new Error("Message can't be empty.");
+  }
+
+  const { data: post } = await supabase
+    .from("feed_posts")
+    .select("id, author_id, post_type")
+    .eq("id", feedPostId)
+    .single();
+
+  if (!post || (post.post_type !== "guest_play" && post.post_type !== "training")) {
+    throw new Error("This post can't be messaged.");
+  }
+
+  const { data: existing } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("parent_id", userData.user.id)
+    .eq("feed_post_id", feedPostId)
+    .maybeSingle();
+
+  let conversationId = existing?.id as string | undefined;
+
+  if (!conversationId) {
+    const { data: created, error } = await supabase
+      .from("conversations")
+      .insert({
+        parent_id: userData.user.id,
+        coach_id: post.author_id,
+        feed_post_id: feedPostId,
+      })
+      .select("id")
+      .single();
+
+    if (error || !created) {
+      throw new Error(error?.message || "Could not start this conversation.");
+    }
+    conversationId = created.id as string;
+  }
+
+  const { error: messageError } = await supabase.from("messages").insert({
+    conversation_id: conversationId,
+    sender_id: userData.user.id,
+    body,
+  });
+
+  if (messageError) {
+    throw new Error(messageError.message);
+  }
+
+  await notifyOtherParticipant(supabase, conversationId, userData.user.id, body);
+
+  revalidatePath("/messages");
+  redirect(`/messages/${conversationId}`);
+}
+
 // Parent -> coach, from a roster post's detail page.
 export async function startConversationWithCoach(
   rosterPostId: string,

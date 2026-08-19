@@ -149,42 +149,44 @@ export function FeedCard({ item }: { item: FeedItem }) {
         ) : null}
       </div>
 
-      {item.kind === "org_event" ? (
-        <p className="mt-2 text-sm font-medium text-slate-900">
-          {item.orgName} — {item.cityName}
-        </p>
-      ) : item.kind === "training" ? (
-        <p className="mt-2 text-sm font-medium text-slate-900">
-          {item.authorName} — {item.cityName}
-        </p>
-      ) : (
-        <p className="mt-2 text-sm font-medium text-slate-900">
-          {item.birthYear ?? "Any birth year"} ·{" "}
-          {(item.positions ?? []).join(", ") || "Any position"} ·{" "}
-          {item.cityName}
-        </p>
-      )}
+      <Link href={`/feed/post/${item.id}`} className="block">
+        {item.kind === "org_event" ? (
+          <p className="mt-2 text-sm font-medium text-slate-900">
+            {item.orgName} — {item.cityName}
+          </p>
+        ) : item.kind === "training" ? (
+          <p className="mt-2 text-sm font-medium text-slate-900">
+            {item.authorName} — {item.cityName}
+          </p>
+        ) : (
+          <p className="mt-2 text-sm font-medium text-slate-900">
+            {item.birthYear ?? "Any birth year"} ·{" "}
+            {(item.positions ?? []).join(", ") || "Any position"} ·{" "}
+            {item.cityName}
+          </p>
+        )}
 
-      {item.kind === "training" && (item.birthYear || item.positions.length > 0) ? (
-        <p className="mt-1 text-xs text-slate-500">
-          {item.birthYear ?? "Any birth year"} ·{" "}
-          {item.positions.join(", ") || "Any position"}
+        {item.kind === "training" && (item.birthYear || item.positions.length > 0) ? (
+          <p className="mt-1 text-xs text-slate-500">
+            {item.birthYear ?? "Any birth year"} ·{" "}
+            {item.positions.join(", ") || "Any position"}
+          </p>
+        ) : null}
+
+        {(item.kind === "looking_for_team" || item.kind === "guest_play") && item.authorName ? (
+          <p className="mt-1 text-xs text-slate-500">Posted by {item.authorName}</p>
+        ) : null}
+
+        {item.kind === "training" && (cost || duration) ? (
+          <p className="mt-1.5 text-sm font-medium text-slate-700">
+            {[cost, duration].filter(Boolean).join(" · ")}
+          </p>
+        ) : null}
+
+        <p className="mt-1.5 text-sm leading-6 text-slate-600">
+          {item.description}
         </p>
-      ) : null}
-
-      {(item.kind === "looking_for_team" || item.kind === "guest_play") && item.authorName ? (
-        <p className="mt-1 text-xs text-slate-500">Posted by {item.authorName}</p>
-      ) : null}
-
-      {item.kind === "training" && (cost || duration) ? (
-        <p className="mt-1.5 text-sm font-medium text-slate-700">
-          {[cost, duration].filter(Boolean).join(" · ")}
-        </p>
-      ) : null}
-
-      <p className="mt-1.5 text-sm leading-6 text-slate-600">
-        {item.description}
-      </p>
+      </Link>
 
       <div className="mt-3 flex gap-2">
         <LikeButton
