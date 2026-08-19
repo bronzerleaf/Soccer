@@ -19,6 +19,65 @@ export default async function NewFeedPostChooserPage() {
     redirect("/feed/new/org_event");
   }
 
+  if (profile?.role === "coach") {
+    const { data: verification } = await supabase
+      .from("coach_verifications")
+      .select("status")
+      .eq("coach_id", userData.user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (verification?.status !== "approved") {
+      redirect("/coach/verify");
+    }
+
+    return (
+      <main className="mx-auto max-w-sm px-6 py-12">
+        <Link href="/feed" className="text-sm text-slate-500 underline">
+          ← Back to feed
+        </Link>
+        <h1 className="mt-3 text-xl font-semibold text-slate-900">
+          Post to the local feed
+        </h1>
+        <p className="mt-2 text-sm text-slate-600">What are you posting?</p>
+
+        <div className="mt-6 space-y-3">
+          <Link
+            href="/roster-posts/new"
+            className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
+          >
+            <p className="text-sm font-medium text-slate-900">Roster spot</p>
+            <p className="mt-1 text-sm text-slate-600">
+              Your club has an open spot for a specific age group.
+            </p>
+          </Link>
+          <Link
+            href="/feed/new/guest_play"
+            className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
+          >
+            <p className="text-sm font-medium text-slate-900">
+              Need a guest player
+            </p>
+            <p className="mt-1 text-sm text-slate-600">
+              Your team needs a one-off guest for an upcoming game.
+            </p>
+          </Link>
+          <Link
+            href="/feed/new/training"
+            className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
+          >
+            <p className="text-sm font-medium text-slate-900">
+              Training / event
+            </p>
+            <p className="mt-1 text-sm text-slate-600">
+              A clinic, camp, or training session families can sign up for.
+            </p>
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   if (profile?.role !== "parent") {
     redirect("/feed");
   }

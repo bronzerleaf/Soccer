@@ -88,6 +88,71 @@ export async function createFamilyFeedPost(formData: FormData) {
   redirect("/feed");
 }
 
+// guest_play (coach's "need a guest player") / training only — a
+// verified coach posting on behalf of their own team/club. Never a
+// player involved (RLS requires player_id is null for both from a
+// coach). cost_cents/duration_minutes only apply to training; the RLS
+// check constraint would reject them on guest_play, so they're only
+// read from the form when postType is training.
+export async function createCoachFeedPost(formData: FormData) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect("/login");
+  }
+
+  const postType = String(formData.get("post_type") ?? "");
+  if (postType !== "guest_play" && postType !== "training") {
+    throw new Error("Unknown post type.");
+  }
+
+  const cityId = String(formData.get("city_id") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const birthYearRaw = String(formData.get("birth_year") ?? "").trim();
+  const positions = formData.getAll("positions").map(String);
+
+  if (!cityId || !description) {
+    throw new Error("Please choose a city and add a description.");
+  }
+
+  let costCents: number | null = null;
+  let durationMinutes: number | null = null;
+  if (postType === "training") {
+    const costRaw = String(formData.get("cost_dollars") ?? "").trim();
+    const durationRaw = String(formData.get("duration_minutes") ?? "").trim();
+    costCents = costRaw ? Math.round(Number(costRaw) * 100) : null;
+    durationMinutes = durationRaw ? Number(durationRaw) : null;
+    if (costCents !== null && (Number.isNaN(costCents) || costCents < 0)) {
+      throw new Error("Enter a valid cost.");
+    }
+    if (durationMinutes !== null && (Number.isNaN(durationMinutes) || durationMinutes <= 0)) {
+      throw new Error("Enter a valid duration in minutes.");
+    }
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + POST_LIFETIME_DAYS);
+
+  const { error } = await supabase.from("feed_posts").insert({
+    post_type: postType,
+    author_id: userData.user.id,
+    city_id: cityId,
+    birth_year: birthYearRaw ? Number(birthYearRaw) : null,
+    positions,
+    description,
+    cost_cents: costCents,
+    duration_minutes: durationMinutes,
+    expires_at: expiresAt.toISOString(),
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/feed");
+  redirect("/feed");
+}
+
 // org_event only — a verified organization posting a tournament/event
 // listing. No player involved.
 export async function createOrgEventPost(formData: FormData) {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { haversineMiles } from "@/lib/geo";
@@ -16,6 +17,7 @@ const POST_TYPE_OPTIONS = [
   { value: "roster_spot", label: "Roster spot" },
   { value: "looking_for_team", label: "Looking for a team" },
   { value: "guest_play", label: "Guest play" },
+  { value: "training", label: "Training / event" },
   { value: "org_event", label: "Tournament / event" },
 ] as const;
 
@@ -26,12 +28,35 @@ function toArray(value: string | string[] | undefined): string[] {
 
 // org_event carries neither a birth year nor a position — it's an event
 // listing, not a player-specific post — so it's exempt from both filters
-// rather than being filtered out by fields it doesn't have.
+// rather than being filtered out by fields it doesn't have. training does
+// carry both (a coach can optionally set an age group/position), so it
+// isn't exempted — a null value there already passes the filter as-is.
 function itemBirthYear(item: FeedItem): number | null {
   return item.kind === "org_event" ? null : item.birthYear;
 }
 function itemPositions(item: FeedItem): string[] {
   return item.kind === "org_event" ? [] : item.positions;
+}
+
+// What the free-text search box matches against — the description plus
+// whatever name/place fields the card itself shows, so a search never
+// surfaces more than the card already displays.
+function itemSearchText(item: FeedItem): string {
+  const parts: string[] = [];
+  if (item.kind === "roster_spot") {
+    parts.push(item.clubName, item.clubCity);
+  } else {
+    parts.push(item.description);
+    if (item.kind === "org_event") {
+      parts.push(item.orgName, item.cityName);
+    } else if (item.kind === "training") {
+      parts.push(item.authorName, item.cityName);
+    } else {
+      parts.push(item.cityName);
+      if (item.authorName) parts.push(item.authorName);
+    }
+  }
+  return parts.join(" ").toLowerCase();
 }
 
 export default async function FeedPage({
@@ -50,6 +75,7 @@ export default async function FeedPage({
   const birthYearFilter = typeof params.birth_year === "string" ? params.birth_year : "";
   const positionFilter = toArray(params.positions);
   const postTypeFilter = toArray(params.post_type);
+  const searchQuery = typeof params.q === "string" ? params.q.trim() : "";
 
   const [{ data: profile }, { data: cities }] = await Promise.all([
     supabase
@@ -84,7 +110,7 @@ export default async function FeedPage({
       supabase
         .from("feed_posts")
         .select(
-          "id, post_type, author_id, city_id, birth_year, positions, description, created_at, author:profiles(full_name)"
+          "id, post_type, author_id, city_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, created_at, author:profiles(full_name)"
         )
         .gt("expires_at", new Date().toISOString())
         .order("created_at", { ascending: false })
@@ -149,6 +175,24 @@ export default async function FeedPage({
         } satisfies FeedItem;
       }
 
+      if (post.post_type === "training") {
+        return {
+          kind: "training",
+          id: post.id,
+          authorName: author?.full_name ?? "A coach",
+          cityName: postCity?.name ?? "",
+          birthYear: post.birth_year,
+          positions: post.positions ?? [],
+          description: post.description,
+          costCents: post.cost_cents,
+          durationMinutes: post.duration_minutes,
+          createdAt: post.created_at,
+          likeCount,
+          likedByMe: likedPostIds.has(post.id),
+          canDelete,
+        } satisfies FeedItem;
+      }
+
       return {
         kind: post.post_type as "looking_for_team" | "guest_play",
         id: post.id,
@@ -156,6 +200,8 @@ export default async function FeedPage({
         positions: post.positions ?? [],
         cityName: postCity?.name ?? "",
         description: post.description,
+        // No player_id means a coach posted it, not a parent.
+        authorName: post.player_id ? null : author?.full_name ?? "A coach",
         createdAt: post.created_at,
         likeCount,
         likedByMe: likedPostIds.has(post.id),
@@ -201,19 +247,40 @@ export default async function FeedPage({
         return false;
       }
     }
+    if (searchQuery && !itemSearchText(item).includes(searchQuery.toLowerCase())) {
+      return false;
+    }
     return true;
   });
 
   const hasActiveFilters =
-    !!birthYearFilter || positionFilter.length > 0 || postTypeFilter.length > 0;
+    !!birthYearFilter || positionFilter.length > 0 || postTypeFilter.length > 0 || !!searchQuery;
+  const activeFilterCount =
+    (birthYearFilter ? 1 : 0) + (positionFilter.length > 0 ? 1 : 0) + postTypeFilter.length;
+
+  const postTypeLabel = new Map<string, string>(
+    POST_TYPE_OPTIONS.map((o) => [o.value, o.label])
+  );
+
+  // Preserves every other active param when removing just one filter
+  // value — used to build each chip's "×" link below.
+  function withoutFilter(kind: "birth_year" | "position" | "post_type", value?: string): string {
+    const next = new URLSearchParams();
+    if (kind !== "birth_year" && birthYearFilter) next.set("birth_year", birthYearFilter);
+    if (kind !== "position") {
+      for (const p of positionFilter) if (p !== value) next.append("positions", p);
+    }
+    if (kind !== "post_type") {
+      for (const t of postTypeFilter) if (t !== value) next.append("post_type", t);
+    }
+    if (searchQuery) next.set("q", searchQuery);
+    const qs = next.toString();
+    return qs ? `/feed?${qs}` : "/feed";
+  }
 
   const role = profile?.role;
   const postHref =
-    role === "coach"
-      ? "/roster-posts/new"
-      : role === "parent" || role === "organization"
-        ? "/feed/new"
-        : null;
+    role === "coach" || role === "parent" || role === "organization" ? "/feed/new" : null;
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
@@ -243,83 +310,161 @@ export default async function FeedPage({
         />
       </div>
 
-      <form method="get" className="mt-4 flex flex-wrap items-end gap-4">
-        <div>
-          <label
-            htmlFor="birth_year"
-            className="block text-sm font-medium text-slate-900"
+      <form method="get" className="mt-4">
+        <div className="relative">
+          <svg
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            Birth year
-          </label>
-          <select
-            id="birth_year"
-            name="birth_year"
-            defaultValue={birthYearFilter}
-            className="mt-1.5 block rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
-          >
-            <option value="">Any</option>
-            {BIRTH_YEARS.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-4.3-4.3" />
+          </svg>
+          <input
+            type="search"
+            name="q"
+            defaultValue={searchQuery}
+            placeholder="Search the feed"
+            className="w-full rounded-full border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          />
         </div>
 
-        <div className="w-full sm:w-auto">
-          <span className="block text-sm font-medium text-slate-900">
-            Position
-          </span>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {POSITIONS.map((position) => (
-              <label
-                key={position}
-                className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
+        <div className="mt-3 flex items-center gap-3">
+          <details className="relative">
+            <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400 [&::-webkit-details-marker]:hidden">
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <input
-                  type="checkbox"
-                  name="positions"
-                  value={position}
-                  defaultChecked={positionFilter.includes(position)}
-                  className="h-3.5 w-3.5"
-                />
+                <path d="M4 6h16M7 12h10M10 18h4" />
+              </svg>
+              Filters
+              {activeFilterCount > 0 ? (
+                <span className="rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                  {activeFilterCount}
+                </span>
+              ) : null}
+            </summary>
+
+            <div className="absolute z-10 mt-2 w-[min(90vw,20rem)] space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
+              <div>
+                <label
+                  htmlFor="birth_year"
+                  className="block text-sm font-medium text-slate-900"
+                >
+                  Birth year
+                </label>
+                <select
+                  id="birth_year"
+                  name="birth_year"
+                  defaultValue={birthYearFilter}
+                  className="mt-1.5 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                >
+                  <option value="">Any</option>
+                  {BIRTH_YEARS.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <span className="block text-sm font-medium text-slate-900">
+                  Position
+                </span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {POSITIONS.map((position) => (
+                    <label
+                      key={position}
+                      className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
+                    >
+                      <input
+                        type="checkbox"
+                        name="positions"
+                        value={position}
+                        defaultChecked={positionFilter.includes(position)}
+                        className="h-3.5 w-3.5"
+                      />
+                      {position}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <span className="block text-sm font-medium text-slate-900">
+                  Post type
+                </span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {POST_TYPE_OPTIONS.map((option) => (
+                    <label
+                      key={option.value}
+                      className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
+                    >
+                      <input
+                        type="checkbox"
+                        name="post_type"
+                        value={option.value}
+                        defaultChecked={postTypeFilter.includes(option.value)}
+                        className="h-3.5 w-3.5"
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              >
+                Apply filters
+              </button>
+            </div>
+          </details>
+
+          {hasActiveFilters ? (
+            <Link
+              href="/feed"
+              className="text-xs font-medium text-slate-500 underline"
+            >
+              Clear all
+            </Link>
+          ) : null}
+        </div>
+
+        {/* Selected filters stay visible as chips even while the dropdown
+            above is closed — each one links straight to the same view
+            with just that filter removed. */}
+        {activeFilterCount > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {birthYearFilter ? (
+              <FilterChip href={withoutFilter("birth_year")}>
+                {birthYearFilter}
+              </FilterChip>
+            ) : null}
+            {positionFilter.map((position) => (
+              <FilterChip key={position} href={withoutFilter("position", position)}>
                 {position}
-              </label>
+              </FilterChip>
+            ))}
+            {postTypeFilter.map((type) => (
+              <FilterChip key={type} href={withoutFilter("post_type", type)}>
+                {postTypeLabel.get(type) ?? type}
+              </FilterChip>
             ))}
           </div>
-        </div>
-
-        <div className="w-full sm:w-auto">
-          <span className="block text-sm font-medium text-slate-900">
-            Post type
-          </span>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {POST_TYPE_OPTIONS.map((option) => (
-              <label
-                key={option.value}
-                className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
-              >
-                <input
-                  type="checkbox"
-                  name="post_type"
-                  value={option.value}
-                  defaultChecked={postTypeFilter.includes(option.value)}
-                  className="h-3.5 w-3.5"
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            className="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-          >
-            Filter
-          </button>
-        </div>
+        ) : null}
       </form>
 
       {allItems.length > 0 ? (
@@ -343,5 +488,17 @@ export default async function FeedPage({
         </div>
       )}
     </main>
+  );
+}
+
+function FilterChip({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200"
+    >
+      {children}
+      <span aria-hidden="true">×</span>
+    </Link>
   );
 }

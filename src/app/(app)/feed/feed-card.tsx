@@ -21,6 +21,12 @@ export type FeedItem =
       positions: string[];
       cityName: string;
       description: string;
+      // Set only for a coach's "need a guest player" post — a parent's
+      // looking_for_team/guest_play never carries an author name, per
+      // CLAUDE.md section 9 ("never a name or photo in the feed card").
+      // A coach's own name is already public (search, roster posts), so
+      // showing it here doesn't create a new exposure.
+      authorName: string | null;
       createdAt: string;
       likeCount: number;
       likedByMe: boolean;
@@ -36,6 +42,21 @@ export type FeedItem =
       likeCount: number;
       likedByMe: boolean;
       canDelete: boolean;
+    }
+  | {
+      kind: "training";
+      id: string;
+      authorName: string;
+      cityName: string;
+      birthYear: number | null;
+      positions: string[];
+      description: string;
+      costCents: number | null;
+      durationMinutes: number | null;
+      createdAt: string;
+      likeCount: number;
+      likedByMe: boolean;
+      canDelete: boolean;
     };
 
 const KIND_LABEL: Record<FeedItem["kind"], string> = {
@@ -43,6 +64,7 @@ const KIND_LABEL: Record<FeedItem["kind"], string> = {
   looking_for_team: "Looking for a team",
   guest_play: "Guest play",
   org_event: "Tournament / event",
+  training: "Training / event",
 };
 
 const KIND_BADGE: Record<FeedItem["kind"], string> = {
@@ -50,7 +72,22 @@ const KIND_BADGE: Record<FeedItem["kind"], string> = {
   looking_for_team: "bg-emerald-50 text-emerald-700",
   guest_play: "bg-amber-50 text-amber-800",
   org_event: "bg-purple-50 text-purple-700",
+  training: "bg-teal-50 text-teal-700",
 };
+
+function formatCost(costCents: number | null): string | null {
+  if (costCents === null) return null;
+  const dollars = costCents / 100;
+  return `$${Number.isInteger(dollars) ? dollars.toString() : dollars.toFixed(2)}`;
+}
+
+function formatDuration(minutes: number | null): string | null {
+  if (minutes === null) return null;
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest === 0 ? `${hours}h` : `${hours}h ${rest}m`;
+}
 
 export function FeedCard({ item }: { item: FeedItem }) {
   const badge = (
@@ -83,6 +120,9 @@ export function FeedCard({ item }: { item: FeedItem }) {
     );
   }
 
+  const cost = item.kind === "training" ? formatCost(item.costCents) : null;
+  const duration = item.kind === "training" ? formatDuration(item.durationMinutes) : null;
+
   return (
     <div className="rounded-lg border border-slate-200 p-4">
       <div className="flex items-center justify-between gap-2">
@@ -104,6 +144,10 @@ export function FeedCard({ item }: { item: FeedItem }) {
         <p className="mt-2 text-sm font-medium text-slate-900">
           {item.orgName} — {item.cityName}
         </p>
+      ) : item.kind === "training" ? (
+        <p className="mt-2 text-sm font-medium text-slate-900">
+          {item.authorName} — {item.cityName}
+        </p>
       ) : (
         <p className="mt-2 text-sm font-medium text-slate-900">
           {item.birthYear ?? "Any birth year"} ·{" "}
@@ -111,6 +155,23 @@ export function FeedCard({ item }: { item: FeedItem }) {
           {item.cityName}
         </p>
       )}
+
+      {item.kind === "training" && (item.birthYear || item.positions.length > 0) ? (
+        <p className="mt-1 text-xs text-slate-500">
+          {item.birthYear ?? "Any birth year"} ·{" "}
+          {item.positions.join(", ") || "Any position"}
+        </p>
+      ) : null}
+
+      {(item.kind === "looking_for_team" || item.kind === "guest_play") && item.authorName ? (
+        <p className="mt-1 text-xs text-slate-500">Posted by {item.authorName}</p>
+      ) : null}
+
+      {item.kind === "training" && (cost || duration) ? (
+        <p className="mt-1.5 text-sm font-medium text-slate-700">
+          {[cost, duration].filter(Boolean).join(" · ")}
+        </p>
+      ) : null}
 
       <p className="mt-1.5 text-sm leading-6 text-slate-600">
         {item.description}
