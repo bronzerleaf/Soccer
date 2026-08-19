@@ -1,240 +1,82 @@
-# OpenRoster
+# PitchLink
 
-Club soccer roster matching for Dallas–Fort Worth. See [`CLAUDE.md`](./CLAUDE.md) for the full project brief, constraints, and build order.
+PitchLink is a youth club soccer networking platform for adult parents, coaches, trainers, organizations, and team administrators. Parents own and manage player profiles; children never have PitchLink accounts.
+
+## Current product model
+
+### Player profiles
+
+Parents can create and edit a player profile at any time. The soccer profile focuses on information useful to the club environment:
+
+- first name + last initial
+- birth year
+- detailed position(s)
+- preferred foot
+- city
+- club and team
+- years playing
+- level of play
+- short soccer bio
+- Instagram / YouTube profile links
+- external highlight clip links
+
+PitchLink does not use weight, speed-test results, or goal totals as core player-profile fields.
+
+### Private professional discovery
+
+A parent controls a private setting: **Allow verified professionals to find this profile**.
+
+The underlying database field remains `players.open_to_opportunities` for compatibility with the existing RLS model, but the product does not display an “available” or “open to opportunities” badge on player profiles. It is a search-access control, not a public status.
+
+Verified coaches can discover consented profiles only when that private setting is enabled. A family may keep a player non-searchable and still explicitly express interest in an individual opportunity post.
+
+### Player clips
+
+PitchLink stores links, not video files. Supported links can point to YouTube, Instagram, Hudl, Veo, or other external providers.
+
+Every clip can include:
+
+- a parent-written caption
+- a soccer theme
+- `Profile only` visibility, or
+- `Profile + feed` visibility
+
+When an external provider exposes an oEmbed thumbnail, PitchLink uses it. Otherwise the UI renders a provider-specific visual fallback. Feed-published clips support likes and comments while the underlying player profile remains protected by its own RLS rules.
+
+### Opportunity interest
+
+Parents can explicitly raise their hand on roster spots, guest-play requests, training opportunities, and organization events. They choose which consent-verified player is interested and may include a note.
+
+The post author can see only families who explicitly expressed interest in that post. Verified coaches, trainers, and organizations can start an adult-to-adult PitchLink conversation from that explicit interest. This does not make the player globally searchable.
+
+### Trainers and organizations
+
+Trainer accounts require manual verification before publishing training sessions or clinics. Organization accounts retain manual verification for event posts. Both use an admin approval queue.
+
+### Teams and GotSport
+
+PitchLink owns its own team records and verified membership relationships. A verified team manager can optionally add a GotSport Team ID and official GotSport team URL as an external cross-reference.
+
+PitchLink does not scrape, copy, or automatically ingest GotSport rosters/rankings. Any future automated GotSport data integration requires authorized API/data access.
 
 ## Stack
 
-Next.js (App Router, TypeScript), Supabase (Postgres, Auth, RLS, Storage), Tailwind CSS, Resend, Stripe, Vercel. Stripe is live now for the $0.50 parental-consent card authorization (immediately voided, never captured); Stripe *subscriptions* for paid roster posts are separate and still feature-flagged off for the DFW launch.
-
-## Getting started
-
-```bash
-npm install
-cp .env.local.example .env.local   # fill in Supabase + Stripe test-mode keys
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000). `SUPABASE_SERVICE_ROLE_KEY` is server-only and used exclusively by the consent flow (`src/app/players/[id]/consent/actions.ts`) to write `consent_records` and flip `players.consent_completed` after a verified Stripe authorization — a parent's own session is never allowed to do either directly (see Database below).
-
-## Database
-
-Schema and row-level security policies live in `supabase/migrations/`. RLS is the actual access-control boundary in this app — a misconfigured client query must not be able to leak a minor's profile, so every table that touches player data ships with policies and a pgTAP test proving them.
-
-To run against a real local Supabase stack (requires Docker):
-
-```bash
-npx supabase start
-npx supabase db reset   # applies migrations + supabase/seed.sql
-npx supabase test db
-```
-
-If Docker/Supabase's image registry isn't reachable from your machine, the same migrations, seed, and pgTAP tests can be run against a bare local Postgres install (16+, with the `postgresql-16-pgtap` package) instead:
-
-```bash
-createdb openroster_test
-psql -d openroster_test -v ON_ERROR_STOP=1 -f supabase/tests/_local_bootstrap.sql   # stand-in for the auth/storage schema + roles the hosted stack provides
-for f in supabase/migrations/*.sql; do psql -d openroster_test -v ON_ERROR_STOP=1 -f "$f"; done
-psql -d openroster_test -v ON_ERROR_STOP=1 -f supabase/seed.sql
-for f in supabase/tests/database/*.sql; do psql -d openroster_test -f "$f"; done
-```
-
-`supabase/tests/_local_bootstrap.sql` is not a migration — it only exists to approximate the `auth`/`storage` schemas and `anon`/`authenticated`/`service_role` roles that the hosted/Dockerized Supabase stack already provides, so the RLS tests have something to run against locally.
-
-## Consent gate
-
-`players.consent_completed` and `players.open_to_opportunities` are both locked down at the database layer, not just in the app:
-
-- A parent can never set `consent_completed` themselves — not via `UPDATE` (column-level grant excludes it) and not via `INSERT` (the insert policy requires it to be `false`). Only the service-role client can flip it, and only from the consent server action after Stripe confirms a real card authorization.
-- A `CHECK` constraint (`players_consent_gates_open_to_opportunities`) forbids `open_to_opportunities = true` while `consent_completed = false`, independent of any RLS policy or app-layer bug.
-- Deleting a player is a hard delete (`ON DELETE CASCADE` takes its `consent_records` with it) — no soft-delete, no orphaned trace of the minor's data.
-
-See `supabase/tests/database/consent_gate_rls.sql` for the proof, including the two bugs this caught while it was being written: a parent could otherwise insert a player row with consent pre-set to `true`, and `REVOKE UPDATE (col) ... FROM role` silently does nothing when that role still holds the table-level grant (fixed by revoking the table-level grant and re-granting only the columns a parent may edit — same pattern as `profiles.role`).
-
-## Coach verification
-
-A coach account can't search players or message anyone until an admin approves a `coach_verifications` row for them (`public.is_verified_coach()`, used throughout the player-visibility policies). The submission itself is locked down the same way as the consent gate: a coach's own `INSERT` policy requires `status = 'pending'` and `reviewed_by`/`reviewed_at` to be null, so a coach can't self-approve by just inserting a row that already claims to be reviewed. Only an admin's own authenticated session can move `status` — no service role needed for that path, since migration 1 already grants admins `UPDATE` on this table directly.
-
-**Bootstrapping the first admin.** There is deliberately no self-serve way to become an admin — `profiles.role` can only be set at signup (defaulting to `parent`/`coach`) or changed by a query that bypasses RLS. To promote a user, run this once against the database with the service role (e.g. the Supabase SQL Editor, or `psql` using the service-role/postgres connection string — never the anon/authenticated one):
-
-```sql
-update public.profiles set role = 'admin' where id = '<their auth.users uuid>';
-```
-
-## Admin queue
-
-`/admin/coaches` lists pending `coach_verifications` for an admin to approve or reject. It's gated by checking `profiles.role = 'admin'` server-side and redirecting otherwise — there's no separate admin subdomain or deploy, just a route ordinary users are redirected away from.
-
-## Player search
-
-`/search` is gated to coaches with an `approved` `coach_verifications` row (`requireVerifiedCoach()`); anyone else is redirected to `/coach/verify` or `/dashboard`. There's no "open to opportunities" filter in the UI because it isn't a real filter from a coach's point of view — the RLS policy on `players` already means every row a coach can see has `open_to_opportunities = true`, full stop.
-
-Photos follow the same rule as everything else here: the `player-photos` storage bucket had no coach-facing `SELECT` policy at all until this milestone (deliberately — no feature needed it yet). The policy added for search mirrors the `players` table's own visibility check exactly (open + consented + an approved verification), rather than trusting that whatever the app queries for is what the storage layer will actually serve. `/players/[id]` and `/search/[id]` — the two actual player-profile routes — set `robots: noindex` in their layouts, per the "never publicly indexable" requirement.
-
-## Roster posts
-
-A coach posts an open spot (birth year, positions, tryout date, description) for exactly one club: the one their `coach_verifications` row is approved for. Verification proves affiliation with *that* club, not a general "trusted coach" badge — so both the insert policy and the update policy on `roster_posts` re-check `claimed_club_id` against the post's `club_id`. Without the update-side check, a coach could post legitimately for their own club and then reassign the post to a club they were never verified for; `supabase/tests/database/roster_posts_rls.sql` proves that path is closed.
-
-Posts run for 30 days from creation (`expires_at`, set server-side — never client-supplied) and a coach can end one early. Browsing is open to any signed-in adult, parent or coach — unlike the player pool, a roster post isn't player data, so it doesn't need the verified-coach gate. The RLS policy simply hides expired posts from everyone except their own coach and admins, who can still see and manage them after expiry. The standalone `/roster-posts` browse-and-filter page was removed once `/feed` (Local Feed, below) fully subsumed it — filtering to `post_type=roster_spot` there does the same job with a wider filter set, and keeping two divergent "browse all roster spots" implementations around would just drift out of sync over time. `/roster-posts/[id]` (the detail + "message the club" page) and `/roster-posts/mine` (a coach's own management view) are unaffected.
-
-`src/lib/coach.ts` now holds the shared `requireVerifiedCoach()` helper (used by search and by posting) and also returns the coach's `clubId`, since roster-post creation needs to know which club to post for without giving the coach a club picker that RLS would just reject anyway.
-
-## Messaging
-
-This is the highest-severity concern CLAUDE.md names: any path from an adult to a child outside the parent inbox. It's handled structurally, not just by policy — `conversations.parent_id` and `conversations.coach_id` both reference `profiles` (adults only), and `player_id` is nullable *context*, never a recipient. There is no column anywhere in `conversations` or `messages` that a message could be addressed to a player through, so this isn't a rule that could be gotten wrong at the app layer; the schema doesn't offer the option.
-
-A conversation also can't be started out of nowhere — the insert policy requires a real discovery context (a specific player the coach can currently see, or a roster post the coach actually posted), not just "any two profiles with the right roles." Both roles are re-verified server-side (parent is actually `role = 'parent'`, coach is actually approved-verified) rather than trusted from whatever the client sends.
-
-One RLS gotcha worth flagging for whoever touches this schema next: the insert policy's checks (is this really a parent? does this player really belong to them and is it open?) all needed to see rows the *inserting user's own RLS* wouldn't otherwise let them see — e.g. a coach can't read a stranger's `profiles` row under the normal "read your own row" policy. Plain `EXISTS` subqueries against `profiles`/`players`/`roster_posts` inside another table's policy do **not** bypass those tables' own RLS; they're evaluated under the caller's ordinary restricted view and would just silently evaluate to false. The fix is the same pattern as `is_admin()`/`is_verified_coach()` from milestone 1: wrap the check in a `security definer` function (`is_parent()`, `player_is_open_for_parent()`, `roster_post_belongs_to_coach()`). `supabase/tests/database/messaging_rls.sql` caught this the first time it was written — every insert test failed until the functions went in.
-
-Once a conversation exists, a new `profiles` policy lets the two participants read each other's row (otherwise a coach could never learn the name of the parent they're messaging). It's scoped tightly to an actual shared conversation and has nothing to do with the adult-to-child boundary above.
-
-No message is ever deleted or edited — there's no `UPDATE`/`DELETE` policy on `messages` for any role, including admin. "Every message is logged and retained" is enforced by simply not offering a way to un-log one; milestone 7's moderation tools will read and flag, not erase.
-
-New-message and matching-roster-post notifications go through `src/lib/resend/server.ts`, which is deliberately best-effort: a missing `RESEND_API_KEY` (this sandbox has no real one) or any send failure is logged and swallowed, never thrown, since a notification failing should never take the underlying message or roster post down with it.
-
-## Admin moderation
-
-`/admin` is the hub for everything below; each page is gated by `requireAdmin()` (`src/lib/admin.ts`) redirecting non-admins to `/dashboard`.
-
-- **Coach queue** (`/admin/coaches`) — carried over from milestone 3.
-- **Flagged messages** (`/admin/messages`) — flagging is a separate, append-only `message_flags` table, not a column on `messages`. Messages stay immutable forever (milestone 6: no `UPDATE`/`DELETE` policy for anyone, admin included); dismissing a flag deletes the flag row and never touches the message it pointed at. A participant can only flag a message in a conversation they're actually part of — unlike the messaging insert-policy checks in milestone 6, this one didn't need a `security definer` wrapper, since "am I a participant on my own conversation" is exactly the access the flagger's ordinary RLS already grants them.
-- **Roster posts** (`/admin/roster-posts`) — remove any post regardless of which coach posted it, via the `roster_posts: admins manage all` policy that's existed since milestone 5.
-- **Club list** (`/admin/clubs`) — add/remove entries in the curated dropdown, via the `clubs: admins manage` policy from milestone 1.
-
-Two gaps this milestone had to close before "view flagged messages" actually worked: migration 6 gave admins `SELECT` on `message_flags` but never on `messages` or `conversations` themselves, so an admin could see *that* something was flagged but not *what it said* — fixed with read-only `messages: admins read all` / `conversations: admins read all` policies (still no write access). And the conversation thread page (`/messages/[id]`) assumed the viewer was always one of the two participants when picking which name to show and whether to render a reply box; an admin opening it from the flagged-messages list is neither, so it now detects that case, shows both participants' names, and hides the (otherwise RLS-rejected) reply form entirely.
-
-## Interaction polish
-
-A UI-only pass with no schema changes, aimed at making the app feel like a modern, professional network rather than a form-heavy CRUD tool — while staying inside every child-safety constraint above (still no photo/video hosting, still nothing that bypasses the parent inbox).
-
-- **Bottom tab navigation** — all authenticated routes moved into an `(app)` route group (`src/app/(app)/layout.tsx`) sharing one server-fetched user/profile/coach-verification lookup and a fixed `<BottomNav>` (`src/components/ui/bottom-nav.tsx`) whose tabs are role-aware (parent / unapproved coach / approved coach / admin see different tab sets). URLs are unchanged — this was a pure `git mv` into a route group, not a route redesign.
-- **Motion & feedback** — shared `<Button>` / `<ActionButton>` primitives (`src/components/ui/button.tsx`, `action-button.tsx`) give every action a pressed state (`active:scale-[0.97]`), a loading state, and a toast on completion (`toast-provider.tsx`), replacing bare server-action forms with no feedback while they ran. Deliberately scoped to press/hover micro-interactions rather than the experimental View Transitions API, which was judged too likely to destabilize a part-time-maintained build for the payoff.
-- **Loading states** — `loading.tsx` skeletons (`src/components/ui/skeleton.tsx`) on every data-heavy route so navigation shows a shaped placeholder instead of a blank flash. Note: a route with a `loading.tsx` boundary that also redirects unauthenticated visitors (most of them) now delivers that redirect as a streamed instruction rather than a top-level HTTP 307 — normal for a browser, but worth knowing if you're curling routes directly instead of clicking through them.
-- **Highlight gallery** — richness without hosting anything. `src/lib/oembed/server.ts` asks the linked provider's own oEmbed endpoint (direct for YouTube/Vimeo, spec auto-discovery for anything else, e.g. Hudl/Veo) for a thumbnail and title. `<LinkGallery>` (`src/components/ui/link-gallery.tsx`) lays highlights out as a grid of tiles instead of a stacked list of bare URLs, on both the parent's own player page (`/players/[id]`) and the coach-facing detail view (`/search/[id]`). A tile with no fetchable thumbnail — unknown provider, network error, timeout, or Instagram (see below) — still renders as a deliberately branded, gradient-and-icon tile via `src/lib/oembed/platform.ts` rather than falling back to plain text; every tile is a link-out, never an embed. Instagram is a deliberate special case: its oEmbed endpoint has required an authenticated Meta developer token since 2020, so there's no public way to fetch a real thumbnail from an Instagram link anymore — `fetchOEmbedPreview` skips the doomed network call entirely and the tile renders with a generic camera glyph instead. We still never fetch, proxy, or store the video/photo itself, only a thumbnail URL the provider already serves publicly.
-
-## Highlight captions and themes
-
-`players.video_links` (a bare `text[]` of URLs) has been replaced with `public.player_highlights` (migration 9): one row per link, carrying an optional parent-written `caption` (≤200 chars) and an optional `theme` — `goal` / `assist` / `defense` / `offense` / `skills` / `full_match`, defined once in `src/lib/highlight-themes.ts` and mirrored exactly by the `public.highlight_theme` Postgres enum. No production data existed for the old column (this app has never been deployed against a real Supabase project), so it was dropped outright rather than migrated or kept around unused.
-
-- **RLS** (`supabase/tests/database/player_highlights_rls.sql`) mirrors the player-photo pattern from milestone 4 exactly: a parent has full CRUD on their own children's highlights via a plain `EXISTS` against `players.parent_id = auth.uid()` (the same access their own player-row policy already grants them, so no `security definer` wrapper needed), and a verified coach gets read-only access, and only for players who are `open_to_opportunities` + `consent_completed` — same three-part check as photos and search visibility, nothing less.
-- **UI** — `<HighlightsManager>` (`src/app/(app)/players/[id]/highlights-manager.tsx`) replaces the old flat URL-inputs list in the player form: it renders the gallery inline with a "Remove" affordance per tile (an `<ActionButton>`, styled as a small pill), plus a form to add another link with an optional caption and theme. Highlights are managed on the player detail page rather than as part of the single player-profile save, since each one is now its own row, added and removed independently — same reasoning as why `<PhotoUpload>` is its own component rather than a form field.
-- **Rendering** — `<HighlightTile>` (exported from `link-gallery.tsx` alongside the read-only `<LinkGallery>` grid) shows the theme as a colored pill in the top-left corner of every tile, real thumbnail or branded fallback alike, and prefers the parent's own caption over the fetched oEmbed title when both exist.
-
-## Local Feed (v1.1)
-
-A radius-based feed layered on top of the v1 core loop — see CLAUDE.md section 9 for the non-negotiable rules this was built against. It exists to reconcile "a marketplace-style local feed with likes and shares" against the app's own "not a marketplace" design rule and child-safety constraints, without giving up either. Three migrations, in order:
-
-- **`20260110000000_local_feed_location.sql`** — a curated `public.cities` table (name + lat/long centroid, admin-managed, same spirit as `public.clubs`) and two opt-in columns on `profiles`: `home_city_id` and `radius_miles` (fixed to 5/10/25/50 via a check constraint). Nothing here ever stores a user's actual device location — a browser geolocation prompt, if used client-side, only ever resolves to picking one of these curated cities. "Traveling" is just changing your city; there's no separate override mechanism to maintain.
-- **`20260111000000_organization_verifications.sql`** — a fourth role, `organization`, verified the same way a coach is: manual admin approval, no exceptions, with the self-approval lockdown (`status`/`reviewed_by`/`reviewed_at` all forced to their unreviewed starting state) built into the INSERT policy from the start rather than needing a follow-up migration like `coach_verifications` did. `is_verified_organization()` mirrors `is_verified_coach()` exactly.
-- **`20260112000000_feed_posts.sql`** — `feed_posts` covers `looking_for_team` (parent: my player is open to a new team), `guest_play` (parent: my player is available for a one-off), and `org_event` (verified organization: a tournament/showcase listing). `roster_spot` — a coach's open roster spot — is deliberately *not* duplicated into this table; `public.roster_posts` stays exactly as it was through milestone 5, and the feed merges the two at the query layer (`src/app/(app)/feed/page.tsx`). Migrating existing roster-post RLS/UI/tests into a merged table would have been a much bigger, riskier change for no real benefit. `feed_post_likes` (one row per like, unique per post+profile) is scoped to `feed_posts` only — never a player profile, never a message, per CLAUDE.md section 9.
-
-Identity-leak note, worth restating: a `feed_posts` row's `player_id` is a plain UUID, visible to anyone who can read the row (same as `roster_posts.coach_id` today). That alone reveals nothing — resolving it to an actual name still requires a separate read of `public.players`, which stays gated by that table's own RLS (`open_to_opportunities` + `consent_completed` + verified coach). Posting to the feed does not unlock a player row that wasn't independently visible already; `supabase/tests/database/local_feed_posts_rls.sql` asserts this directly (test 8).
-
-**UI**: `/feed` merges both tables, radius-filters `feed_posts` (plain JS haversine math in `src/lib/geo.ts` against the curated city centroids — DFW-only, a few hundred posts, not worth a Postgres geo extension) while `roster_posts` are shown unfiltered by radius (they carry a club's free-text city, not a `cities.id`). On top of that, `/feed` also filters by birth year, position, and post type — the same vocabulary `/search` already used, applied in-memory rather than chained into either query: user-controlled filter values have no safe way to reach a raw PostgREST filter string without risking injection, and `org_event` listings carry neither a birth year nor a position (they're events, not player-specific posts), so they need to be exempted from those two filters rather than matched against columns they don't populate. `/feed/new` is a role-aware composer chooser; `/feed/new/[type]` handles all three new post types with one shared form component. Likes are a single `toggleFeedPostLike` action (checks server-side whether you've already liked it, flips it) rather than separate like/unlike actions. Shares copy a link to the post's own OpenRoster page (`/feed/post/[id]` for the three new types, the existing `/roster-posts/[id]` for roster spots) — still behind the same login wall as every other route, so nothing is ever exposed to a signed-out visitor.
-
-**Admin**: `/admin/organizations` and `/admin/feed-posts` extend the existing approve/reject and flag/remove tooling — no new moderation surface, same patterns as `/admin/coaches` and `/admin/roster-posts`.
-
-**Scope note**: a "Message the family" action on a `looking_for_team`/`guest_play` card is only offered to verified coaches (reusing the existing `startConversationWithParent` flow, keyed off the post's `player_id`) — the same messaging model as player search. Parent-to-parent contact isn't part of this: `conversations` has always required one parent and one coach, and introducing peer-to-peer messaging wasn't part of what was approved. `org_event` listings carry no reply action at all — organizations have zero messaging capability by design, so an event's own description is expected to carry sign-up/contact info.
-
-## Teams
-
-`public.teams` (migration 13) lets a parent group their player under a team name — typed free-text on the player form, resolved server-side via `findOrCreateTeam()` (`src/lib/teams.ts`) to an existing team's id (exact name match) or a newly created row if none exists yet. A coach then claims a specific team the same way they verify a club affiliation: submit evidence, wait for admin approval (`team_verifications`, with the self-approval lockdown built into the INSERT policy from the start — same pattern `organization_verifications` used, rather than needing a follow-up migration the way `coach_verifications` did). `is_verified_team_owner()` mirrors `is_verified_coach()`/`is_verified_organization()` exactly.
-
-**Scope decision, stated explicitly because it's a safety-relevant one**: this does *not* build any way for one parent to see another family's child through shared team membership. The user's original ask was "team rosters based on parents who selected the same team" — visible, implicitly, to other parents on that team. That's a direct conflict with CLAUDE.md's core rule ("profiles are private by default and visible only to verified coach accounts") and its highest-severity bug class (a path from an adult to a child outside the parent inbox); "team management/scheduling" is also explicitly out of scope for v1. What's built instead stays inside those rules: a team's name/city/leagues are non-sensitive org metadata any authenticated user can read (same visibility level `clubs` already have, needed so a parent can search for an existing team before typing a duplicate) — but *who's on a team* is visible to nobody except that child's own parent and, once verified, the coach who owns that exact team. No parent can ever see another family's child this way.
-
-- **`players.team_id`** references `teams`, with a narrow column-level `UPDATE` grant (parents set it on their own child, same pattern as every other player field) and a second, narrower `SELECT` policy — `"players: verified team owner reads own team roster"` — that only unlocks a row when `is_verified_team_owner(auth.uid(), team_id)` is true. This is additive to the existing open-to-opportunities/consented visibility a coach already gets through search; it never grants anything to an unverified coach or to another parent.
-- **Removing a player from a team** is deliberately not a general players `UPDATE` grant for coaches (which would be table-wide for the `authenticated` role with no way to restrict it to just `team_id`). `remove_player_from_team()` is a narrow `security definer` function that does exactly one thing — null out `team_id` — after checking the caller owns that player's current team.
-- **Merging duplicate teams**: parents entering a team name freehand will inevitably create near-duplicates ("Solar SC 13B" vs "Solar 2013 Boys"). `merge_unclaimed_team_into()` lets a verified owner fold another team into theirs, but only when the source team is *unclaimed* (no `approved` `team_verifications` row of its own) — one coach can never unilaterally absorb a team another coach already verified ownership of. `supabase/tests/database/teams_rls.sql` (14 assertions) proves that rejection path directly, alongside the roster-isolation and self-approval-lockdown checks.
-
-**UI**: the team field lives on the player form (`src/app/(app)/players/player-form.tsx`) as a plain text input with a `<datalist>` of existing team names for autocomplete — not a `<select>`, since teams aren't curated the way clubs are. `/teams` is a coach-only browse-and-claim list (any authenticated user *could* read the `teams` table, but claiming is gated to `role = 'coach'`, independent of whether that coach is also club-verified — "can't assume all coaches will be on this app" cuts both ways, so team claiming doesn't require a prior club verification). `/teams/[id]/manage` is the verified-owner page: edit name/city/leagues, view the roster, remove a player, merge a duplicate in. `/admin/teams` extends the existing approve/reject queue pattern.
-
-## Feed search, modern filters, and coach-posted training/events
-
-Three changes to `/feed`, all in migration 14 (`20260114000000_feed_post_type_training.sql` + `20260114000001_feed_training_and_coach_posts.sql`) and the feed UI.
-
-**Coaches can now post two more things.** Alongside a roster spot (unchanged, still `public.roster_posts`), a verified coach can post that their own team needs a guest player (`feed_posts.post_type = 'guest_play'`, `player_id` left null — the mirror image of a parent's guest_play post, which still requires a real player they own) and a training/event listing (`post_type = 'training'`, new `cost_cents`/`duration_minutes` columns). `/feed/new` branches by role: a parent sees the two existing family options, a coach sees roster spot / need a guest / training. `guest_play` is one enum value shared by two different insert policies and two different UI flows (`ComposerForm`'s `mode` prop picks which), which is why the feed card shows "Posted by {coach name}" only when there's no `player_id` — a parent's post never carries an author name, per section 9's "never a name or photo in the feed card."
-
-**Scope note on `training`**, because CLAUDE.md section 3 explicitly rules out a "trainer marketplace" and "in-app payments to trainers": this stays outside both. `cost_cents` is a plain informational number rendered on the card (`$25 · 90 min`), the same way a roster post's tryout date or an org_event's description already tell a family when/where/how to show up — there's no trainer discovery, no trainer profile, no independent-contractor listing, and no payment processing anywhere in this feature. Payment happens off-platform, same as a tryout does today. This is a verified coach posting on behalf of their own club, gated by the same `is_verified_coach()` check a roster spot already requires — not a marketplace matching independent trainers to families. A `feed_posts_cost_duration_only_for_training` check constraint keeps `cost_cents`/`duration_minutes` from being set on any other post type by mistake.
-
-**Enum addition split into its own migration file.** `alter type feed_post_type add value 'training'` lives alone in `20260114000000_feed_post_type_training.sql` — Postgres can't validate a `CHECK` constraint (or anything else that has to compare against real rows) using a brand-new enum value inside the same transaction that added it, and Supabase applies each migration file as one transaction. `20260114000001` (the very next file) is where `'training'` actually gets used in constraints and policies, safely in its own transaction. `organization_verifications`' `alter type user_role add value 'organization'` didn't need this split back in migration 11 because nothing in that same file validated existing rows against the new value — only `CREATE POLICY` did, which stores its expression unevaluated rather than scanning the table.
-
-## Likes and player interest (declined: highlight posts, name search/friending, public comments)
-
-A follow-up request asked for highlight posts in the feed (so "coaches, scouts" would see them), parent-to-parent name search with a "friend" mechanic, and comments on every post. Three separate CLAUDE.md rules rule those out directly, not just in spirit, so none of the three got built:
-
-- **Highlight posts in the feed** would put actual video/photo content in front of every authenticated user — including an unverified coach, or another parent — bypassing the verified-coach + `open_to_opportunities` + `consent_completed` gate `player_highlights` already sits behind, and breaking section 9's "never a name or photo in the feed card" rule for the exact post types this would extend. A verified coach can already see a player's highlights on their profile through search; that stays the only place they live.
-- **Parent-to-parent player search + "friending"** is CLAUDE.md's own named highest-severity bug class, verbatim: a path from an adult to a child outside the parent inbox. There's no narrower version of this that stays inside the rule, so nothing was built here at all.
-- **Public comments** were already ruled out by name in section 9: "No public comment threads. A reply is a message, logged and retained under the existing rules in Section 2." Messaging (already built, coach ↔ parent) remains the only reply mechanism on any post.
-
-What *did* ship, migration 15 (`20260115000000_roster_post_likes_and_player_interest.sql`):
-
-- **`roster_post_likes`** — brings roster spots to like-parity with `feed_posts`, which already supported likes. Mirrors `feed_post_likes` exactly (any authenticated user reads; like as yourself on an active post; unlike your own). `<LikeButton>` (`src/app/(app)/feed/like-button.tsx`) took a `toggleAction` prop so the same component drives both tables instead of forking it.
-- **`player_interest`** — lets a verified coach mark interest in a player profile they can already see through search, and lets that player's own parent see who has. Deliberately **not** built as a "like": CLAUDE.md section 7 explicitly warns against anything that reads as a dating-app mechanic, and an adult putting a heart icon on a child's profile is exactly that pattern, regardless of intent. The UI calls it "Mark as interested," no heart, and the visibility is as narrow as the mechanic allows: the RLS `SELECT` policies only let the liking coach read their own row and the player's own parent read every row on their own player — never another coach, never another parent. This isn't a new exposure either way: a coach who can insert a row here could already see this exact player through search (same `open_to_opportunities`/`consent_completed`/verified-coach gate, checked again in the `INSERT` policy), and a parent who can read it could already see their own player's full profile. Both `INSERT` policies use the established player_highlights pattern — a plain `EXISTS` subquery against a table the caller already has direct `SELECT` on, no `security definer` wrapper needed.
-
-**Modern filters + a real search bar.** The old always-open filter form is now a `<details>`-based dropdown (`Filters`, with a count badge) that opens on click and collapses again — no client JS needed, just a native disclosure element styled to look like a popover. Whatever's selected still shows as removable chips below the search bar even while the dropdown is collapsed, each one linking straight to the same view with just that one filter value stripped out (`withoutFilter()` in `src/app/(app)/feed/page.tsx`). A new free-text search box (`?q=`) matches in-memory against exactly what each card already shows — description, city, and author/club name — never more than what's already visible, and never chained into a raw PostgREST filter string for the same injection-safety reason the other feed filters already apply in-memory rather than server-side.
-
-## Verified team membership + minimal teammate roster
-
-A follow-up round of requests pushed hard on team-roster visibility for parents — first as general player search, then as "friending," then as team rosters citing other platforms as precedent, then (correctly) pointing out that no message in this app is ever delivered to a child regardless of who's messaging whom. That last point was right and worth stating plainly: every message here goes adult to adult, always has. But the risk was never about message delivery — it's about an unverified adult *locating* a specific, real child through search or a roster, since the contact that follows can lead somewhere real. That's the same reason coach access is gated at all, even though a coach can never message a child either.
-
-The conversation converged on something that actually resolves it: don't just label team membership as verified/unverified and show it to other families either way — gate *visibility itself* on verification, so an unconfirmed membership is invisible to anyone but the coach and that child's own parent until a real coach (already admin-approved to own the team) confirms it. Migration 16 (`20260116000000_verified_team_membership.sql`) builds exactly that, and nothing more:
-
-- **`players.team_membership_verified`** — defaults `false` on every team assignment, always. It is **never** added to the parent's column-level `UPDATE` grant (`grant update (team_id) on players`, from migration 13, is left untouched) — the only way this column ever changes is through `verify_team_member()` / `unverify_team_member()` below. A parent's own client can update `team_id` freely (unchanged, self-service, no coach in the loop for the claim itself) but has no path at all to flip this flag on their own child.
-- **`verify_team_member(player_id)` / `unverify_team_member(player_id)`** — `security definer`, both re-check `is_verified_team_owner(auth.uid(), player's current team_id)` before doing anything, mirroring `remove_player_from_team()` exactly. Only the team's actual admin-approved coach can confirm — or revoke — a specific child's membership.
-- **A `before update` trigger** (`reset_team_membership_verification`) resets the flag to `false` the instant `team_id` changes, for *any* reason, on *any* code path — a parent switching their kid to a different team can't carry a stale verified badge over to a team nobody there has confirmed them on.
-- **`get_team_roster(team_id)`** — the actual feature: returns first name, last initial, birth year, and positions (never bio, photo, or highlights — the same fields search already shows a coach) for every *verified* member of a team, but only to a caller whose own player is *also* a verified member of that exact team. Unverified members never appear in this function's output, to anyone but the coach managing the team and their own parent — not shown-with-a-badge, not shown at all. A parent with no real connection to the team gets zero rows back, same as if it didn't exist for them.
-
-**UI**: `/teams/[id]/manage` gets a Verify/Unverify action per roster row (pending members show an amber "Pending" badge, verified ones green "Verified"); `/players/[id]` shows a "Teammates" section — calling `get_team_roster` — only once that specific player is themselves verified, plus a "Team membership pending" notice while they aren't.
-
-13 new pgTAP assertions (`verified_team_membership_rls.sql`), covering: a fresh membership starts unverified; a parent cannot self-verify (column simply isn't granted — this is a Postgres permission error, not an RLS policy violation); nobody sees any roster before anyone's verified, including two families genuinely on the same team; a coach who owns a *different* team cannot verify a player on this one; the actual owner can; a verified parent sees themselves before any teammate is verified, then the full roster once a teammate is too; unverify and remove-from-team both work and are owner-gated the same way; and changing `team_id` resets verification via the trigger regardless of which function touched the column. Full existing suite green, zero regressions.
-
-## Parents can browse teams and message a team's verified coach
-
-The very next ask, right after verified team membership shipped: let parents search teams to find coaches, see team rosters, and see (and like) player highlights from a team page. The first part is new and safe; the second and third are the exact thing `get_team_roster()` was just built to prevent, asked for again through a different entry point. Migration 17 (`20260117000000_parent_team_coach_contact.sql`) builds only the first part:
-
-- **`conversations.team_id`** — a third nullable discovery context alongside `player_id` and `roster_post_id`, unchanged since milestone 6. The insert policy gained one more `or` branch: `team_id is not null and is_verified_team_owner(coach_id, team_id)`. Same shape as the roster-post branch that's existed since milestone 5 — a parent still can't cold-message an arbitrary coach, only one who's the actual admin-approved owner of the specific team being messaged.
-- **`get_team_coach(team_id)`** — the only new thing a parent can learn about a team by browsing it: which coach, if any, is its *approved* verified owner (id + name). Never evidence text, never a pending or rejected claim, never anything for a team with no verified owner. A coach's name being visible to a browsing parent isn't a new exposure — it's already public at this level via every roster post. A plain RLS policy on `team_verifications` couldn't do this without also exposing evidence to every browsing parent (row-level security filters rows, not columns), so this is a narrow `security definer` function instead, same pattern `get_team_roster()` already established.
-
-**What's explicitly untouched**: `get_team_roster()` itself, the whole verified-membership model, and everything about who's on a team. `/teams` for a parent shows team name, city, and leagues only — the same non-sensitive metadata clubs have always exposed to every authenticated user — plus a "Message {coach}" form once a verified coach exists. No roster, no player count, no highlights, no likes on any of it. A parent still learns nothing about who's on a team unless their own child is a verified member of that exact team, exactly as migration 16 left it.
-
-9 new pgTAP assertions (`parent_team_coach_contact_rls.sql`): `get_team_coach` returns the right owner for a claimed team and nothing for an unclaimed one; a parent can message a team's real verified coach; a parent cannot message a different coach while claiming that team as context, or message against an unclaimed team at all; and — since the milestone-6 insert policy had to be dropped and recreated to add the new branch — explicit regression coverage proving the two pre-existing discovery contexts (player, roster post) still work, a conversation still can't be started with no context at all, and `get_team_roster()` is completely unaffected. Full suite green.
-
-## Team search by name + radius, and player Instagram/YouTube links
-
-Two more asks in the same message. Both are safe extensions of features that already exist — neither opens any new visibility into a child.
-
-**Team search + radius filter.** `/teams` for a parent now has a name search box (`?q=`, case-insensitive substring match) and reuses the Local Feed's location model rather than introducing a new one: the same `<LocationSettings>` component and `profiles.home_city_id` / `radius_miles` columns already used for feed posts now also scope team results, via the same `haversineMiles()` calculation against the curated `cities` table (never a raw device coordinate, never a third-party geocoder). A team with no `city_id` set is never filtered out — the radius is a narrowing filter, not a requirement. Google Maps was raised as an option and explicitly declined by the user's own choice (asked directly, since CLAUDE.md requires checking before adding a dependency) in favor of reusing the existing curated-city/radius pattern — no new dependency, no new location precision beyond what Local Feed already established. No migration needed and no new RLS surface: this only changes which of the already-visible team rows (name/city/leagues, per the previous section) get returned to a search, not what any single row exposes.
-
-**Player Instagram/YouTube links.** Migration 18 (`20260118000000_player_social_profiles.sql`) adds `players.instagram_url` and `players.youtube_url` — two more parent-entered link-out fields, shown at the top of a player's profile, alongside the existing highlight links. Same platform philosophy as every other link here: store the URL, render a click-through, never fetch or embed the destination ("We do not host video. Ever."). No new RLS surface — these are two more columns on an already-visible row, covered by the exact same read/write rules every other profile field already has. As with `team_id` before it (migration 13) and `consent_completed` before that (migration 2), `players` UPDATE is a maintained column-level grant rather than table-wide, so the migration explicitly adds `grant update (instagram_url, youtube_url) on public.players to authenticated` — without it a parent's own RLS policy would still say yes, but the column-privilege check underneath would silently reject the write anyway.
-
-One scope note worth stating plainly: this is a materially bigger surface than one curated highlight clip. A coach can browse a linked Instagram account in full, not just the one clip a parent chose to share — and a personal Instagram account can reveal a school, a location, a friend group, well past soccer. The UI nudges toward a recruiting/highlights-focused account (copy: "A recruiting or highlights account works best here") rather than hard-blocking a personal one, since the app has no technical way to tell the two apart and this is already common practice in youth sports profiles elsewhere. Visibility itself is unchanged: still only a verified coach, still only once the player is `open_to_opportunities` and `consent_completed`, same as every other field.
-
-Both link fields appear on the parent's own edit form (`players/[id]/page.tsx`) and, read-only as click-through buttons, on the coach-facing detail view (`search/[id]/page.tsx`) — "coaches can click and go to a full profile off this app," per the request, without the app ever hosting or embedding that content itself.
-
-5 new pgTAP assertions (`player_social_profiles_rls.sql`): a parent can set both links and they're actually persisted (not just RLS-permitted); a verified coach reads the YouTube link on an open, consented player, same as any other field; and — since no `UPDATE` policy grants a coach write access to a player row at all — a `lives_ok` assertion that a coach's write attempt runs without error, followed by an `is` assertion proving the value was never actually changed. (Unlike `INSERT`'s `WITH CHECK`, an `UPDATE` with no matching policy silently excludes the row from the target set rather than throwing — worth a `lives_ok` + `is` pair instead of `throws_ok`.) Full suite green, zero regressions.
-
-## Messaging the person behind a feed post
-
-The feed has had likes since migration 15, but no way to actually reach the person behind a post — a real gap, since "more information" and "is this spot still open" are the whole point of a roster spot or training listing. Migration 19 (`20260119000000_feed_post_messaging.sql`) closes it along the two directions that are actually safe, and leaves one closed on purpose.
-
-**Coach → family, on a `looking_for_team`/`guest_play` post.** No new context needed at all. These posts always carry `player_id`, and the existing `player_id` branch (migration 6) already lets a verified coach start a conversation with any open, consented player's parent — the same rule that already governs `/search`. This shipped as UI only: the feed post detail page now looks up that player, and RLS itself decides whether the row (and therefore the "Message the family" form) is visible — a coach only ever sees it when the player is actually open and consented, which is exactly when messaging would succeed anyway.
-
-**Parent → coach, on a coach-authored `guest_play` ("need a guest player") or `training` post.** This is the actual gap: these posts never carry a `player_id`, so nothing linked them to a conversation before. Migration 19 adds `conversations.feed_post_id` — a fourth nullable discovery context alongside `player_id`, `roster_post_id`, and `team_id` — and `feed_post_belongs_to_coach(feed_post_id, coach_id)`, a `security definer` function proving the post actually belongs to the coach being messaged, added as one more `or` branch on the existing insert policy. Same shape as `roster_post_belongs_to_coach` and `is_verified_team_owner` before it.
-
-**Deliberately absent: `org_event`.** CLAUDE.md section 9 is explicit that an organization account "has no access to player search, player profiles, or messaging" and "must never be treated as [a coach] in RLS" — so `feed_post_belongs_to_coach` only ever matches `guest_play`/`training`, never `org_event`, and there's no `is_verified_organization`-based branch anywhere in this migration. A family can still like or share a tournament listing, same as before; they just can't message the organization running it. That boundary is enforced twice over: the function itself never returns true for an `org_event` row, and separately, an organization profile can never satisfy `is_verified_coach()` at all, so it could never be a conversation's `coach_id` even if some other context matched.
-
-**UI**: `/feed/post/[id]` gained the same "Message the family" / "Message {coach}" form pattern already used on `/search/[id]` and `/roster-posts/[id]`, shown only when the viewer's role and the post actually support it. The feed list itself (`/feed`) previously had no click-through to a post's detail page at all for anything but `roster_spot` — `ShareButton` only ever copied a link, it never navigated — so `feed-card.tsx` now wraps each card's body in a link to its detail page, the same pattern `roster_spot` already used, or the new messaging UI would have been unreachable from the feed.
-
-10 new pgTAP assertions (`feed_post_messaging_rls.sql`): `feed_post_belongs_to_coach` is true for a post's real coach author and false for a different coach *and* for an org_event (even checked against its own real author); a parent can message the real coach behind both a `guest_play` and a `training` post; a parent cannot message a coach who isn't the actual author of the post being claimed as context; a parent cannot start a `feed_post`-context conversation against an `org_event` at all, and separately, an organization can never be a conversation's `coach_id` regardless of context; and regression coverage proving the pre-existing player-context path still works after the insert policy was dropped and recreated a third time. Full suite green.
-
-## Conversation context everywhere, structured event details, and sign-up links
-
-Two real gaps, not visual ones. First: a coach's inbox showed "Re: {player}" for a player-context conversation but nothing at all for a roster-post, team, or feed-post conversation — the exact contexts messaging milestone 17 and 19 had just added. A coach opening a message about a training post or a team had no idea what it was about until they read the whole thread, if then. Fixed in `/messages` and `/messages/[id]` by selecting all four context joins (`player`, `roster_post`, `team`, `feed_post`) and showing whichever one is set — no migration needed, the context columns already existed, this was purely a missing read.
-
-Second: roster posts and feed posts (training, org_event, guest_play) buried "when, where, and how do I sign up" inside free-text description prose. Migration 20 (`20260120000000_event_details_and_signup_links.sql`) adds structured fields instead:
-
-- **`roster_posts.tryout_time`, `.location`** — alongside the existing `tryout_date`, so a card can show "Sept 14 at 6:00 PM · Toyota Soccer Center" instead of making a family read a paragraph.
-- **`feed_posts.event_date`, `.event_time`, `.location`** — same idea for training and org_event listings, and optionally for a coach's or parent's `guest_play` post ("available Saturday at 2pm"). Deliberately not offered on `looking_for_team`, which isn't an event.
-- **`roster_posts.signup_url` / `feed_posts.signup_url`** — an optional link-out to wherever the poster already collects RSVPs (a club's own tryout page, a Google Form). Same store-the-URL-never-host philosophy as every other link on this platform; rendered as a "Sign up ↗" button on the card and detail page.
-
-No new RLS surface on either table — more nullable columns on an already-visible row, and neither table restricts `UPDATE` to a column allowlist the way `players` does, so (unlike the Instagram/YouTube migration) there was no grant to add either. 4 new pgTAP assertions (`event_details_and_signup_links_rls.sql`) prove a coach can actually set and read these fields through the existing policies, not just that the columns exist. Full suite green.
+- Next.js App Router + TypeScript
+- React
+- Supabase Postgres, Auth, RLS, and Storage
+- Tailwind CSS
+- Resend
+- Stripe scaffolding
+
+## Safety principles
+
+- adults only hold accounts
+- parents own player profiles
+- parental consent gates player-data sharing
+- player discovery is private and permissioned
+- messages always route between adult accounts
+- player video is never hosted by PitchLink
+- verified team rosters are limited to verified team relationships
+- professional contact from a trainer/organization requires explicit family interest in that professional's opportunity
+
+See the Supabase migrations and database tests for the enforcement layer.
