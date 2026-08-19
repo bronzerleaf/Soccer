@@ -89,6 +89,14 @@ export default async function DashboardPage() {
             Claim or manage a team
           </Link>
         ) : null}
+        {profile?.role === "parent" ? (
+          <Link
+            href="/teams"
+            className="mt-4 inline-block text-sm font-medium text-slate-700 underline"
+          >
+            Browse teams and message a coach
+          </Link>
+        ) : null}
       </div>
     </main>
   );

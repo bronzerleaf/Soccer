@@ -156,6 +156,77 @@ export async function startConversationWithParent(
   redirect(`/messages/${conversationId}`);
 }
 
+// Parent -> coach, from browsing the team list. The coach is looked up
+// via get_team_coach() rather than trusted from the client — same
+// reasoning as every other conversation-start path here: the server
+// re-derives who's actually allowed to be the other side, never takes
+// it as a form value.
+export async function startConversationWithTeamCoach(
+  teamId: string,
+  formData: FormData
+) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect("/login");
+  }
+
+  const body = String(formData.get("body") ?? "").trim();
+  if (!body) {
+    throw new Error("Message can't be empty.");
+  }
+
+  const { data: coachRows } = await supabase.rpc("get_team_coach", {
+    target_team_id: teamId,
+  });
+  const coach = coachRows?.[0] as { coach_id: string; full_name: string } | undefined;
+
+  if (!coach) {
+    throw new Error("This team doesn't have a verified coach yet.");
+  }
+
+  const { data: existing } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("parent_id", userData.user.id)
+    .eq("team_id", teamId)
+    .maybeSingle();
+
+  let conversationId = existing?.id as string | undefined;
+
+  if (!conversationId) {
+    const { data: created, error } = await supabase
+      .from("conversations")
+      .insert({
+        parent_id: userData.user.id,
+        coach_id: coach.coach_id,
+        team_id: teamId,
+      })
+      .select("id")
+      .single();
+
+    if (error || !created) {
+      throw new Error(error?.message || "Could not start this conversation.");
+    }
+    conversationId = created.id as string;
+  }
+
+  const { error: messageError } = await supabase.from("messages").insert({
+    conversation_id: conversationId,
+    sender_id: userData.user.id,
+    body,
+  });
+
+  if (messageError) {
+    throw new Error(messageError.message);
+  }
+
+  await notifyOtherParticipant(supabase, conversationId, userData.user.id, body);
+
+  revalidatePath("/messages");
+  redirect(`/messages/${conversationId}`);
+}
+
 // Parent -> coach, from a roster post's detail page.
 export async function startConversationWithCoach(
   rosterPostId: string,
