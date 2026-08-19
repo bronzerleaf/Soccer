@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f8fb;
+  --foreground: #0b1736;
+  --pitch-navy: #0b1736;
+  --pitch-green: #08a66c;
+  --pitch-green-dark: #07845a;
+  --pitch-mint: #e9f9f2;
+  --pitch-coral: #ff625f;
+  --pitch-blue: #3478f6;
+  --pitch-line: #e5eaf1;
+  --pitch-muted: #667085;
 }
 
 @theme inline {
@@ -12,15 +20,45 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
 }
 
 body {
-  background: var(--background);
+  margin: 0;
+  background:
+    radial-gradient(circle at 20% -10%, rgba(8, 166, 108, 0.07), transparent 28rem),
+    linear-gradient(180deg, #ffffff 0, #f7f9fc 24rem, #f6f8fb 100%);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+::selection {
+  background: #c9f3e2;
+  color: var(--pitch-navy);
+}
+
+.pitch-card {
+  border: 1px solid rgba(229, 234, 241, 0.9);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 1.25rem;
+  box-shadow: 0 12px 32px rgba(11, 23, 54, 0.06);
+}
+
+.pitch-pill {
+  border-radius: 9999px;
+  border: 1px solid var(--pitch-line);
+  background: #fff;
+}
+
+.pitch-gradient-text {
+  background: linear-gradient(110deg, var(--pitch-navy), var(--pitch-green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
