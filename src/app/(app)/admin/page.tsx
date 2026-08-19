@@ -11,6 +11,7 @@ export default async function AdminHomePage() {
     { count: clubCount },
     { count: pendingOrganizations },
     { count: activeFeedPosts },
+    { count: pendingTeams },
   ] = await Promise.all([
     supabase
       .from("coach_verifications")
@@ -30,6 +31,10 @@ export default async function AdminHomePage() {
       .from("feed_posts")
       .select("id", { count: "exact", head: true })
       .gt("expires_at", new Date().toISOString()),
+    supabase
+      .from("team_verifications")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending"),
   ]);
 
   const sections = [
@@ -43,6 +48,12 @@ export default async function AdminHomePage() {
       href: "/admin/organizations",
       label: "Organization verification queue",
       count: pendingOrganizations ?? 0,
+      countLabel: "pending",
+    },
+    {
+      href: "/admin/teams",
+      label: "Team verification queue",
+      count: pendingTeams ?? 0,
       countLabel: "pending",
     },
     {

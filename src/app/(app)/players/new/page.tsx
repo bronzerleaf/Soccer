@@ -10,10 +10,14 @@ export default async function NewPlayerPage() {
     redirect("/login");
   }
 
-  const { data: clubs } = await supabase
-    .from("clubs")
-    .select("id, name, city")
-    .order("name");
+  const [{ data: clubs }, { data: teams }] = await Promise.all([
+    supabase.from("clubs").select("id, name, city").order("name"),
+    supabase
+      .from("teams")
+      .select("id, name")
+      .is("merged_into_team_id", null)
+      .order("name"),
+  ]);
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
@@ -26,7 +30,7 @@ export default async function NewPlayerPage() {
       </p>
 
       <div className="mt-8">
-        <NewPlayerForm clubs={clubs ?? []} />
+        <NewPlayerForm clubs={clubs ?? []} teams={teams ?? []} />
       </div>
     </main>
   );

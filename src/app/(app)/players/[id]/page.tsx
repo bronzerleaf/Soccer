@@ -23,15 +23,20 @@ export default async function PlayerDetailPage({
     redirect("/login");
   }
 
-  const [{ data: player }, { data: clubs }] = await Promise.all([
+  const [{ data: player }, { data: clubs }, { data: teams }] = await Promise.all([
     supabase
       .from("players")
       .select(
-        "id, parent_id, first_name, last_initial, birth_year, positions, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, player_highlights(id, url, caption, theme)"
+        "id, parent_id, first_name, last_initial, birth_year, positions, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, team_id, team:teams(name), player_highlights(id, url, caption, theme)"
       )
       .eq("id", id)
       .single(),
     supabase.from("clubs").select("id, name, city").order("name"),
+    supabase
+      .from("teams")
+      .select("id, name")
+      .is("merged_into_team_id", null)
+      .order("name"),
   ]);
 
   if (!player) {
@@ -139,6 +144,7 @@ export default async function PlayerDetailPage({
         <EditPlayerForm
           playerId={player.id}
           clubs={clubs ?? []}
+          teams={teams ?? []}
           defaultValues={{
             first_name: player.first_name,
             last_initial: player.last_initial,
@@ -148,6 +154,7 @@ export default async function PlayerDetailPage({
             current_club_id: player.current_club_id,
             city: player.city,
             bio: player.bio,
+            team_name: (player.team as unknown as { name: string } | null)?.name ?? null,
           }}
         />
       </div>

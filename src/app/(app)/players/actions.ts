@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { isValidTheme } from "@/lib/highlight-themes";
+import { findOrCreateTeam } from "@/lib/teams";
 
 export type PlayerFormInput = {
   firstName: string;
@@ -14,6 +15,7 @@ export type PlayerFormInput = {
   currentClubId: string | null;
   city: string;
   bio: string;
+  teamName: string;
 };
 
 function parseFormInput(formData: FormData): PlayerFormInput {
@@ -31,6 +33,7 @@ function parseFormInput(formData: FormData): PlayerFormInput {
     currentClubId: (formData.get("current_club_id") as string) || null,
     city: String(formData.get("city") ?? "").trim(),
     bio: String(formData.get("bio") ?? "").trim(),
+    teamName: String(formData.get("team_name") ?? "").trim(),
   };
 }
 
@@ -42,6 +45,9 @@ export async function createPlayer(formData: FormData) {
   }
 
   const input = parseFormInput(formData);
+  const teamId = input.teamName
+    ? await findOrCreateTeam(supabase, input.teamName, userData.user.id)
+    : null;
 
   const { data, error } = await supabase
     .from("players")
@@ -55,6 +61,7 @@ export async function createPlayer(formData: FormData) {
       current_club_id: input.currentClubId,
       city: input.city,
       bio: input.bio || null,
+      team_id: teamId,
     })
     .select("id")
     .single();
@@ -75,6 +82,9 @@ export async function updatePlayer(playerId: string, formData: FormData) {
   }
 
   const input = parseFormInput(formData);
+  const teamId = input.teamName
+    ? await findOrCreateTeam(supabase, input.teamName, userData.user.id)
+    : null;
 
   const { error } = await supabase
     .from("players")
@@ -87,6 +97,7 @@ export async function updatePlayer(playerId: string, formData: FormData) {
       current_club_id: input.currentClubId,
       city: input.city,
       bio: input.bio || null,
+      team_id: teamId,
     })
     .eq("id", playerId);
 

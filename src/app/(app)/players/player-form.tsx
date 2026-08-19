@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { POSITIONS, PREFERRED_FEET } from "./constants";
 
 type Club = { id: string; name: string; city: string };
+type Team = { id: string; name: string };
 
 type PlayerFormValues = {
   first_name: string;
@@ -14,6 +15,7 @@ type PlayerFormValues = {
   current_club_id: string | null;
   city: string;
   bio: string | null;
+  team_name: string | null;
 };
 
 const currentYear = new Date().getFullYear();
@@ -22,12 +24,14 @@ export function PlayerForm<T>({
   action,
   onSuccess,
   clubs,
+  teams,
   defaultValues,
   submitLabel,
 }: {
   action: (formData: FormData) => Promise<T>;
   onSuccess?: (result: T) => void;
   clubs: Club[];
+  teams: Team[];
   defaultValues?: Partial<PlayerFormValues>;
   submitLabel: string;
 }) {
@@ -197,6 +201,33 @@ export function PlayerForm<T>({
             </option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label
+          htmlFor="team_name"
+          className="block text-sm font-medium text-slate-900"
+        >
+          Team
+        </label>
+        <input
+          id="team_name"
+          name="team_name"
+          type="text"
+          list="team-suggestions"
+          placeholder="e.g. Solar SC 2013 Boys"
+          defaultValue={defaultValues?.team_name ?? ""}
+          className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+        />
+        <datalist id="team-suggestions">
+          {teams.map((team) => (
+            <option key={team.id} value={team.name} />
+          ))}
+        </datalist>
+        <p className="mt-1 text-xs text-slate-500">
+          Type the team name. If it&rsquo;s not listed yet, just type it and
+          we&rsquo;ll add it — a coach can later verify ownership of it.
+        </p>
       </div>
 
       <div>

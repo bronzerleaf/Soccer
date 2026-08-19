@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,14 @@ export default async function DashboardPage() {
                 : "Parent account"}
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-600">{roleCopy}</p>
+        {profile?.role === "coach" ? (
+          <Link
+            href="/teams"
+            className="mt-4 inline-block text-sm font-medium text-slate-700 underline"
+          >
+            Claim or manage a team
+          </Link>
+        ) : null}
       </div>
     </main>
   );
