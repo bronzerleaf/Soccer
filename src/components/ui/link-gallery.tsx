@@ -8,14 +8,9 @@ export type Highlight = {
   url: string;
   caption: string | null;
   theme: string | null;
+  show_in_feed?: boolean;
 };
 
-// A grid of link-out tiles for a player's highlight/social links — styled
-// like a gallery a family is building, not a list of bare URLs. Still never
-// hosts anything: every tile links out to the provider, and a tile without
-// a fetchable thumbnail (Instagram, or any failed/unknown provider) still
-// renders as a deliberate, branded card instead of falling back to plain
-// text. See src/lib/oembed/server.ts for where previews come from.
 export function LinkGallery({
   highlights,
   previews,
@@ -38,11 +33,6 @@ export function LinkGallery({
   );
 }
 
-// Exported separately (rather than only used internally by LinkGallery) so
-// a caller that needs per-tile controls — the parent's own editable
-// gallery, which adds a "Remove" affordance — can lay out the same grid
-// itself and pass an `actions` slot, without duplicating the thumbnail /
-// theme-badge / caption markup.
 export function HighlightTile({
   highlight,
   preview,
@@ -60,7 +50,7 @@ export function HighlightTile({
     (platform.kind === "photo" ? `View on ${platform.name}` : `Open on ${platform.name}`);
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-slate-200 transition-shadow hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white transition-shadow hover:shadow-md">
       <a href={highlight.url} target="_blank" rel="noopener noreferrer" className="block">
         <div
           className="relative aspect-square w-full overflow-hidden"
@@ -110,13 +100,7 @@ export function HighlightTile({
 function PlatformGlyph({ kind }: { kind: PlatformKind }) {
   if (kind === "photo") {
     return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="white"
-        strokeWidth="1.6"
-        className="h-8 w-8 opacity-90"
-      >
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.6" className="h-8 w-8 opacity-90">
         <rect x="3" y="5" width="18" height="15" rx="3.5" />
         <circle cx="12" cy="12.5" r="4" />
         <circle cx="17" cy="8.5" r="0.7" fill="white" stroke="none" />
@@ -132,15 +116,7 @@ function PlatformGlyph({ kind }: { kind: PlatformKind }) {
     );
   }
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="white"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="h-7 w-7 opacity-90"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-7 w-7 opacity-90">
       <path d="M10 14L20 4" />
       <path d="M14 4h6v6" />
       <path d="M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6" />
