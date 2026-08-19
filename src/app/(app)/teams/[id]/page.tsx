@@ -3,11 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { startConversationWithTeamCoach } from "@/app/(app)/messages/actions";
 
-export default async function TeamProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function TeamProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
@@ -16,7 +12,7 @@ export default async function TeamProfilePage({
   const [{ data: team }, { data: coachRows }, { data: rosterRows }, { data: myPlayers }] = await Promise.all([
     supabase
       .from("teams")
-      .select("id, name, leagues, city:cities(name)")
+      .select("id, name, leagues, gotsport_team_id, gotsport_url, city:cities(name)")
       .eq("id", id)
       .is("merged_into_team_id", null)
       .single(),
@@ -69,6 +65,20 @@ export default async function TeamProfilePage({
           ) : null}
         </div>
       </section>
+
+      {team.gotsport_team_id || team.gotsport_url ? (
+        <section className="pitch-card mt-4 p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-black text-[#0b1736]">GotSport reference</p>
+              {team.gotsport_team_id ? <p className="mt-1 text-xs text-slate-500">Team ID: {team.gotsport_team_id}</p> : null}
+            </div>
+            {team.gotsport_url ? (
+              <a href={team.gotsport_url} target="_blank" rel="noopener noreferrer" className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700">Official page ↗</a>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       {pendingMine ? (
         <section className="mt-4 rounded-[20px] border border-amber-200 bg-amber-50 p-4">
@@ -126,9 +136,9 @@ export default async function TeamProfilePage({
             ))}
           </div>
         ) : verifiedMine ? (
-          <div className="mt-4 rounded-2xl bg-slate-50 p-5 text-center"><p className="text-sm font-bold text-slate-700">No other verified players yet.</p><p className="mt-1 text-xs text-slate-500">As more families join and the coach confirms them, they&rsquo;ll appear here.</p></div>
+          <div className="mt-4 rounded-2xl bg-slate-50 p-5 text-center"><p className="text-sm font-bold text-slate-700">No other verified players yet.</p></div>
         ) : (
-          <div className="mt-4 rounded-2xl bg-slate-50 p-5 text-center"><div className="text-2xl">🔒</div><p className="mt-2 text-sm font-black text-slate-800">Roster protected</p><p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-slate-500">PitchLink does not expose children on a roster just because someone searches a team name. Your own player must first be verified on this team.</p></div>
+          <div className="mt-4 rounded-2xl bg-slate-50 p-5 text-center"><div className="text-2xl">🔒</div><p className="mt-2 text-sm font-black text-slate-800">Roster protected</p><p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-slate-500">Your own player must be verified on this team before the roster is shown.</p></div>
         )}
       </section>
     </main>
