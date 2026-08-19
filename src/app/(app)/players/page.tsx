@@ -5,81 +5,45 @@ import { createClient } from "@/lib/supabase/server";
 export default async function PlayersPage() {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
-
-  if (!userData.user) {
-    redirect("/login");
-  }
+  if (!userData.user) redirect("/login");
 
   const { data: players } = await supabase
     .from("players")
-    .select(
-      "id, first_name, last_initial, birth_year, city, open_to_opportunities, consent_completed"
-    )
+    .select("id, first_name, last_initial, birth_year, city, open_to_opportunities, consent_completed")
     .order("created_at", { ascending: false });
 
   return (
-    <main className="mx-auto max-w-lg px-6 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">
-          Your players
-        </h1>
-        <Link
-          href="/players/new"
-          className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
-        >
-          Add a player
-        </Link>
+    <main className="mx-auto max-w-lg px-4 pb-32 pt-8 sm:px-6">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-600">PitchLink</p>
+          <h1 className="mt-1 text-2xl font-black text-[#0b1736]">Your players</h1>
+        </div>
+        <Link href="/players/new" className="rounded-xl bg-[#0b1736] px-4 py-2.5 text-xs font-black text-white">Add player</Link>
       </div>
 
       {players && players.length > 0 ? (
-        <ul className="mt-8 space-y-3">
+        <ul className="mt-6 space-y-3">
           {players.map((player) => (
             <li key={player.id}>
-              <Link
-                href={`/players/${player.id}`}
-                className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-900">
-                    {player.first_name} {player.last_initial}. · {player.birth_year}
-                  </p>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                      !player.consent_completed
-                        ? "bg-amber-100 text-amber-800"
-                        : player.open_to_opportunities
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {!player.consent_completed
-                      ? "Needs verification"
-                      : player.open_to_opportunities
-                        ? "Open to opportunities"
-                        : "Not open"}
-                  </span>
+              <Link href={`/players/${player.id}`} className="pitch-card flex items-center justify-between gap-4 p-4">
+                <div>
+                  <p className="text-sm font-black text-[#0b1736]">{player.first_name} {player.last_initial}. · {player.birth_year}</p>
+                  <p className="mt-1 text-xs text-slate-500">{player.city}</p>
                 </div>
-                <p className="mt-1 text-sm text-slate-500">{player.city}</p>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black ${!player.consent_completed ? "bg-amber-50 text-amber-800" : player.open_to_opportunities ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
+                  {!player.consent_completed ? "Consent needed" : player.open_to_opportunities ? "Searchable" : "Private"}
+                </span>
               </Link>
             </li>
           ))}
         </ul>
       ) : (
-        <div className="mt-8 rounded-lg border border-dashed border-slate-300 p-6 text-center">
-          <p className="text-sm font-medium text-slate-900">
-            Add your first player
-          </p>
-          <p className="mt-1 text-sm text-slate-600">
-            Create a profile, verify parental consent, then flag them open
-            to opportunities whenever you&rsquo;re ready for coaches to find
-            them.
-          </p>
-          <Link
-            href="/players/new"
-            className="mt-4 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
-          >
-            Add a player
-          </Link>
+        <div className="pitch-card mt-6 p-7 text-center">
+          <div className="text-3xl">⚽</div>
+          <p className="mt-3 text-sm font-black text-[#0b1736]">Add your first player</p>
+          <p className="mt-1 text-sm leading-6 text-slate-500">Create an editable soccer profile, add clips, and privately choose whether verified professionals can find it.</p>
+          <Link href="/players/new" className="mt-4 inline-block rounded-xl bg-[#0b1736] px-4 py-2.5 text-sm font-bold text-white">Add a player</Link>
         </div>
       )}
     </main>
