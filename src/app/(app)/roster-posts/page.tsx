@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { POSITIONS } from "@/app/(app)/players/constants";
 
 const currentYear = new Date().getFullYear();
 const BIRTH_YEARS = Array.from(
   { length: currentYear - 4 - (currentYear - 19) + 1 },
   (_, i) => currentYear - 19 + i
 );
+
+function toArray(value: string | string[] | undefined): string[] {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
 
 export default async function RosterPostsPage({
   searchParams,
@@ -23,6 +29,7 @@ export default async function RosterPostsPage({
   const params = await searchParams;
   const birthYear = typeof params.birth_year === "string" ? params.birth_year : "";
   const city = typeof params.city === "string" ? params.city.trim() : "";
+  const positions = toArray(params.positions);
 
   let query = supabase
     .from("roster_posts")
@@ -32,6 +39,7 @@ export default async function RosterPostsPage({
     .order("created_at", { ascending: false });
 
   if (birthYear) query = query.eq("birth_year", Number(birthYear));
+  if (positions.length > 0) query = query.overlaps("positions", positions);
 
   const { data: allPosts } = await query;
 
@@ -55,7 +63,7 @@ export default async function RosterPostsPage({
         Clubs looking to fill a spot for a specific age group.
       </p>
 
-      <form method="get" className="mt-6 flex flex-wrap gap-4">
+      <form method="get" className="mt-6 flex flex-wrap items-end gap-4">
         <div>
           <label
             htmlFor="birth_year"
@@ -92,7 +100,29 @@ export default async function RosterPostsPage({
             className="mt-1.5 block rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
           />
         </div>
-        <div className="flex items-end">
+        <div className="w-full sm:w-auto">
+          <span className="block text-sm font-medium text-slate-900">
+            Position
+          </span>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {POSITIONS.map((position) => (
+              <label
+                key={position}
+                className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
+              >
+                <input
+                  type="checkbox"
+                  name="positions"
+                  value={position}
+                  defaultChecked={positions.includes(position)}
+                  className="h-3.5 w-3.5"
+                />
+                {position}
+              </label>
+            ))}
+          </div>
+        </div>
+        <div>
           <button
             type="submit"
             className="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
