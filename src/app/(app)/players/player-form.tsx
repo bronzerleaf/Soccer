@@ -16,6 +16,8 @@ type PlayerFormValues = {
   city: string;
   bio: string | null;
   team_name: string | null;
+  instagram_url: string | null;
+  youtube_url: string | null;
 };
 
 const currentYear = new Date().getFullYear();
@@ -96,6 +98,46 @@ export function PlayerForm<T>({
       <p className="text-xs text-slate-500">
         We only ever collect a first name and last initial — never a full
         legal name.
+      </p>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label
+            htmlFor="instagram_url"
+            className="block text-sm font-medium text-slate-900"
+          >
+            Instagram (optional)
+          </label>
+          <input
+            id="instagram_url"
+            name="instagram_url"
+            type="url"
+            placeholder="https://instagram.com/..."
+            defaultValue={defaultValues?.instagram_url ?? ""}
+            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="youtube_url"
+            className="block text-sm font-medium text-slate-900"
+          >
+            YouTube (optional)
+          </label>
+          <input
+            id="youtube_url"
+            name="youtube_url"
+            type="url"
+            placeholder="https://youtube.com/@..."
+            defaultValue={defaultValues?.youtube_url ?? ""}
+            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          />
+        </div>
+      </div>
+      <p className="-mt-3 text-xs text-slate-500">
+        A recruiting or highlights account works best here — coaches can
+        click straight through to it. Only ever shown to a verified
+        coach, same as the rest of this profile.
       </p>
 
       <div className="grid grid-cols-2 gap-4">

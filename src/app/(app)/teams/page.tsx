@@ -3,8 +3,14 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ClaimTeamForm } from "./claim-team-form";
 import { startConversationWithTeamCoach } from "@/app/(app)/messages/actions";
+import { LocationSettings } from "@/app/(app)/feed/location-settings";
+import { haversineMiles } from "@/lib/geo";
 
-export default async function TeamsPage() {
+export default async function TeamsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
 
@@ -19,7 +25,8 @@ export default async function TeamsPage() {
     .single();
 
   if (profile?.role === "parent") {
-    return renderParentTeamBrowse(supabase);
+    const { q } = await searchParams;
+    return renderParentTeamBrowse(supabase, userData.user.id, q?.trim() ?? "");
   }
 
   // Team claiming is separate from club verification -- a coach doesn't
@@ -119,16 +126,57 @@ export default async function TeamsPage() {
 // gated on the caller's own verified membership via get_team_roster(),
 // completely untouched by this. Team name/city/leagues are the same
 // non-sensitive org metadata clubs already expose to everyone.
+//
+// Location filtering reuses the exact same profile-level home_city_id/
+// radius_miles + haversine pattern the local feed already established —
+// one shared "my area" preference, no new dependency, no raw device
+// location or zip-code geocoding involved.
 async function renderParentTeamBrowse(
-  supabase: Awaited<ReturnType<typeof createClient>>
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  searchQuery: string
 ) {
-  const { data: teams } = await supabase
-    .from("teams")
-    .select("id, name, leagues, city:cities(name)")
-    .is("merged_into_team_id", null)
-    .order("name");
+  const [{ data: teams }, { data: cities }, { data: profile }] = await Promise.all([
+    supabase
+      .from("teams")
+      .select("id, name, leagues, city_id, city:cities(name)")
+      .is("merged_into_team_id", null)
+      .order("name"),
+    supabase.from("cities").select("id, name, latitude, longitude").order("name"),
+    supabase
+      .from("profiles")
+      .select("home_city_id, radius_miles")
+      .eq("id", userId)
+      .single(),
+  ]);
 
-  const teamList = teams ?? [];
+  const cityList = cities ?? [];
+  const cityById = new Map(cityList.map((c) => [c.id, c]));
+  const homeCity = profile?.home_city_id ? cityById.get(profile.home_city_id) : null;
+  const radiusMiles = profile?.radius_miles ?? null;
+  const canFilterByRadius = !!(homeCity && radiusMiles);
+
+  const teamList = (teams ?? [])
+    .filter((team) => {
+      if (searchQuery && !team.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      if (!canFilterByRadius) return true;
+      // A team with no city set is never excluded by a radius filter —
+      // there's nothing to measure, so it stays visible rather than
+      // silently disappearing.
+      const teamCity = team.city_id ? cityById.get(team.city_id) : null;
+      if (!teamCity || !homeCity) return true;
+      return (
+        haversineMiles(
+          homeCity.latitude,
+          homeCity.longitude,
+          teamCity.latitude,
+          teamCity.longitude
+        ) <= radiusMiles
+      );
+    });
+
   const coachContacts = await Promise.all(
     teamList.map((team) =>
       supabase.rpc("get_team_coach", { target_team_id: team.id })
@@ -147,6 +195,28 @@ async function renderParentTeamBrowse(
         This shows team names and leagues only — never who&rsquo;s on a
         roster, which stays private to that team&rsquo;s own families.
       </p>
+
+      <div className="mt-6">
+        <LocationSettings
+          cities={cityList.map((c) => ({ id: c.id, name: c.name }))}
+          homeCityId={profile?.home_city_id ?? null}
+          radiusMiles={radiusMiles}
+        />
+      </div>
+
+      <form method="get" className="mt-4">
+        <label htmlFor="q" className="sr-only">
+          Search teams
+        </label>
+        <input
+          id="q"
+          type="search"
+          name="q"
+          defaultValue={searchQuery}
+          placeholder="Search teams by name"
+          className="w-full rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+        />
+      </form>
 
       {teamList.length > 0 ? (
         <ul className="mt-8 space-y-3">

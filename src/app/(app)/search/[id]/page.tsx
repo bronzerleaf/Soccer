@@ -18,7 +18,7 @@ export default async function SearchPlayerDetailPage({
   const { data: player } = await supabase
     .from("players")
     .select(
-      "id, first_name, last_initial, birth_year, positions, preferred_foot, city, bio, photo_url, current_club:clubs(name, city), player_highlights(id, url, caption, theme)"
+      "id, first_name, last_initial, birth_year, positions, preferred_foot, city, bio, photo_url, instagram_url, youtube_url, current_club:clubs(name, city), player_highlights(id, url, caption, theme)"
     )
     .eq("id", id)
     .single();
@@ -82,6 +82,31 @@ export default async function SearchPlayerDetailPage({
           </p>
         </div>
       </div>
+
+      {player.instagram_url || player.youtube_url ? (
+        <div className="mt-3 flex gap-2">
+          {player.instagram_url ? (
+            <a
+              href={player.instagram_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
+            >
+              Instagram ↗
+            </a>
+          ) : null}
+          {player.youtube_url ? (
+            <a
+              href={player.youtube_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
+            >
+              YouTube ↗
+            </a>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-4">
         <ActionButton

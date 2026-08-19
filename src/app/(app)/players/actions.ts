@@ -16,6 +16,8 @@ export type PlayerFormInput = {
   city: string;
   bio: string;
   teamName: string;
+  instagramUrl: string;
+  youtubeUrl: string;
 };
 
 function parseFormInput(formData: FormData): PlayerFormInput {
@@ -34,6 +36,8 @@ function parseFormInput(formData: FormData): PlayerFormInput {
     city: String(formData.get("city") ?? "").trim(),
     bio: String(formData.get("bio") ?? "").trim(),
     teamName: String(formData.get("team_name") ?? "").trim(),
+    instagramUrl: String(formData.get("instagram_url") ?? "").trim(),
+    youtubeUrl: String(formData.get("youtube_url") ?? "").trim(),
   };
 }
 
@@ -62,6 +66,8 @@ export async function createPlayer(formData: FormData) {
       city: input.city,
       bio: input.bio || null,
       team_id: teamId,
+      instagram_url: input.instagramUrl || null,
+      youtube_url: input.youtubeUrl || null,
     })
     .select("id")
     .single();
@@ -98,6 +104,8 @@ export async function updatePlayer(playerId: string, formData: FormData) {
       city: input.city,
       bio: input.bio || null,
       team_id: teamId,
+      instagram_url: input.instagramUrl || null,
+      youtube_url: input.youtubeUrl || null,
     })
     .eq("id", playerId);
 

@@ -27,7 +27,7 @@ export default async function PlayerDetailPage({
     supabase
       .from("players")
       .select(
-        "id, parent_id, first_name, last_initial, birth_year, positions, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, team_id, team_membership_verified, team:teams(name), player_highlights(id, url, caption, theme)"
+        "id, parent_id, first_name, last_initial, birth_year, positions, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, team_id, team_membership_verified, instagram_url, youtube_url, team:teams(name), player_highlights(id, url, caption, theme)"
       )
       .eq("id", id)
       .single(),
@@ -93,6 +93,31 @@ export default async function PlayerDetailPage({
       <h1 className="mt-3 text-xl font-semibold text-slate-900">
         {player.first_name} {player.last_initial}.
       </h1>
+
+      {player.instagram_url || player.youtube_url ? (
+        <div className="mt-3 flex gap-2">
+          {player.instagram_url ? (
+            <a
+              href={player.instagram_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
+            >
+              Instagram ↗
+            </a>
+          ) : null}
+          {player.youtube_url ? (
+            <a
+              href={player.youtube_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
+            >
+              YouTube ↗
+            </a>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-6">
         <PhotoUpload
@@ -231,6 +256,8 @@ export default async function PlayerDetailPage({
             city: player.city,
             bio: player.bio,
             team_name: (player.team as unknown as { name: string } | null)?.name ?? null,
+            instagram_url: player.instagram_url,
+            youtube_url: player.youtube_url,
           }}
         />
       </div>
