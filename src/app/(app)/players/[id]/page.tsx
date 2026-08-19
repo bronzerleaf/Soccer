@@ -27,7 +27,7 @@ export default async function PlayerDetailPage({
     supabase
       .from("players")
       .select(
-        "id, parent_id, first_name, last_initial, birth_year, positions, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, team_id, team:teams(name), player_highlights(id, url, caption, theme)"
+        "id, parent_id, first_name, last_initial, birth_year, positions, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, team_id, team_membership_verified, team:teams(name), player_highlights(id, url, caption, theme)"
       )
       .eq("id", id)
       .single(),
@@ -54,6 +54,18 @@ export default async function PlayerDetailPage({
   const interestedCoaches = (interestRows ?? []).map(
     (row) => (row.coach as unknown as { full_name: string } | null)?.full_name ?? "A coach"
   );
+
+  // Only returns rows at all once this exact player is a *verified* team
+  // member — get_team_roster() re-checks that itself, so this can't be
+  // fooled by requesting it for a team this player isn't confirmed on.
+  type Teammate = { id: string; first_name: string; last_initial: string; birth_year: number; positions: string[] };
+  let teammates: Teammate[] = [];
+  if (player.team_id && player.team_membership_verified) {
+    const { data: rosterRows } = await supabase.rpc("get_team_roster", {
+      target_team_id: player.team_id,
+    });
+    teammates = ((rosterRows ?? []) as Teammate[]).filter((row) => row.id !== player.id);
+  }
 
   let signedPhotoUrl: string | null = null;
   if (player.photo_url) {
@@ -152,6 +164,44 @@ export default async function PlayerDetailPage({
             {player.first_name}&rsquo;s profile. Check your messages, or
             reach out from theirs.
           </p>
+        </div>
+      ) : null}
+
+      {player.team_id && !player.team_membership_verified ? (
+        <div className="mt-6 rounded-lg border border-slate-200 bg-amber-50 p-5">
+          <p className="text-sm font-medium text-slate-900">
+            Team membership pending
+          </p>
+          <p className="mt-1 text-sm text-slate-600">
+            {player.first_name}&rsquo;s team hasn&rsquo;t confirmed them yet.
+            Once the team&rsquo;s coach verifies it, {player.first_name} will
+            show up to their verified teammates&rsquo; families too.
+          </p>
+        </div>
+      ) : null}
+
+      {teammates.length > 0 ? (
+        <div className="mt-6">
+          <h2 className="text-sm font-medium text-slate-900">Teammates</h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Other verified players on {(player.team as unknown as { name: string } | null)?.name}.
+          </p>
+          <ul className="mt-2 space-y-2">
+            {teammates.map((mate) => (
+              <li
+                key={mate.id}
+                className="rounded-lg border border-slate-200 p-3 text-sm"
+              >
+                <span className="font-medium text-slate-900">
+                  {mate.first_name} {mate.last_initial}.
+                </span>{" "}
+                <span className="text-slate-500">
+                  {mate.birth_year} ·{" "}
+                  {(mate.positions ?? []).join(", ") || "No position listed"}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       ) : null}
 

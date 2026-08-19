@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ActionButton } from "@/components/ui/action-button";
 import { TeamProfileForm } from "./team-profile-form";
 import { MergeTeamForm } from "./merge-team-form";
-import { removeTeamPlayer } from "./actions";
+import { removeTeamPlayer, verifyTeamPlayer, unverifyTeamPlayer } from "./actions";
 
 export default async function ManageTeamPage({
   params,
@@ -37,7 +37,7 @@ export default async function ManageTeamPage({
         .single(),
       supabase
         .from("players")
-        .select("id, first_name, last_initial, birth_year, positions")
+        .select("id, first_name, last_initial, birth_year, positions, team_membership_verified")
         .eq("team_id", id)
         .order("first_name"),
       supabase.from("cities").select("id, name").order("name"),
@@ -63,8 +63,10 @@ export default async function ManageTeamPage({
         Manage {team.name}
       </h1>
       <p className="mt-2 text-sm text-slate-600">
-        Only you can see this roster and edit this team&rsquo;s profile —
-        no other family can see who else is on the team.
+        You can always see and edit this roster. A player only becomes
+        visible to their verified teammates&rsquo; families once you confirm
+        them below — until then, nobody but you and their own parent can
+        see they&rsquo;re here.
       </p>
 
       <div className="mt-8">
@@ -89,26 +91,57 @@ export default async function ManageTeamPage({
             {roster.map((player) => (
               <li
                 key={player.id}
-                className="flex items-center justify-between rounded-lg border border-slate-200 p-3"
+                className="rounded-lg border border-slate-200 p-3"
               >
-                <div>
-                  <p className="text-sm font-medium text-slate-900">
-                    {player.first_name} {player.last_initial}.
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    {player.birth_year} ·{" "}
-                    {(player.positions ?? []).join(", ") || "No position listed"}
-                  </p>
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">
+                      {player.first_name} {player.last_initial}.
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {player.birth_year} ·{" "}
+                      {(player.positions ?? []).join(", ") || "No position listed"}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                      player.team_membership_verified
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-amber-50 text-amber-800"
+                    }`}
+                  >
+                    {player.team_membership_verified ? "Verified" : "Pending"}
+                  </span>
                 </div>
-                <ActionButton
-                  action={removeTeamPlayer.bind(null, player.id, team.id)}
-                  label="Remove"
-                  pendingLabel="Removing..."
-                  successMessage="Removed from the team"
-                  confirmMessage={`Remove ${player.first_name} from ${team.name}? Their parent can add them back later.`}
-                  variant="secondary"
-                  size="sm"
-                />
+                <div className="mt-3 flex gap-2">
+                  {player.team_membership_verified ? (
+                    <ActionButton
+                      action={unverifyTeamPlayer.bind(null, player.id, team.id)}
+                      label="Unverify"
+                      pendingLabel="Updating..."
+                      successMessage="Unverified"
+                      variant="secondary"
+                      size="sm"
+                    />
+                  ) : (
+                    <ActionButton
+                      action={verifyTeamPlayer.bind(null, player.id, team.id)}
+                      label="Verify"
+                      pendingLabel="Verifying..."
+                      successMessage="Verified — now visible to their verified teammates' families"
+                      size="sm"
+                    />
+                  )}
+                  <ActionButton
+                    action={removeTeamPlayer.bind(null, player.id, team.id)}
+                    label="Remove"
+                    pendingLabel="Removing..."
+                    successMessage="Removed from the team"
+                    confirmMessage={`Remove ${player.first_name} from ${team.name}? Their parent can add them back later.`}
+                    variant="secondary"
+                    size="sm"
+                  />
+                </div>
               </li>
             ))}
           </ul>

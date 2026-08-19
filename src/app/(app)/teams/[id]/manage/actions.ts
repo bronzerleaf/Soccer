@@ -53,6 +53,46 @@ export async function removeTeamPlayer(playerId: string, teamId: string) {
   revalidatePath(`/teams/${teamId}/manage`);
 }
 
+// Confirming a player actually belongs on this team is what unlocks
+// them (and only them) in get_team_roster() for the rest of the
+// verified teammates' parents — an unverified entry never shows up
+// there, no matter how long it's been pending.
+export async function verifyTeamPlayer(playerId: string, teamId: string) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect("/login");
+  }
+
+  const { error } = await supabase.rpc("verify_team_member", {
+    target_player_id: playerId,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/teams/${teamId}/manage`);
+}
+
+export async function unverifyTeamPlayer(playerId: string, teamId: string) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect("/login");
+  }
+
+  const { error } = await supabase.rpc("unverify_team_member", {
+    target_player_id: playerId,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/teams/${teamId}/manage`);
+}
+
 export async function mergeTeam(sourceTeamId: string, targetTeamId: string) {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
