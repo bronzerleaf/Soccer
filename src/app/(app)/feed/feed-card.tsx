@@ -1,0 +1,129 @@
+import Link from "next/link";
+import { LikeButton } from "./like-button";
+import { ShareButton } from "./share-button";
+import { ActionButton } from "@/components/ui/action-button";
+import { deleteFeedPost } from "./actions";
+
+export type FeedItem =
+  | {
+      kind: "roster_spot";
+      id: string;
+      birthYear: number;
+      positions: string[];
+      clubName: string;
+      clubCity: string;
+      createdAt: string;
+    }
+  | {
+      kind: "looking_for_team" | "guest_play";
+      id: string;
+      birthYear: number | null;
+      positions: string[];
+      cityName: string;
+      description: string;
+      createdAt: string;
+      likeCount: number;
+      likedByMe: boolean;
+      canDelete: boolean;
+    }
+  | {
+      kind: "org_event";
+      id: string;
+      orgName: string;
+      cityName: string;
+      description: string;
+      createdAt: string;
+      likeCount: number;
+      likedByMe: boolean;
+      canDelete: boolean;
+    };
+
+const KIND_LABEL: Record<FeedItem["kind"], string> = {
+  roster_spot: "Roster spot",
+  looking_for_team: "Looking for a team",
+  guest_play: "Guest play",
+  org_event: "Tournament / event",
+};
+
+const KIND_BADGE: Record<FeedItem["kind"], string> = {
+  roster_spot: "bg-blue-50 text-blue-700",
+  looking_for_team: "bg-emerald-50 text-emerald-700",
+  guest_play: "bg-amber-50 text-amber-800",
+  org_event: "bg-purple-50 text-purple-700",
+};
+
+export function FeedCard({ item }: { item: FeedItem }) {
+  const badge = (
+    <span
+      className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${KIND_BADGE[item.kind]}`}
+    >
+      {KIND_LABEL[item.kind]}
+    </span>
+  );
+
+  if (item.kind === "roster_spot") {
+    return (
+      <div className="rounded-lg border border-slate-200 p-4">
+        <Link href={`/roster-posts/${item.id}`} className="block">
+          <div className="flex items-center justify-between gap-2">
+            {badge}
+          </div>
+          <p className="mt-2 text-sm font-medium text-slate-900">
+            {item.clubName} — {item.clubCity}
+          </p>
+          <p className="mt-1 text-sm text-slate-600">
+            {item.birthYear} ·{" "}
+            {(item.positions ?? []).join(", ") || "Any position"}
+          </p>
+        </Link>
+        <div className="mt-3">
+          <ShareButton href={`/roster-posts/${item.id}`} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-slate-200 p-4">
+      <div className="flex items-center justify-between gap-2">
+        {badge}
+        {item.canDelete ? (
+          <ActionButton
+            action={deleteFeedPost.bind(null, item.id)}
+            label="Remove"
+            pendingLabel="..."
+            successMessage="Removed"
+            variant="ghost"
+            size="sm"
+            confirmMessage="Remove this post?"
+          />
+        ) : null}
+      </div>
+
+      {item.kind === "org_event" ? (
+        <p className="mt-2 text-sm font-medium text-slate-900">
+          {item.orgName} — {item.cityName}
+        </p>
+      ) : (
+        <p className="mt-2 text-sm font-medium text-slate-900">
+          {item.birthYear ?? "Any birth year"} ·{" "}
+          {(item.positions ?? []).join(", ") || "Any position"} ·{" "}
+          {item.cityName}
+        </p>
+      )}
+
+      <p className="mt-1.5 text-sm leading-6 text-slate-600">
+        {item.description}
+      </p>
+
+      <div className="mt-3 flex gap-2">
+        <LikeButton
+          postId={item.id}
+          likedByMe={item.likedByMe}
+          likeCount={item.likeCount}
+        />
+        <ShareButton href={`/feed/post/${item.id}`} />
+      </div>
+    </div>
+  );
+}

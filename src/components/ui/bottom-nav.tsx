@@ -56,14 +56,22 @@ const icons = {
       <path d="m9 12 2 2 4-4" />
     </svg>
   ),
+  pin: (
+    <svg {...iconProps}>
+      <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" />
+      <circle cx="12" cy="9.5" r="2.3" />
+    </svg>
+  ),
 };
 
 export function BottomNav({
   role,
   coachApproved,
+  organizationApproved,
 }: {
-  role: "parent" | "coach" | "admin";
+  role: "parent" | "coach" | "admin" | "organization";
   coachApproved: boolean;
+  organizationApproved?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -72,7 +80,7 @@ export function BottomNav({
   if (role === "parent") {
     tabs = tabs.concat([
       { href: "/players", label: "Players", icon: icons.players },
-      { href: "/roster-posts", label: "Roster Spots", icon: icons.clipboard },
+      { href: "/feed", label: "Feed", icon: icons.pin },
       { href: "/messages", label: "Messages", icon: icons.message },
     ]);
   } else if (role === "coach") {
@@ -80,10 +88,17 @@ export function BottomNav({
       tabs = tabs.concat([
         { href: "/search", label: "Search", icon: icons.search },
         { href: "/roster-posts/mine", label: "Roster Posts", icon: icons.clipboard, matchPrefix: "/roster-posts" },
+        { href: "/feed", label: "Feed", icon: icons.pin },
         { href: "/messages", label: "Messages", icon: icons.message },
       ]);
     } else {
       tabs.push({ href: "/coach/verify", label: "Verify", icon: icons.shield });
+    }
+  } else if (role === "organization") {
+    if (organizationApproved) {
+      tabs.push({ href: "/feed", label: "Feed", icon: icons.pin });
+    } else {
+      tabs.push({ href: "/organization/verify", label: "Verify", icon: icons.shield });
     }
   } else if (role === "admin") {
     tabs.push({ href: "/admin", label: "Admin", icon: icons.shield });

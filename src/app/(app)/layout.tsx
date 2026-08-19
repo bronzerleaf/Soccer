@@ -21,7 +21,11 @@ export default async function AppLayout({
     .eq("id", userData.user.id)
     .single();
 
-  const role = (profile?.role ?? "parent") as "parent" | "coach" | "admin";
+  const role = (profile?.role ?? "parent") as
+    | "parent"
+    | "coach"
+    | "admin"
+    | "organization";
 
   let coachApproved = false;
   if (role === "coach") {
@@ -35,10 +39,26 @@ export default async function AppLayout({
     coachApproved = verification?.status === "approved";
   }
 
+  let organizationApproved = false;
+  if (role === "organization") {
+    const { data: verification } = await supabase
+      .from("organization_verifications")
+      .select("status")
+      .eq("organization_id", userData.user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    organizationApproved = verification?.status === "approved";
+  }
+
   return (
     <>
       <div className="pb-16">{children}</div>
-      <BottomNav role={role} coachApproved={coachApproved} />
+      <BottomNav
+        role={role}
+        coachApproved={coachApproved}
+        organizationApproved={organizationApproved}
+      />
     </>
   );
 }

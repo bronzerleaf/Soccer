@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type Role = "parent" | "coach";
+type Role = "parent" | "coach" | "organization";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -75,11 +75,12 @@ export default function SignUpPage() {
           <legend className="text-sm font-medium text-slate-900">
             I am a...
           </legend>
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="mt-2 grid grid-cols-3 gap-2">
             {(
               [
                 { value: "parent", label: "Parent" },
                 { value: "coach", label: "Coach" },
+                { value: "organization", label: "Organization" },
               ] as const
             ).map((option) => (
               <label
@@ -106,6 +107,13 @@ export default function SignUpPage() {
             <p className="mt-2 text-xs leading-5 text-slate-500">
               Coach accounts are reviewed before they can search players or
               message families.
+            </p>
+          ) : null}
+          {role === "organization" ? (
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              For leagues, tournament directors, and event organizers.
+              Reviewed before you can post — organizations never get access
+              to player search or messaging.
             </p>
           ) : null}
         </fieldset>

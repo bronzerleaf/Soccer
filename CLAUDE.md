@@ -112,3 +112,41 @@ Empty states carry a lot of weight in a cold-start product — write them as inv
 - Write RLS policy tests alongside every table that touches player data.
 - Flag anything that looks like it creates a path from an adult to a child outside the parent inbox. That is the highest-severity bug class in this codebase.
 - Prefer boring, well-documented patterns. This will be maintained part-time by one person.
+
+## 9. Local Feed (v1.1 — pending sign-off)
+
+A radius-based feed layered on top of the v1 core loop. Every rule in Section 2 still applies without exception; this section only adds to it.
+
+### Location
+
+- Location is a city choice, not a coordinate. Resolve the browser's geolocation prompt to a city from the existing curated DFW list and store nothing more precise than that plus a radius in miles.
+- Never store a raw lat/long against a profile. Never show a location, precise or coarse, to another user — it is a filter, not a field.
+- Radius and city are user-editable at any time, including a manual override for travel.
+
+### Organizations
+
+- A fourth role: `organization`. Verified the same way a coach is — manual admin approval, no exceptions.
+- An organization account can only create `org_event` posts. It has no access to player search, player profiles, or messaging. It is not a coach and must never be treated as one in RLS.
+
+### Feed posts
+
+- `looking_for_team` and `guest_play` posts carry exactly what a player profile already carries in search — birth year, position, city. Never a name or photo in the feed card. A coach who wants to say more must message the parent, same as today.
+- Likes and shares apply only to `feed_posts`. Never to a player profile. Never to a message. A shared link still requires an account to open.
+- No public comment threads. A reply is a message, logged and retained under the existing rules in Section 2.
+
+### Data model addition
+
+- `profiles.home_city_id` / `profiles.radius_miles` — feed location preference, opt-in (null = not participating).
+- `organization_verifications` — mirrors `coach_verifications`: org name, evidence, status, reviewed_by, reviewed_at.
+- `feed_posts` — `post_type` (`roster_spot` / `looking_for_team` / `guest_play` / `org_event`), author_id, city_id, birth_year, positions, description, expires_at, and a nullable player_id (set only for looking_for_team/guest_play, never exposed in the card).
+- `feed_post_likes` — post_id, profile_id, created_at, unique per pair.
+
+### Build order
+
+1. Migration: `home_city_id` / `radius_miles` on profiles, RLS for self-only read/write.
+2. Migration: `organization_verifications` + admin queue, mirroring the coach flow. pgTAP: an org cannot self-approve.
+3. Migration: `feed_posts` + `feed_post_likes`, RLS scoped by post type and radius. pgTAP: identity never leaks for looking_for_team/guest_play; an org can only write org_event.
+4. UI: radius picker + "traveling" override, feed card list, composer per post type.
+5. UI: like / share, login-gated share links.
+6. Admin: extend the existing flag/remove tooling to cover feed_posts.
+7. Run pgTAP + build/lint, update README, commit, push.

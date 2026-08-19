@@ -34,6 +34,21 @@ export default async function DashboardPage() {
         : verification?.status === "pending"
           ? "Your club verification is under review."
           : "Verify your club affiliation to start searching the player pool and messaging families.";
+  } else if (profile?.role === "organization") {
+    const { data: verification } = await supabase
+      .from("organization_verifications")
+      .select("status")
+      .eq("organization_id", userData.user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    roleCopy =
+      verification?.status === "approved"
+        ? "You're verified. You can now post tournament and event listings to the local feed."
+        : verification?.status === "pending"
+          ? "Your organization verification is under review."
+          : "Verify your organization to start posting tournament and event listings to the local feed.";
   } else if (profile?.role === "admin") {
     roleCopy = "Review coach verifications, flagged messages, roster posts, and the club list.";
   }
@@ -60,7 +75,9 @@ export default async function DashboardPage() {
             ? "Coach account"
             : profile?.role === "admin"
               ? "Admin account"
-              : "Parent account"}
+              : profile?.role === "organization"
+                ? "Organization account"
+                : "Parent account"}
         </p>
         <p className="mt-2 text-sm leading-6 text-slate-600">{roleCopy}</p>
       </div>
