@@ -1,5 +1,14 @@
+import type { ReactNode } from "react";
 import type { OEmbedPreview } from "@/lib/oembed/server";
 import { detectPlatform, type PlatformKind } from "@/lib/oembed/platform";
+import { themeMeta } from "@/lib/highlight-themes";
+
+export type Highlight = {
+  id: string;
+  url: string;
+  caption: string | null;
+  theme: string | null;
+};
 
 // A grid of link-out tiles for a player's highlight/social links — styled
 // like a gallery a family is building, not a list of bare URLs. Still never
@@ -8,74 +17,93 @@ import { detectPlatform, type PlatformKind } from "@/lib/oembed/platform";
 // renders as a deliberate, branded card instead of falling back to plain
 // text. See src/lib/oembed/server.ts for where previews come from.
 export function LinkGallery({
-  links,
+  highlights,
   previews,
 }: {
-  links: string[];
-  previews: (OEmbedPreview | null)[];
+  highlights: Highlight[];
+  previews: Record<string, OEmbedPreview | null>;
 }) {
-  if (links.length === 0) return null;
+  if (highlights.length === 0) return null;
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      {links.map((url, i) => (
-        <GalleryTile key={url} url={url} preview={previews[i] ?? null} />
+      {highlights.map((highlight) => (
+        <HighlightTile
+          key={highlight.id}
+          highlight={highlight}
+          preview={previews[highlight.id] ?? null}
+        />
       ))}
     </div>
   );
 }
 
-function GalleryTile({
-  url,
+// Exported separately (rather than only used internally by LinkGallery) so
+// a caller that needs per-tile controls — the parent's own editable
+// gallery, which adds a "Remove" affordance — can lay out the same grid
+// itself and pass an `actions` slot, without duplicating the thumbnail /
+// theme-badge / caption markup.
+export function HighlightTile({
+  highlight,
   preview,
+  actions,
 }: {
-  url: string;
+  highlight: Highlight;
   preview: OEmbedPreview | null;
+  actions?: ReactNode;
 }) {
-  const platform = detectPlatform(url);
+  const platform = detectPlatform(highlight.url);
+  const theme = themeMeta(highlight.theme);
   const caption =
+    highlight.caption ??
     preview?.title ??
     (platform.kind === "photo" ? `View on ${platform.name}` : `Open on ${platform.name}`);
 
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block overflow-hidden rounded-xl border border-slate-200 transition-shadow hover:shadow-md"
-    >
-      <div
-        className="relative aspect-square w-full overflow-hidden"
-        style={preview ? undefined : { background: platform.gradient }}
-      >
-        {preview ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={preview.thumbnailUrl}
-              alt=""
-              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-            />
-            <span className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/20" />
-          </>
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <PlatformGlyph kind={platform.kind} />
-          </div>
-        )}
-        {platform.kind !== "photo" ? (
-          <span className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 shadow-sm">
-            <PlayGlyph />
-          </span>
-        ) : null}
-      </div>
-      <div className="px-2.5 py-2">
-        <p className="truncate text-xs font-medium text-slate-900">{caption}</p>
-        <p className="mt-0.5 truncate text-[11px] text-slate-500">
-          {preview?.providerName ?? platform.name}
-        </p>
-      </div>
-    </a>
+    <div className="group relative overflow-hidden rounded-xl border border-slate-200 transition-shadow hover:shadow-md">
+      <a href={highlight.url} target="_blank" rel="noopener noreferrer" className="block">
+        <div
+          className="relative aspect-square w-full overflow-hidden"
+          style={preview ? undefined : { background: platform.gradient }}
+        >
+          {preview ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={preview.thumbnailUrl}
+                alt=""
+                className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+              />
+              <span className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/20" />
+            </>
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <PlatformGlyph kind={platform.kind} />
+            </div>
+          )}
+          {theme ? (
+            <span
+              className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm"
+              style={{ background: theme.color }}
+            >
+              {theme.label}
+            </span>
+          ) : null}
+          {platform.kind !== "photo" ? (
+            <span className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 shadow-sm">
+              <PlayGlyph />
+            </span>
+          ) : null}
+        </div>
+        <div className="px-2.5 py-2">
+          <p className="truncate text-xs font-medium text-slate-900">{caption}</p>
+          <p className="mt-0.5 truncate text-[11px] text-slate-500">
+            {preview?.providerName ?? platform.name}
+          </p>
+        </div>
+      </a>
+      {actions ? <div className="absolute right-1.5 top-1.5">{actions}</div> : null}
+    </div>
   );
 }
 

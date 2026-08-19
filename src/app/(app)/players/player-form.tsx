@@ -14,7 +14,6 @@ type PlayerFormValues = {
   current_club_id: string | null;
   city: string;
   bio: string | null;
-  video_links: string[];
 };
 
 const currentYear = new Date().getFullYear();
@@ -34,9 +33,6 @@ export function PlayerForm<T>({
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [videoLinks, setVideoLinks] = useState<string[]>(
-    defaultValues?.video_links?.length ? defaultValues.video_links : [""]
-  );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     setError(null);
@@ -217,35 +213,6 @@ export function PlayerForm<T>({
           defaultValue={defaultValues?.bio ?? ""}
           className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
         />
-      </div>
-
-      <div>
-        <span className="block text-sm font-medium text-slate-900">
-          Highlight links (Hudl, Veo, YouTube, Instagram...)
-        </span>
-        <p className="mt-1 text-xs text-slate-500">
-          These show up as a gallery on the profile — add as many as you
-          like.
-        </p>
-        <div className="mt-2 space-y-2">
-          {videoLinks.map((link, index) => (
-            <input
-              key={index}
-              name="video_links"
-              type="url"
-              placeholder="https://"
-              defaultValue={link}
-              className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
-            />
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={() => setVideoLinks((links) => [...links, ""])}
-          className="mt-2 text-sm font-medium text-slate-700 underline"
-        >
-          Add another link
-        </button>
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}

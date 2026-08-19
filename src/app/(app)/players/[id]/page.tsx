@@ -6,8 +6,9 @@ import { ActionButton } from "@/components/ui/action-button";
 import { PhotoUpload } from "./photo-upload";
 import { EditPlayerForm } from "./edit-player-form";
 import { DeletePlayerButton } from "./delete-player-button";
-import { fetchOEmbedPreview } from "@/lib/oembed/server";
-import { LinkGallery } from "@/components/ui/link-gallery";
+import { fetchOEmbedPreview, type OEmbedPreview } from "@/lib/oembed/server";
+import { HighlightsManager } from "./highlights-manager";
+import type { Highlight } from "@/components/ui/link-gallery";
 
 export default async function PlayerDetailPage({
   params,
@@ -26,7 +27,7 @@ export default async function PlayerDetailPage({
     supabase
       .from("players")
       .select(
-        "id, parent_id, first_name, last_initial, birth_year, positions, preferred_foot, current_club_id, city, bio, video_links, photo_url, open_to_opportunities, consent_completed"
+        "id, parent_id, first_name, last_initial, birth_year, positions, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, player_highlights(id, url, caption, theme)"
       )
       .eq("id", id)
       .single(),
@@ -45,10 +46,14 @@ export default async function PlayerDetailPage({
     signedPhotoUrl = data?.signedUrl ?? null;
   }
 
-  const videoLinks: string[] = player.video_links ?? [];
-  const videoPreviews = await Promise.all(
-    videoLinks.map((link) => fetchOEmbedPreview(link))
+  const highlights: Highlight[] = player.player_highlights ?? [];
+  const previewList = await Promise.all(
+    highlights.map((highlight) => fetchOEmbedPreview(highlight.url))
   );
+  const previews: Record<string, OEmbedPreview | null> = {};
+  highlights.forEach((highlight, i) => {
+    previews[highlight.id] = previewList[i];
+  });
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
@@ -121,18 +126,13 @@ export default async function PlayerDetailPage({
 
       <div className="mt-8">
         <h2 className="text-sm font-medium text-slate-900">Highlights</h2>
-        {videoLinks.length > 0 ? (
-          <div className="mt-2">
-            <LinkGallery links={videoLinks} previews={videoPreviews} />
-          </div>
-        ) : (
-          <div className="mt-2 rounded-lg border border-dashed border-slate-300 p-4 text-center">
-            <p className="text-sm text-slate-600">
-              Add a Hudl, Veo, YouTube, or Instagram link below and it&rsquo;ll
-              show up here as a gallery for coaches to see.
-            </p>
-          </div>
-        )}
+        <div className="mt-2">
+          <HighlightsManager
+            playerId={player.id}
+            highlights={highlights}
+            previews={previews}
+          />
+        </div>
       </div>
 
       <div className="mt-8">
@@ -148,7 +148,6 @@ export default async function PlayerDetailPage({
             current_club_id: player.current_club_id,
             city: player.city,
             bio: player.bio,
-            video_links: player.video_links ?? [],
           }}
         />
       </div>

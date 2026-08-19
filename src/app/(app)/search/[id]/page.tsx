@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireVerifiedCoach } from "@/lib/coach";
 import { startConversationWithParent } from "@/app/(app)/messages/actions";
-import { fetchOEmbedPreview } from "@/lib/oembed/server";
-import { LinkGallery } from "@/components/ui/link-gallery";
+import { fetchOEmbedPreview, type OEmbedPreview } from "@/lib/oembed/server";
+import { LinkGallery, type Highlight } from "@/components/ui/link-gallery";
 
 export default async function SearchPlayerDetailPage({
   params,
@@ -16,7 +16,7 @@ export default async function SearchPlayerDetailPage({
   const { data: player } = await supabase
     .from("players")
     .select(
-      "id, first_name, last_initial, birth_year, positions, preferred_foot, city, bio, video_links, photo_url, current_club:clubs(name, city)"
+      "id, first_name, last_initial, birth_year, positions, preferred_foot, city, bio, photo_url, current_club:clubs(name, city), player_highlights(id, url, caption, theme)"
     )
     .eq("id", id)
     .single();
@@ -41,10 +41,14 @@ export default async function SearchPlayerDetailPage({
     city: string;
   } | null;
 
-  const videoLinks: string[] = player.video_links ?? [];
-  const videoPreviews = await Promise.all(
-    videoLinks.map((link) => fetchOEmbedPreview(link))
+  const highlights: Highlight[] = player.player_highlights ?? [];
+  const previewList = await Promise.all(
+    highlights.map((highlight) => fetchOEmbedPreview(highlight.url))
   );
+  const previews: Record<string, OEmbedPreview | null> = {};
+  highlights.forEach((highlight, i) => {
+    previews[highlight.id] = previewList[i];
+  });
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
@@ -100,11 +104,11 @@ export default async function SearchPlayerDetailPage({
             </dd>
           </div>
         ) : null}
-        {videoLinks.length > 0 ? (
+        {highlights.length > 0 ? (
           <div>
             <dt className="text-sm font-medium text-slate-900">Highlights</dt>
             <dd className="mt-2">
-              <LinkGallery links={videoLinks} previews={videoPreviews} />
+              <LinkGallery highlights={highlights} previews={previews} />
             </dd>
           </div>
         ) : null}

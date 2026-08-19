@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { isValidTheme } from "@/lib/highlight-themes";
 
 export type PlayerFormInput = {
   firstName: string;
@@ -13,7 +14,6 @@ export type PlayerFormInput = {
   currentClubId: string | null;
   city: string;
   bio: string;
-  videoLinks: string[];
 };
 
 function parseFormInput(formData: FormData): PlayerFormInput {
@@ -31,10 +31,6 @@ function parseFormInput(formData: FormData): PlayerFormInput {
     currentClubId: (formData.get("current_club_id") as string) || null,
     city: String(formData.get("city") ?? "").trim(),
     bio: String(formData.get("bio") ?? "").trim(),
-    videoLinks: formData
-      .getAll("video_links")
-      .map((value) => String(value).trim())
-      .filter(Boolean),
   };
 }
 
@@ -59,7 +55,6 @@ export async function createPlayer(formData: FormData) {
       current_club_id: input.currentClubId,
       city: input.city,
       bio: input.bio || null,
-      video_links: input.videoLinks,
     })
     .select("id")
     .single();
@@ -92,7 +87,6 @@ export async function updatePlayer(playerId: string, formData: FormData) {
       current_club_id: input.currentClubId,
       city: input.city,
       bio: input.bio || null,
-      video_links: input.videoLinks,
     })
     .eq("id", playerId);
 
@@ -162,4 +156,52 @@ export async function deletePlayer(playerId: string) {
 
   revalidatePath("/players");
   redirect("/players");
+}
+
+export async function addHighlight(playerId: string, formData: FormData) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect("/login");
+  }
+
+  const url = String(formData.get("url") ?? "").trim();
+  const caption = String(formData.get("caption") ?? "").trim();
+  const themeRaw = String(formData.get("theme") ?? "").trim();
+
+  if (!url) {
+    throw new Error("Add a link before saving.");
+  }
+
+  const { error } = await supabase.from("player_highlights").insert({
+    player_id: playerId,
+    url,
+    caption: caption || null,
+    theme: isValidTheme(themeRaw) ? themeRaw : null,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/players/${playerId}`);
+}
+
+export async function deleteHighlight(highlightId: string, playerId: string) {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    redirect("/login");
+  }
+
+  const { error } = await supabase
+    .from("player_highlights")
+    .delete()
+    .eq("id", highlightId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/players/${playerId}`);
 }
