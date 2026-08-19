@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpenRoster",
+  title: "PitchLink",
   description:
-    "Connecting DFW club soccer families and coaches around open roster spots.",
+    "The youth soccer network connecting families, verified coaches, teams, and real playing opportunities.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
