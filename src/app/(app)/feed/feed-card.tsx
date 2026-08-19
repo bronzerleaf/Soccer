@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LikeButton } from "./like-button";
 import { ShareButton } from "./share-button";
 import { ActionButton } from "@/components/ui/action-button";
+import { formatTime } from "@/lib/format";
 import { deleteFeedPost } from "./actions";
 import { toggleRosterPostLike } from "../roster-posts/actions";
 
@@ -30,6 +31,12 @@ export type FeedItem =
       // A coach's own name is already public (search, roster posts), so
       // showing it here doesn't create a new exposure.
       authorName: string | null;
+      // Only ever set on guest_play (from either side) — looking_for_team
+      // isn't an event with a date/place.
+      eventDate: string | null;
+      eventTime: string | null;
+      location: string | null;
+      signupUrl: string | null;
       createdAt: string;
       likeCount: number;
       likedByMe: boolean;
@@ -41,6 +48,10 @@ export type FeedItem =
       orgName: string;
       cityName: string;
       description: string;
+      eventDate: string | null;
+      eventTime: string | null;
+      location: string | null;
+      signupUrl: string | null;
       createdAt: string;
       likeCount: number;
       likedByMe: boolean;
@@ -56,6 +67,10 @@ export type FeedItem =
       description: string;
       costCents: number | null;
       durationMinutes: number | null;
+      eventDate: string | null;
+      eventTime: string | null;
+      location: string | null;
+      signupUrl: string | null;
       createdAt: string;
       likeCount: number;
       likedByMe: boolean;
@@ -90,6 +105,16 @@ function formatDuration(minutes: number | null): string | null {
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
   return rest === 0 ? `${hours}h` : `${hours}h ${rest}m`;
+}
+
+function formatEventDate(date: string | null, time: string | null): string | null {
+  if (!date) return null;
+  const formatted = new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+  return time ? `${formatted} · ${formatTime(time)}` : formatted;
 }
 
 export function FeedCard({ item }: { item: FeedItem }) {
@@ -131,6 +156,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
 
   const cost = item.kind === "training" ? formatCost(item.costCents) : null;
   const duration = item.kind === "training" ? formatDuration(item.durationMinutes) : null;
+  const eventWhen = formatEventDate(item.eventDate, item.eventTime);
 
   return (
     <div className="rounded-lg border border-slate-200 p-4">
@@ -183,18 +209,34 @@ export function FeedCard({ item }: { item: FeedItem }) {
           </p>
         ) : null}
 
+        {eventWhen || item.location ? (
+          <p className="mt-1.5 text-xs font-medium text-slate-600">
+            {[eventWhen, item.location].filter(Boolean).join(" · ")}
+          </p>
+        ) : null}
+
         <p className="mt-1.5 text-sm leading-6 text-slate-600">
           {item.description}
         </p>
       </Link>
 
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
         <LikeButton
           postId={item.id}
           likedByMe={item.likedByMe}
           likeCount={item.likeCount}
         />
         <ShareButton href={`/feed/post/${item.id}`} />
+        {item.signupUrl ? (
+          <a
+            href={item.signupUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-400"
+          >
+            Sign up ↗
+          </a>
+        ) : null}
       </div>
     </div>
   );

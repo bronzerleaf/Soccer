@@ -51,6 +51,15 @@ export async function createFamilyFeedPost(formData: FormData) {
   const playerId = String(formData.get("player_id") ?? "").trim();
   const cityId = String(formData.get("city_id") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
+  // Only guest_play is an actual event with a date/place -- the
+  // composer only shows these fields for that post type, but a
+  // looking_for_team submission could in theory still carry stale
+  // values from a prior form state, so drop them here rather than trust
+  // the client's choice of which type it claims to be.
+  const eventDate = postType === "guest_play" ? String(formData.get("event_date") ?? "").trim() : "";
+  const eventTime = postType === "guest_play" ? String(formData.get("event_time") ?? "").trim() : "";
+  const location = postType === "guest_play" ? String(formData.get("location") ?? "").trim() : "";
+  const signupUrl = postType === "guest_play" ? String(formData.get("signup_url") ?? "").trim() : "";
 
   if (!playerId || !cityId || !description) {
     throw new Error("Please choose a player, a city, and add a description.");
@@ -77,6 +86,10 @@ export async function createFamilyFeedPost(formData: FormData) {
     birth_year: player.birth_year,
     positions: player.positions ?? [],
     description,
+    event_date: eventDate || null,
+    event_time: eventTime || null,
+    location: location || null,
+    signup_url: signupUrl || null,
     expires_at: expiresAt.toISOString(),
   });
 
@@ -110,6 +123,10 @@ export async function createCoachFeedPost(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim();
   const birthYearRaw = String(formData.get("birth_year") ?? "").trim();
   const positions = formData.getAll("positions").map(String);
+  const eventDate = String(formData.get("event_date") ?? "").trim();
+  const eventTime = String(formData.get("event_time") ?? "").trim();
+  const location = String(formData.get("location") ?? "").trim();
+  const signupUrl = String(formData.get("signup_url") ?? "").trim();
 
   if (!cityId || !description) {
     throw new Error("Please choose a city and add a description.");
@@ -142,6 +159,10 @@ export async function createCoachFeedPost(formData: FormData) {
     description,
     cost_cents: costCents,
     duration_minutes: durationMinutes,
+    event_date: eventDate || null,
+    event_time: eventTime || null,
+    location: location || null,
+    signup_url: signupUrl || null,
     expires_at: expiresAt.toISOString(),
   });
 
@@ -164,6 +185,10 @@ export async function createOrgEventPost(formData: FormData) {
 
   const cityId = String(formData.get("city_id") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
+  const eventDate = String(formData.get("event_date") ?? "").trim();
+  const eventTime = String(formData.get("event_time") ?? "").trim();
+  const location = String(formData.get("location") ?? "").trim();
+  const signupUrl = String(formData.get("signup_url") ?? "").trim();
 
   if (!cityId || !description) {
     throw new Error("Please choose a city and describe the event.");
@@ -177,6 +202,10 @@ export async function createOrgEventPost(formData: FormData) {
     author_id: userData.user.id,
     city_id: cityId,
     description,
+    event_date: eventDate || null,
+    event_time: eventTime || null,
+    location: location || null,
+    signup_url: signupUrl || null,
     expires_at: expiresAt.toISOString(),
   });
 

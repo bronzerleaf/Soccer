@@ -22,7 +22,7 @@ export default async function ConversationPage({
   const { data: conversation } = await supabase
     .from("conversations")
     .select(
-      "id, parent_id, coach_id, player:players(first_name, last_initial), roster_post:roster_posts(description)"
+      "id, parent_id, coach_id, player:players(first_name, last_initial), roster_post:roster_posts(description), team:teams(name), feed_post:feed_posts(description)"
     )
     .eq("id", id)
     .single();
@@ -74,6 +74,10 @@ export default async function ConversationPage({
   const rosterPost = conversation.roster_post as unknown as {
     description: string;
   } | null;
+  const team = conversation.team as unknown as { name: string } | null;
+  const feedPost = conversation.feed_post as unknown as {
+    description: string;
+  } | null;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col px-6 py-12">
@@ -92,6 +96,14 @@ export default async function ConversationPage({
       {rosterPost ? (
         <p className="mt-1 text-sm text-slate-500">
           Re: &ldquo;{rosterPost.description}&rdquo;
+        </p>
+      ) : null}
+      {team ? (
+        <p className="mt-1 text-sm text-slate-500">About {team.name}</p>
+      ) : null}
+      {feedPost ? (
+        <p className="mt-1 text-sm text-slate-500">
+          Re: &ldquo;{feedPost.description}&rdquo;
         </p>
       ) : null}
 

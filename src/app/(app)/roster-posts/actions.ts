@@ -51,6 +51,9 @@ export async function createRosterPost(formData: FormData) {
   const birthYear = Number(formData.get("birth_year"));
   const positions = formData.getAll("positions").map(String);
   const tryoutDate = String(formData.get("tryout_date") ?? "").trim();
+  const tryoutTime = String(formData.get("tryout_time") ?? "").trim();
+  const location = String(formData.get("location") ?? "").trim();
+  const signupUrl = String(formData.get("signup_url") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
 
   if (!description) {
@@ -66,6 +69,9 @@ export async function createRosterPost(formData: FormData) {
     birth_year: birthYear,
     positions,
     tryout_date: tryoutDate || null,
+    tryout_time: tryoutTime || null,
+    location: location || null,
+    signup_url: signupUrl || null,
     description,
     expires_at: expiresAt.toISOString(),
   });

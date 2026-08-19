@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { startConversationWithCoach } from "@/app/(app)/messages/actions";
 import { LikeButton } from "@/app/(app)/feed/like-button";
+import { formatTime } from "@/lib/format";
 import { toggleRosterPostLike } from "../actions";
 
 export default async function RosterPostDetailPage({
@@ -21,7 +22,7 @@ export default async function RosterPostDetailPage({
   const { data: post } = await supabase
     .from("roster_posts")
     .select(
-      "id, birth_year, positions, tryout_date, description, expires_at, club:clubs(name, city)"
+      "id, birth_year, positions, tryout_date, tryout_time, location, signup_url, description, expires_at, club:clubs(name, city)"
     )
     .eq("id", id)
     .single();
@@ -62,12 +63,31 @@ export default async function RosterPostDetailPage({
             day: "numeric",
             year: "numeric",
           })}
+          {post.tryout_time ? ` at ${formatTime(post.tryout_time)}` : ""}
+        </p>
+      ) : null}
+
+      {post.location ? (
+        <p className="mt-1 text-sm text-slate-700">
+          <span className="font-medium text-slate-900">Location:</span>{" "}
+          {post.location}
         </p>
       ) : null}
 
       <p className="mt-4 text-sm leading-6 text-slate-700">
         {post.description}
       </p>
+
+      {post.signup_url ? (
+        <a
+          href={post.signup_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+        >
+          Sign up ↗
+        </a>
+      ) : null}
 
       <div className="mt-4">
         <LikeButton

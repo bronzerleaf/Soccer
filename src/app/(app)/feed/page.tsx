@@ -110,7 +110,7 @@ export default async function FeedPage({
       supabase
         .from("feed_posts")
         .select(
-          "id, post_type, author_id, city_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, created_at, author:profiles(full_name)"
+          "id, post_type, author_id, city_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, event_date, event_time, location, signup_url, created_at, author:profiles(full_name)"
         )
         .gt("expires_at", new Date().toISOString())
         .order("created_at", { ascending: false })
@@ -175,6 +175,10 @@ export default async function FeedPage({
           orgName: author?.full_name ?? "An organization",
           cityName: postCity?.name ?? "",
           description: post.description,
+          eventDate: post.event_date,
+          eventTime: post.event_time,
+          location: post.location,
+          signupUrl: post.signup_url,
           createdAt: post.created_at,
           likeCount,
           likedByMe: likedPostIds.has(post.id),
@@ -193,6 +197,10 @@ export default async function FeedPage({
           description: post.description,
           costCents: post.cost_cents,
           durationMinutes: post.duration_minutes,
+          eventDate: post.event_date,
+          eventTime: post.event_time,
+          location: post.location,
+          signupUrl: post.signup_url,
           createdAt: post.created_at,
           likeCount,
           likedByMe: likedPostIds.has(post.id),
@@ -209,6 +217,10 @@ export default async function FeedPage({
         description: post.description,
         // No player_id means a coach posted it, not a parent.
         authorName: post.player_id ? null : author?.full_name ?? "A coach",
+        eventDate: post.event_date,
+        eventTime: post.event_time,
+        location: post.location,
+        signupUrl: post.signup_url,
         createdAt: post.created_at,
         likeCount,
         likedByMe: likedPostIds.has(post.id),

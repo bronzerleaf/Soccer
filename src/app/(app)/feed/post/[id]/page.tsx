@@ -24,7 +24,7 @@ export default async function FeedPostDetailPage({
     supabase
       .from("feed_posts")
       .select(
-        "id, post_type, author_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, created_at, city:cities(name), author:profiles(full_name)"
+        "id, post_type, author_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, event_date, event_time, location, signup_url, created_at, city:cities(name), author:profiles(full_name)"
       )
       .eq("id", id)
       .single(),
@@ -88,6 +88,10 @@ export default async function FeedPostDetailPage({
           orgName: author?.full_name ?? "An organization",
           cityName: city?.name ?? "",
           description: post.description,
+          eventDate: post.event_date,
+          eventTime: post.event_time,
+          location: post.location,
+          signupUrl: post.signup_url,
           createdAt: post.created_at,
           likeCount,
           likedByMe,
@@ -104,6 +108,10 @@ export default async function FeedPostDetailPage({
             description: post.description,
             costCents: post.cost_cents,
             durationMinutes: post.duration_minutes,
+            eventDate: post.event_date,
+            eventTime: post.event_time,
+            location: post.location,
+            signupUrl: post.signup_url,
             createdAt: post.created_at,
             likeCount,
             likedByMe,
@@ -119,6 +127,10 @@ export default async function FeedPostDetailPage({
             // No player_id means a coach posted it (they have no player
             // of their own to attach) -- a parent's post always has one.
             authorName: post.player_id ? null : author?.full_name ?? "A coach",
+            eventDate: post.event_date,
+            eventTime: post.event_time,
+            location: post.location,
+            signupUrl: post.signup_url,
             createdAt: post.created_at,
             likeCount,
             likedByMe,

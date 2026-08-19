@@ -15,7 +15,7 @@ export default async function MessagesInboxPage() {
   const { data: conversations } = await supabase
     .from("conversations")
     .select(
-      "id, parent_id, coach_id, created_at, player:players(first_name, last_initial)"
+      "id, parent_id, coach_id, created_at, player:players(first_name, last_initial), roster_post:roster_posts(description), team:teams(name), feed_post:feed_posts(description)"
     )
     .order("created_at", { ascending: false });
 
@@ -71,6 +71,26 @@ export default async function MessagesInboxPage() {
               first_name: string;
               last_initial: string;
             } | null;
+            const rosterPost = conversation.roster_post as unknown as {
+              description: string;
+            } | null;
+            const team = conversation.team as unknown as { name: string } | null;
+            const feedPost = conversation.feed_post as unknown as {
+              description: string;
+            } | null;
+            // Exactly one of these is ever set per conversation (the
+            // context that started it) -- a parent or coach glancing at
+            // their inbox should never have to open a thread just to
+            // find out what it's about.
+            const contextLabel = player
+              ? `Re: ${player.first_name} ${player.last_initial}.`
+              : rosterPost
+                ? `Re: "${rosterPost.description.slice(0, 40)}${rosterPost.description.length > 40 ? "…" : ""}"`
+                : team
+                  ? `Re: ${team.name}`
+                  : feedPost
+                    ? `Re: "${feedPost.description.slice(0, 40)}${feedPost.description.length > 40 ? "…" : ""}"`
+                    : null;
             const latest = latestMessageByConversation.get(conversation.id);
 
             return (
@@ -79,13 +99,13 @@ export default async function MessagesInboxPage() {
                   href={`/messages/${conversation.id}`}
                   className="block rounded-lg border border-slate-200 p-4 hover:border-slate-300"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-medium text-slate-900">
                       {other?.full_name ?? "Someone"}
                     </p>
-                    {player ? (
-                      <span className="text-xs text-slate-500">
-                        Re: {player.first_name} {player.last_initial}.
+                    {contextLabel ? (
+                      <span className="shrink-0 text-xs text-slate-500">
+                        {contextLabel}
                       </span>
                     ) : null}
                   </div>

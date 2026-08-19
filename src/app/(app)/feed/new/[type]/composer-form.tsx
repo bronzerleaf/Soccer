@@ -31,6 +31,14 @@ export function ComposerForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // A "when/where/how do families sign up" block makes sense for
+  // anything that's actually an event with a spot to show up to --
+  // every coach and org post, plus a parent's guest_play (their player
+  // is available on a specific date). Not looking_for_team, which isn't
+  // an event at all.
+  const showEventFields =
+    mode === "org" || mode === "coach" || (mode === "parent" && postType === "guest_play");
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -198,6 +206,76 @@ export function ComposerForm({
           ))}
         </select>
       </div>
+
+      {showEventFields ? (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="event_date"
+                className="block text-sm font-medium text-slate-900"
+              >
+                Date (optional)
+              </label>
+              <input
+                id="event_date"
+                name="event_date"
+                type="date"
+                className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="event_time"
+                className="block text-sm font-medium text-slate-900"
+              >
+                Time (optional)
+              </label>
+              <input
+                id="event_time"
+                name="event_time"
+                type="time"
+                className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="location"
+              className="block text-sm font-medium text-slate-900"
+            >
+              Location (optional)
+            </label>
+            <input
+              id="location"
+              name="location"
+              type="text"
+              placeholder="Field name and address"
+              className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="signup_url"
+              className="block text-sm font-medium text-slate-900"
+            >
+              Sign-up link (optional)
+            </label>
+            <input
+              id="signup_url"
+              name="signup_url"
+              type="url"
+              placeholder="https://..."
+              className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Link to a sign-up sheet or registration form, if you have one.
+            </p>
+          </div>
+        </>
+      ) : null}
 
       <div>
         <label

@@ -69,19 +69,71 @@ export default async function NewRosterPostPage() {
           </div>
         </fieldset>
 
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label
+              htmlFor="tryout_date"
+              className="block text-sm font-medium text-slate-900"
+            >
+              Tryout date (optional)
+            </label>
+            <input
+              id="tryout_date"
+              name="tryout_date"
+              type="date"
+              className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="tryout_time"
+              className="block text-sm font-medium text-slate-900"
+            >
+              Time (optional)
+            </label>
+            <input
+              id="tryout_time"
+              name="tryout_time"
+              type="time"
+              className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            />
+          </div>
+        </div>
+
         <div>
           <label
-            htmlFor="tryout_date"
+            htmlFor="location"
             className="block text-sm font-medium text-slate-900"
           >
-            Tryout date (optional)
+            Location (optional)
           </label>
           <input
-            id="tryout_date"
-            name="tryout_date"
-            type="date"
+            id="location"
+            name="location"
+            type="text"
+            placeholder="Field name and address"
             className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
           />
+        </div>
+
+        <div>
+          <label
+            htmlFor="signup_url"
+            className="block text-sm font-medium text-slate-900"
+          >
+            Sign-up link (optional)
+          </label>
+          <input
+            id="signup_url"
+            name="signup_url"
+            type="url"
+            placeholder="https://..."
+            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            Link to a sign-up sheet or registration form, if you have one.
+            Families can always reach out directly instead.
+          </p>
         </div>
 
         <div>
