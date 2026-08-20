@@ -2,9 +2,28 @@ import Link from "next/link";
 import { LikeButton } from "./like-button";
 import { ShareButton } from "./share-button";
 import { ActionButton } from "@/components/ui/action-button";
+import { ClubCrest } from "@/components/ui/club-crest";
 import { formatTime } from "@/lib/format";
 import { deleteFeedPost } from "./actions";
 import { toggleRosterPostLike } from "../roster-posts/actions";
+
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5 shrink-0">
+      <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" />
+      <circle cx="12" cy="9.5" r="2.3" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5 shrink-0">
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M8 3v4M16 3v4M3 10h18" />
+    </svg>
+  );
+}
 
 export type FeedItem =
   | {
@@ -130,13 +149,20 @@ export function FeedCard({ item }: { item: FeedItem }) {
     return (
       <div className="rounded-[18px] border border-gray-200 bg-white p-4 shadow-[0_3px_16px_rgba(17,24,39,0.07)]">
         <Link href={`/roster-posts/${item.id}`} className="block">
-          <div className="flex items-center justify-between gap-2">
-            {badge}
+          <div className="flex items-start gap-3">
+            <ClubCrest name={item.clubName} size={40} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="truncate text-sm font-bold text-gray-900">{item.clubName}</p>
+                {badge}
+              </div>
+              <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                <PinIcon />
+                {item.clubCity}
+              </p>
+            </div>
           </div>
-          <p className="mt-2 text-sm font-medium text-gray-900">
-            {item.clubName} — {item.clubCity}
-          </p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-2.5 text-sm text-gray-600">
             {item.birthYear} ·{" "}
             {(item.positions ?? []).join(", ") || "Any position"}
           </p>
@@ -210,8 +236,19 @@ export function FeedCard({ item }: { item: FeedItem }) {
         ) : null}
 
         {eventWhen || item.location ? (
-          <p className="mt-1.5 text-xs font-medium text-gray-600">
-            {[eventWhen, item.location].filter(Boolean).join(" · ")}
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-gray-600">
+            {eventWhen ? (
+              <span className="flex items-center gap-1">
+                <CalendarIcon />
+                {eventWhen}
+              </span>
+            ) : null}
+            {item.location ? (
+              <span className="flex items-center gap-1">
+                <PinIcon />
+                {item.location}
+              </span>
+            ) : null}
           </p>
         ) : null}
 

@@ -1,11 +1,11 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { haversineMiles } from "@/lib/geo";
 import { LocationSettings } from "./location-settings";
 import { FeedCard, type FeedItem } from "./feed-card";
 import { POSITIONS } from "@/app/(app)/players/constants";
+import { FilterChip } from "@/components/pitchlink/filter-chip";
 
 const currentYear = new Date().getFullYear();
 const BIRTH_YEARS = Array.from(
@@ -320,9 +320,9 @@ export default async function FeedPage({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Local feed</h1>
+          <h1 className="text-[22px] font-bold text-gray-900">Local feed</h1>
           <p className="mt-1 text-sm text-gray-600">
             Roster spots, families looking for a team, and event listings
             near you.
@@ -331,7 +331,7 @@ export default async function FeedPage({
         {postHref ? (
           <Link
             href={postHref}
-            className="shrink-0 rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+            className="shrink-0 rounded-full bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700"
           >
             Post
           </Link>
@@ -510,8 +510,8 @@ export default async function FeedPage({
           ))}
         </div>
       ) : (
-        <div className="mt-8 rounded-lg border border-dashed border-gray-300 p-6 text-center">
-          <p className="text-sm font-medium text-gray-900">
+        <div className="mt-8 rounded-[18px] border border-dashed border-gray-300 bg-white p-6 text-center">
+          <p className="text-sm font-bold text-gray-900">
             Nothing in the feed yet
           </p>
           <p className="mt-1 text-sm text-gray-600">
@@ -524,17 +524,5 @@ export default async function FeedPage({
         </div>
       )}
     </main>
-  );
-}
-
-function FilterChip({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
-    >
-      {children}
-      <span aria-hidden="true">×</span>
-    </Link>
   );
 }
