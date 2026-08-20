@@ -26,7 +26,7 @@ export default async function RosterPostDetailPage({
   const { data: post } = await supabase
     .from("roster_posts")
     .select(
-      "id, birth_year, positions, tryout_date, tryout_time, location, signup_url, description, expires_at, club:clubs(name, city)"
+      "id, birth_year, positions, tryout_date, tryout_time, location, signup_url, description, expires_at, club:clubs(name, city), coach:profiles(full_name)"
     )
     .eq("id", id)
     .single();
@@ -44,6 +44,7 @@ export default async function RosterPostDetailPage({
   const likedByMe = (likeRows ?? []).some((l) => l.profile_id === userData.user!.id);
 
   const club = post.club as unknown as { name: string; city: string } | null;
+  const coach = post.coach as unknown as { full_name: string } | null;
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
@@ -66,6 +67,21 @@ export default async function RosterPostDetailPage({
           </div>
         </div>
 
+        {coach?.full_name ? (
+          <div className="mt-3.5 flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-600">
+              {coach.full_name.slice(0, 1).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-gray-900">
+                {coach.full_name}
+              </p>
+              <p className="text-[11px] text-gray-500">Verified coach{club?.name ? ` · ${club.name}` : ""}</p>
+            </div>
+            <VerifiedMark className="h-4 w-4 shrink-0" />
+          </div>
+        ) : null}
+
         <div className="mt-4">
           <InfoTileRow>
             <InfoTile value={likeCount} label={likeCount === 1 ? "Family interested" : "Families interested"} />
@@ -76,22 +92,29 @@ export default async function RosterPostDetailPage({
 
         <div className="mt-4 flex gap-2">
           {profile?.role === "parent" ? (
-            <a
-              href="#message-club"
-              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-green-600 px-3 py-3 text-sm font-semibold text-white hover:bg-green-700"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-                <path d="M2 12 21 3l-6 19-4-8-9-2Z" />
-              </svg>
-              Message the Club
-            </a>
-          ) : null}
-          <LikeButton
-            postId={post.id}
-            likedByMe={likedByMe}
-            likeCount={likeCount}
-            toggleAction={toggleRosterPostLike}
-          />
+            <>
+              <LikeButton
+                postId={post.id}
+                likedByMe={likedByMe}
+                likeCount={likeCount}
+                toggleAction={toggleRosterPostLike}
+                variant="primary"
+              />
+              <a
+                href="#message-club"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 hover:border-gray-400"
+              >
+                Message
+              </a>
+            </>
+          ) : (
+            <LikeButton
+              postId={post.id}
+              likedByMe={likedByMe}
+              likeCount={likeCount}
+              toggleAction={toggleRosterPostLike}
+            />
+          )}
         </div>
       </Card>
 
