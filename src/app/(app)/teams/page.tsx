@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { ClubCrest } from "@/components/ui/club-crest";
 import { BackLink } from "@/components/pitchlink/back-link";
 import { FilterChip } from "@/components/pitchlink/filter-chip";
+import { DiscoverTabs } from "@/components/pitchlink/discover-tabs";
 
 export default async function TeamsPage({
   searchParams,
@@ -212,6 +213,8 @@ async function renderParentTeamBrowse(
         This shows team names and leagues only — never who&rsquo;s on a
         roster, which stays private to that team&rsquo;s own families.
       </p>
+
+      <DiscoverTabs active="teams" role="parent" />
 
       <div className="mt-6">
         <LocationSettings

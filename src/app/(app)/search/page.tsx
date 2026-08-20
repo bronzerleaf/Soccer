@@ -5,6 +5,7 @@ import { Badge, VerifiedMark } from "@/components/ui/badge";
 import { CardLink } from "@/components/ui/card";
 import { PlayerAvatar } from "@/components/ui/player-avatar";
 import { FilterChip } from "@/components/pitchlink/filter-chip";
+import { DiscoverTabs } from "@/components/pitchlink/discover-tabs";
 
 const currentYear = new Date().getFullYear();
 const BIRTH_YEARS = Array.from(
@@ -84,6 +85,8 @@ export default async function SearchPage({
         Only players whose families have flagged them open to
         opportunities appear here.
       </p>
+
+      <DiscoverTabs active="players" role="coach" />
 
       <form method="get" className="mt-6">
         <div className="flex items-center gap-3">
