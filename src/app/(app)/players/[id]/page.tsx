@@ -150,7 +150,7 @@ export default async function PlayerDetailPage({
       </div>
 
       {player.bio ? (
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.08)]">
           <svg viewBox="0 0 24 24" fill="#16a34a" className="h-4 w-4 opacity-70">
             <path d="M7.5 6C4.9 6 3 8.1 3 10.7c0 2.4 1.7 4.3 4 4.6-.3 1.4-1.2 2.4-2.6 3.1l.6 1.4c2.7-1 4.6-3.2 4.6-6.6C9.6 10 8.9 6 7.5 6Zm9 0c-2.6 0-4.5 2.1-4.5 4.7 0 2.4 1.7 4.3 4 4.6-.3 1.4-1.2 2.4-2.6 3.1l.6 1.4c2.7-1 4.6-3.2 4.6-6.6 0-3.2-.7-7.2-2.1-7.2Z" />
           </svg>
@@ -159,7 +159,7 @@ export default async function PlayerDetailPage({
         </div>
       ) : null}
 
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.08)]">
         {player.consent_completed ? (
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -208,7 +208,7 @@ export default async function PlayerDetailPage({
       </div>
 
       {interestedCoaches.length > 0 ? (
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.08)]">
           <p className="text-sm font-bold text-slate-900">
             {interestedCoaches.length} coach
             {interestedCoaches.length === 1 ? "" : "es"} interested

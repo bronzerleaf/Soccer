@@ -64,17 +64,19 @@ const icons = {
   ),
 };
 
-// Centered floating soccer-ball mark that sits above the tab row — the
-// literal ball from the reference design, ringed in the app's green
-// accent. Rendered as the system emoji glyph rather than a hand-drawn
-// SVG: every platform's emoji font already draws a properly shaded,
-// photographic-looking ball, which reads as "real" in a way a flat
-// vector redraw doesn't at this size.
+// Centered floating soccer-ball mark that sits above the tab row —
+// cropped directly from the reference mockup's own ball graphic
+// (public/ball-icon.png), not a redrawn SVG or emoji stand-in, so the
+// shading, panel detail, and green ring match the source exactly.
 function BallMark() {
   return (
-    <span aria-hidden="true" style={{ fontSize: 26, lineHeight: 1 }}>
-      ⚽
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/ball-icon.png"
+      alt=""
+      aria-hidden="true"
+      className="h-full w-full rounded-full object-cover"
+    />
   );
 }
 
@@ -157,8 +159,8 @@ export function BottomNav({
         <Link
           href="/dashboard"
           aria-label="Home"
-          className={`absolute left-1/2 top-0 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] bg-white shadow-md transition-colors ${
-            homeActive ? "border-green-600" : "border-green-500 hover:border-green-600"
+          className={`absolute left-1/2 top-0 h-14 w-14 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full bg-white shadow-md transition-transform ${
+            homeActive ? "scale-105" : "hover:scale-105"
           }`}
         >
           <BallMark />

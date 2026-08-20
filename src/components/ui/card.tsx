@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const cardClass =
-  "rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]";
+  "rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.08)]";
 
 export function Card({
   id,

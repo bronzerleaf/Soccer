@@ -128,7 +128,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
 
   if (item.kind === "roster_spot") {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.08)]">
         <Link href={`/roster-posts/${item.id}`} className="block">
           <div className="flex items-center justify-between gap-2">
             {badge}
@@ -159,7 +159,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
   const eventWhen = formatEventDate(item.eventDate, item.eventTime);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.08)]">
       <div className="flex items-center justify-between gap-2">
         {badge}
         {item.canDelete ? (
