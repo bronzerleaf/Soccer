@@ -65,20 +65,16 @@ const icons = {
 };
 
 // Centered floating soccer-ball mark that sits above the tab row — the
-// literal ball glyph from the reference design (flat black/white panels,
-// no gradient), ringed in the app's green accent.
+// literal ball from the reference design, ringed in the app's green
+// accent. Rendered as the system emoji glyph rather than a hand-drawn
+// SVG: every platform's emoji font already draws a properly shaded,
+// photographic-looking ball, which reads as "real" in a way a flat
+// vector redraw doesn't at this size.
 function BallMark() {
   return (
-    <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" fill="#fff" stroke="#0f172a" strokeWidth="1" />
-      <path d="M12 7.5 16 10.3 14.5 15 9.5 15 8 10.3Z" fill="#0f172a" />
-      <path
-        d="M12 7.5 12 2.2M16 10.3 20.8 8.7M14.5 15 17.5 19.5M9.5 15 6.5 19.5M8 10.3 3.2 8.7"
-        stroke="#0f172a"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-      />
-    </svg>
+    <span aria-hidden="true" style={{ fontSize: 26, lineHeight: 1 }}>
+      ⚽
+    </span>
   );
 }
 

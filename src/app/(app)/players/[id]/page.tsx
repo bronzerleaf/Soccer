@@ -133,6 +133,16 @@ export default async function PlayerDetailPage({
         {player.city ? <Badge tone="neutral">{player.city}</Badge> : null}
       </div>
 
+      {player.bio ? (
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <svg viewBox="0 0 24 24" fill="#16a34a" className="h-4 w-4 opacity-70">
+            <path d="M7.5 6C4.9 6 3 8.1 3 10.7c0 2.4 1.7 4.3 4 4.6-.3 1.4-1.2 2.4-2.6 3.1l.6 1.4c2.7-1 4.6-3.2 4.6-6.6C9.6 10 8.9 6 7.5 6Zm9 0c-2.6 0-4.5 2.1-4.5 4.7 0 2.4 1.7 4.3 4 4.6-.3 1.4-1.2 2.4-2.6 3.1l.6 1.4c2.7-1 4.6-3.2 4.6-6.6 0-3.2-.7-7.2-2.1-7.2Z" />
+          </svg>
+          <p className="mt-1.5 text-sm italic leading-6 text-slate-700">{player.bio}</p>
+          <p className="mt-2 text-xs font-semibold text-green-700">— {player.first_name}</p>
+        </div>
+      ) : null}
+
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         {player.consent_completed ? (
           <div className="flex items-center justify-between gap-3">
@@ -210,35 +220,39 @@ export default async function PlayerDetailPage({
 
       {teammates.length > 0 ? (
         <div className="mt-5">
-          <h2 className="text-sm font-bold text-slate-900">Teammates</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-slate-900">Verified Teammates</h2>
+            <span className="text-xs font-semibold text-slate-400">{teammates.length}</span>
+          </div>
           <p className="mt-0.5 text-xs text-slate-400">
             Other verified players on {(player.team as unknown as { name: string } | null)?.name}.
           </p>
-          <ul className="mt-2.5 space-y-2">
+          <div className="mt-2.5 grid grid-cols-2 gap-2">
             {teammates.map((mate) => (
-              <li
+              <div
                 key={mate.id}
-                className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5"
+                className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white p-2.5"
               >
-                <PlayerAvatar name={mate.first_name} size={32} />
-                <span className="flex-1 text-sm">
-                  <span className="font-semibold text-slate-900">
-                    {mate.first_name} {mate.last_initial}.
-                  </span>{" "}
-                  <span className="text-slate-400">
-                    · {mate.birth_year} ·{" "}
-                    {(mate.positions ?? []).join(", ") || "No position listed"}
-                  </span>
-                </span>
-                <VerifiedMark />
-              </li>
+                <PlayerAvatar name={mate.first_name} size={36} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1">
+                    <p className="truncate text-xs font-semibold text-slate-900">
+                      {mate.first_name} {mate.last_initial}.
+                    </p>
+                    <VerifiedMark className="h-3.5 w-3.5" />
+                  </div>
+                  <p className="truncate text-[11px] text-slate-400">
+                    {(mate.positions ?? [])[0] ?? "No position"} · {mate.birth_year}
+                  </p>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       ) : null}
 
       <div className="mt-8">
-        <h2 className="text-sm font-medium text-slate-900">Highlights</h2>
+        <h2 className="text-sm font-bold text-slate-900">Highlights</h2>
         <div className="mt-2">
           <HighlightsManager
             playerId={player.id}
