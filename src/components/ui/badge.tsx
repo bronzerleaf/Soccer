@@ -3,8 +3,8 @@ type BadgeTone = "verified" | "pending" | "neutral" | "accent";
 const tones: Record<BadgeTone, string> = {
   verified: "bg-green-50 text-green-700",
   pending: "bg-amber-50 text-amber-700",
-  neutral: "bg-slate-100 text-slate-600",
-  accent: "bg-slate-900 text-white",
+  neutral: "bg-gray-100 text-gray-600",
+  accent: "bg-gray-900 text-white",
 };
 
 export function Badge({

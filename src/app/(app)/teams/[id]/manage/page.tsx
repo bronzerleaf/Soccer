@@ -65,17 +65,17 @@ export default async function ManageTeamPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12 pb-24">
-      <Link href="/teams" className="text-sm text-slate-500 underline">
+      <Link href="/teams" className="text-sm text-gray-500 underline">
         ← All teams
       </Link>
 
       <div className="mt-4 flex items-center gap-3.5">
         <ClubCrest name={team.name} size={64} />
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900">{team.name}</h1>
+          <h1 className="text-xl font-extrabold text-gray-900">{team.name}</h1>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             {city?.name ? (
-              <span className="text-xs text-slate-500">{city.name}</span>
+              <span className="text-xs text-gray-500">{city.name}</span>
             ) : null}
             {(team.leagues ?? []).map((league: string) => (
               <Badge key={league} tone="neutral">
@@ -110,8 +110,8 @@ export default async function ManageTeamPage({
       </div>
 
       <div className="mt-8">
-        <h2 className="text-sm font-semibold text-slate-900">Roster</h2>
-        <p className="mt-0.5 text-xs text-slate-500">
+        <h2 className="text-sm font-semibold text-gray-900">Roster</h2>
+        <p className="mt-0.5 text-xs text-gray-500">
           Verify once you confirm a player belongs to this team.
         </p>
         {roster_.length > 0 ? (
@@ -122,10 +122,10 @@ export default async function ManageTeamPage({
                   <div className="flex min-w-0 items-center gap-2.5">
                     <PlayerAvatar name={player.first_name} size={36} />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-sm font-semibold text-gray-900">
                         {player.first_name} {player.last_initial}.
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-gray-400">
                         {player.birth_year} ·{" "}
                         {(player.positions ?? []).join(", ") || "No position listed"}
                       </p>
@@ -175,7 +175,7 @@ export default async function ManageTeamPage({
             ))}
           </div>
         ) : (
-          <p className="mt-3 text-sm text-slate-600">
+          <p className="mt-3 text-sm text-gray-600">
             No players on this team yet — they show up here once a parent
             picks this team on their player&rsquo;s profile.
           </p>
@@ -183,7 +183,7 @@ export default async function ManageTeamPage({
       </div>
 
       <div className="mt-8">
-        <h2 className="text-sm font-medium text-slate-900">Team profile</h2>
+        <h2 className="text-sm font-medium text-gray-900">Team profile</h2>
         <div className="mt-3">
           <TeamProfileForm
             teamId={team.id}
@@ -198,10 +198,10 @@ export default async function ManageTeamPage({
       </div>
 
       <div className="mt-8">
-        <h2 className="text-sm font-medium text-slate-900">
+        <h2 className="text-sm font-medium text-gray-900">
           Merge a duplicate team
         </h2>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-gray-500">
           If parents created more than one entry for this team, fold the
           duplicate in here. This only works on a team no other coach has
           already claimed.

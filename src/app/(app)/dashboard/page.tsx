@@ -62,8 +62,8 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-3">
           <PlayerAvatar name={profile?.full_name || userData.user.email || "?"} size={44} />
           <div>
-            <p className="text-sm text-slate-500">Signed in as</p>
-            <p className="text-base font-semibold text-slate-900">
+            <p className="text-sm text-gray-500">Signed in as</p>
+            <p className="text-base font-semibold text-gray-900">
               {profile?.full_name || userData.user.email}
             </p>
           </div>
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
       </div>
 
       <Card className="mt-10 p-5">
-        <p className="text-sm font-medium text-slate-900">
+        <p className="text-sm font-medium text-gray-900">
           {profile?.role === "coach"
             ? "Coach account"
             : profile?.role === "admin"
@@ -85,22 +85,26 @@ export default async function DashboardPage() {
                 ? "Organization account"
                 : "Parent account"}
         </p>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{roleCopy}</p>
+        <p className="mt-2 text-sm leading-6 text-gray-600">{roleCopy}</p>
         {profile?.role === "coach" ? (
-          <Link
-            href="/teams"
-            className="mt-4 inline-block text-sm font-medium text-slate-700 underline"
-          >
-            Claim or manage a team
-          </Link>
+          <div className="mt-4 flex flex-col gap-2">
+            <Link href="/roster-posts/mine" className="text-sm font-medium text-gray-700 underline">
+              Manage your roster posts
+            </Link>
+            <Link href="/teams" className="text-sm font-medium text-gray-700 underline">
+              Claim or manage a team
+            </Link>
+          </div>
         ) : null}
         {profile?.role === "parent" ? (
-          <Link
-            href="/teams"
-            className="mt-4 inline-block text-sm font-medium text-slate-700 underline"
-          >
-            Browse teams and message a coach
-          </Link>
+          <div className="mt-4 flex flex-col gap-2">
+            <Link href="/players" className="text-sm font-medium text-gray-700 underline">
+              Manage your players
+            </Link>
+            <Link href="/teams" className="text-sm font-medium text-gray-700 underline">
+              Browse teams and message a coach
+            </Link>
+          </div>
         ) : null}
       </Card>
     </main>

@@ -20,7 +20,7 @@ export function PlayerAvatar({
         src={photoUrl}
         alt=""
         style={style}
-        className="shrink-0 rounded-full border border-slate-200 object-cover"
+        className="shrink-0 rounded-full border border-gray-200 object-cover"
       />
     );
   }
@@ -28,7 +28,7 @@ export function PlayerAvatar({
   return (
     <div
       style={style}
-      className="flex shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-semibold text-slate-500"
+      className="flex shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-sm font-semibold text-gray-500"
     >
       {name?.[0]?.toUpperCase() ?? "?"}
     </div>

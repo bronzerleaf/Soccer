@@ -38,12 +38,12 @@ export default async function PlayersPage() {
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-gray-900">
           Your players
         </h1>
         <Link
           href="/players/new"
-          className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+          className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800"
         >
           Add a player
         </Link>
@@ -60,12 +60,12 @@ export default async function PlayersPage() {
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="truncate text-sm font-semibold text-slate-900">
+                    <p className="truncate text-sm font-semibold text-gray-900">
                       {player.first_name} {player.last_initial}. · {player.birth_year}
                     </p>
                     {player.consent_completed ? <VerifiedMark /> : null}
                   </div>
-                  <p className="mt-0.5 text-sm text-slate-500">
+                  <p className="mt-0.5 text-sm text-gray-500">
                     {(player.positions ?? []).join(", ") || "No position set"} · {player.city}
                   </p>
                   <Badge
@@ -90,18 +90,18 @@ export default async function PlayersPage() {
           ))}
         </ul>
       ) : (
-        <div className="mt-8 rounded-lg border border-dashed border-slate-300 p-6 text-center">
-          <p className="text-sm font-medium text-slate-900">
+        <div className="mt-8 rounded-lg border border-dashed border-gray-300 p-6 text-center">
+          <p className="text-sm font-medium text-gray-900">
             Add your first player
           </p>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-gray-600">
             Create a profile, verify parental consent, then flag them open
             to opportunities whenever you&rsquo;re ready for coaches to find
             them.
           </p>
           <Link
             href="/players/new"
-            className="mt-4 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+            className="mt-4 inline-block rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800"
           >
             Add a player
           </Link>

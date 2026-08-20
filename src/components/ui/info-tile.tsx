@@ -5,9 +5,9 @@
 // (out of scope per CLAUDE.md §3: no stats tracking, no AI matching).
 export function InfoTile({ value, label }: { value: string | number; label: string }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col items-center rounded-xl border border-slate-200 bg-white px-2 py-3 text-center">
-      <p className="truncate text-base font-semibold text-slate-900">{value}</p>
-      <p className="mt-0.5 truncate text-[11px] text-slate-500">{label}</p>
+    <div className="flex min-w-0 flex-1 flex-col items-center rounded-xl border border-gray-200 bg-white px-2 py-3 text-center">
+      <p className="truncate text-base font-semibold text-gray-900">{value}</p>
+      <p className="mt-0.5 truncate text-[11px] text-gray-500">{label}</p>
     </div>
   );
 }

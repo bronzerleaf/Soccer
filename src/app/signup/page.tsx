@@ -49,10 +49,10 @@ export default function SignUpPage() {
   if (status === "check-email") {
     return (
       <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 py-16">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-gray-900">
           Check your email
         </h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
+        <p className="mt-3 text-sm leading-6 text-gray-600">
           We sent a confirmation link to {email}. Follow it to finish setting
           up your account.
         </p>
@@ -62,17 +62,17 @@ export default function SignUpPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 py-16">
-      <h1 className="text-xl font-semibold text-slate-900">
+      <h1 className="text-xl font-semibold text-gray-900">
         Create your account
       </h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm text-gray-600">
         OpenRoster connects DFW club soccer families and coaches. Accounts
         are for adults only.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <fieldset>
-          <legend className="text-sm font-medium text-slate-900">
+          <legend className="text-sm font-medium text-gray-900">
             I am a...
           </legend>
           <div className="mt-2 grid grid-cols-3 gap-2">
@@ -87,8 +87,8 @@ export default function SignUpPage() {
                 key={option.value}
                 className={`cursor-pointer rounded-md border px-3 py-2 text-center text-sm font-medium transition-colors ${
                   role === option.value
-                    ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-300 text-slate-700 hover:border-slate-400"
+                    ? "border-gray-900 bg-gray-900 text-white"
+                    : "border-gray-300 text-gray-700 hover:border-gray-400"
                 }`}
               >
                 <input
@@ -104,13 +104,13 @@ export default function SignUpPage() {
             ))}
           </div>
           {role === "coach" ? (
-            <p className="mt-2 text-xs leading-5 text-slate-500">
+            <p className="mt-2 text-xs leading-5 text-gray-500">
               Coach accounts are reviewed before they can search players or
               message families.
             </p>
           ) : null}
           {role === "organization" ? (
-            <p className="mt-2 text-xs leading-5 text-slate-500">
+            <p className="mt-2 text-xs leading-5 text-gray-500">
               For leagues, tournament directors, and event organizers.
               Reviewed before you can post — organizations never get access
               to player search or messaging.
@@ -121,7 +121,7 @@ export default function SignUpPage() {
         <div>
           <label
             htmlFor="full_name"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Full name
           </label>
@@ -133,14 +133,14 @@ export default function SignUpPage() {
             autoComplete="name"
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
 
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Email
           </label>
@@ -152,14 +152,14 @@ export default function SignUpPage() {
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
 
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Password
           </label>
@@ -172,7 +172,7 @@ export default function SignUpPage() {
             autoComplete="new-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
 
@@ -181,15 +181,15 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="w-full rounded-md bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+          className="w-full rounded-md bg-gray-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-60"
         >
           {status === "submitting" ? "Creating account..." : "Create account"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-600">
+      <p className="mt-6 text-center text-sm text-gray-600">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-slate-900 underline">
+        <Link href="/login" className="font-medium text-gray-900 underline">
           Log in
         </Link>
       </p>

@@ -64,7 +64,7 @@ function Form({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <div className="rounded-md border border-slate-300 px-3 py-3">
+      <div className="rounded-md border border-gray-300 px-3 py-3">
         <CardElement
           options={{
             style: {
@@ -79,7 +79,7 @@ function Form({
       <button
         type="submit"
         disabled={!stripe || submitting}
-        className="w-full rounded-md bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+        className="w-full rounded-md bg-gray-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-60"
       >
         {submitting ? "Verifying..." : "Verify and activate profile"}
       </button>

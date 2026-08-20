@@ -57,12 +57,12 @@ export default async function TeamsPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12 pb-24">
-      <Link href="/dashboard" className="text-sm text-slate-500 underline">
+      <Link href="/dashboard" className="text-sm text-gray-500 underline">
         ← Back to dashboard
       </Link>
 
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">Teams</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="mt-3 text-xl font-semibold text-gray-900">Teams</h1>
+      <p className="mt-2 text-sm text-gray-600">
         Claim the team you coach to manage its profile and see its roster.
         An admin reviews every claim before it&rsquo;s approved. Teams show
         up here once a parent adds one to their player&rsquo;s profile.
@@ -77,24 +77,24 @@ export default async function TeamsPage({
             return (
               <li
                 key={team.id}
-                className="rounded-lg border border-slate-200 p-4"
+                className="rounded-lg border border-gray-200 p-4"
               >
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-medium text-gray-900">
                   {team.name}
                 </p>
                 {city ? (
-                  <p className="text-xs text-slate-500">{city.name}</p>
+                  <p className="text-xs text-gray-500">{city.name}</p>
                 ) : null}
 
                 {status === "approved" ? (
                   <Link
                     href={`/teams/${team.id}/manage`}
-                    className="mt-2 inline-block text-sm font-medium text-slate-700 underline"
+                    className="mt-2 inline-block text-sm font-medium text-gray-700 underline"
                   >
                     Manage this team
                   </Link>
                 ) : status === "pending" ? (
-                  <p className="mt-2 text-sm text-slate-500">
+                  <p className="mt-2 text-sm text-gray-500">
                     Your claim is under review.
                   </p>
                 ) : (
@@ -113,7 +113,7 @@ export default async function TeamsPage({
           })}
         </ul>
       ) : (
-        <p className="mt-8 text-sm text-slate-600">
+        <p className="mt-8 text-sm text-gray-600">
           No teams yet — once a parent adds one to their player&rsquo;s
           profile, it&rsquo;ll show up here for you to claim.
         </p>
@@ -188,12 +188,12 @@ async function renderParentTeamBrowse(
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12 pb-24">
-      <Link href="/dashboard" className="text-sm text-slate-500 underline">
+      <Link href="/dashboard" className="text-sm text-gray-500 underline">
         ← Back to dashboard
       </Link>
 
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">Teams</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="mt-3 text-xl font-semibold text-gray-900">Teams</h1>
+      <p className="mt-2 text-sm text-gray-600">
         Browse teams on OpenRoster and message a verified coach directly.
         This shows team names and leagues only — never who&rsquo;s on a
         roster, which stays private to that team&rsquo;s own families.
@@ -217,7 +217,7 @@ async function renderParentTeamBrowse(
           name="q"
           defaultValue={searchQuery}
           placeholder="Search teams by name"
-          className="w-full rounded-full border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="w-full rounded-full border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         />
       </form>
 
@@ -236,16 +236,16 @@ async function renderParentTeamBrowse(
                     <ClubCrest name={team.name} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <p className="truncate text-sm font-semibold text-slate-900">
+                        <p className="truncate text-sm font-semibold text-gray-900">
                           {team.name}
                         </p>
                         {coach ? <Badge tone="verified">Verified team</Badge> : null}
                       </div>
                       {city ? (
-                        <p className="text-xs text-slate-500">{city.name}</p>
+                        <p className="text-xs text-gray-500">{city.name}</p>
                       ) : null}
                       {team.leagues && team.leagues.length > 0 ? (
-                        <p className="mt-0.5 text-xs text-slate-500">
+                        <p className="mt-0.5 text-xs text-gray-500">
                           {team.leagues.join(", ")}
                         </p>
                       ) : null}
@@ -254,7 +254,7 @@ async function renderParentTeamBrowse(
 
                   {coach ? (
                     <details className="mt-3">
-                      <summary className="cursor-pointer text-sm font-medium text-slate-700 underline">
+                      <summary className="cursor-pointer text-sm font-medium text-gray-700 underline">
                         Message {coach.full_name}
                       </summary>
                       <form
@@ -269,7 +269,7 @@ async function renderParentTeamBrowse(
                           rows={2}
                           required
                           placeholder={`Introduce yourself to ${coach.full_name}...`}
-                          className="block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                          className="block w-full rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
                         />
                         <button
                           type="submit"
@@ -280,7 +280,7 @@ async function renderParentTeamBrowse(
                       </form>
                     </details>
                   ) : (
-                    <p className="mt-2 text-xs text-slate-400">
+                    <p className="mt-2 text-xs text-gray-400">
                       No verified coach yet.
                     </p>
                   )}
@@ -290,7 +290,7 @@ async function renderParentTeamBrowse(
           })}
         </ul>
       ) : (
-        <p className="mt-8 text-sm text-slate-600">
+        <p className="mt-8 text-sm text-gray-600">
           No teams yet — they show up here once a parent adds one to
           their player&rsquo;s profile.
         </p>

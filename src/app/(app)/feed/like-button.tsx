@@ -44,8 +44,8 @@ export function LikeButton({
       disabled={isPending}
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-60 ${
         optimisticLiked
-          ? "border-slate-900 bg-slate-900 text-white"
-          : "border-slate-300 text-slate-600 hover:border-slate-400"
+          ? "border-gray-900 bg-gray-900 text-white"
+          : "border-gray-300 text-gray-600 hover:border-gray-400"
       }`}
     >
       <svg

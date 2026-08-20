@@ -47,7 +47,7 @@ export default async function RosterPostDetailPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/feed" className="text-sm text-slate-500 underline">
+      <Link href="/feed" className="text-sm text-gray-500 underline">
         ← Back to feed
       </Link>
 
@@ -56,13 +56,13 @@ export default async function RosterPostDetailPage({
           <ClubCrest name={club?.name ?? "Club"} size={48} />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="truncate text-lg font-semibold text-slate-900">
+              <h1 className="truncate text-lg font-semibold text-gray-900">
                 {club?.name}
               </h1>
               <VerifiedMark />
               <Badge tone="neutral">Club</Badge>
             </div>
-            <p className="text-sm text-slate-500">{club?.city}</p>
+            <p className="text-sm text-gray-500">{club?.city}</p>
           </div>
         </div>
 
@@ -96,7 +96,7 @@ export default async function RosterPostDetailPage({
       </Card>
 
       <Card className="mt-4">
-        <h2 className="text-sm font-semibold text-slate-900">Opportunity details</h2>
+        <h2 className="text-sm font-semibold text-gray-900">Opportunity details</h2>
         <div className="mt-3.5 space-y-3.5">
           <DetailRow
             label="Position(s) needed"
@@ -134,7 +134,7 @@ export default async function RosterPostDetailPage({
             href={post.signup_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 block rounded-xl border border-slate-900 px-3 py-2.5 text-center text-sm font-semibold text-slate-900 hover:bg-slate-50"
+            className="mt-4 block rounded-xl border border-gray-900 px-3 py-2.5 text-center text-sm font-semibold text-gray-900 hover:bg-gray-50"
           >
             Sign Up ↗
           </a>
@@ -143,7 +143,7 @@ export default async function RosterPostDetailPage({
 
       {profile?.role === "parent" ? (
         <Card id="message-club" className="mt-4 scroll-mt-6">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-semibold text-gray-900">
             Message the club
           </h2>
           <form
@@ -155,7 +155,7 @@ export default async function RosterPostDetailPage({
               rows={2}
               required
               placeholder="Introduce your player and ask about this spot..."
-              className="block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              className="block w-full rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
             <button
               type="submit"
@@ -187,8 +187,8 @@ function DetailRow({
         </svg>
       </div>
       <div className="min-w-0">
-        <p className="text-[13px] font-bold text-slate-900">{label}</p>
-        <p className="mt-0.5 text-[13px] leading-6 text-slate-500">{value}</p>
+        <p className="text-[13px] font-bold text-gray-900">{label}</p>
+        <p className="mt-0.5 text-[13px] leading-6 text-gray-500">{value}</p>
       </div>
     </div>
   );

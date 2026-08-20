@@ -41,7 +41,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={item.id}
             className={`pointer-events-auto rounded-full px-4 py-2 text-sm font-medium shadow-lg transition-all duration-300 ${
               item.leaving ? "translate-y-1 opacity-0" : "translate-y-0 opacity-100"
-            } ${item.tone === "error" ? "bg-red-600 text-white" : "bg-slate-900 text-white"}`}
+            } ${item.tone === "error" ? "bg-red-600 text-white" : "bg-gray-900 text-white"}`}
           >
             {item.message}
           </div>

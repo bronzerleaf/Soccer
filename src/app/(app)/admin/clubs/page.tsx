@@ -15,13 +15,13 @@ export default async function AdminClubsPage() {
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/admin" className="text-sm text-slate-500 underline">
+      <Link href="/admin" className="text-sm text-gray-500 underline">
         ← Admin
       </Link>
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
+      <h1 className="mt-3 text-xl font-semibold text-gray-900">
         Club list
       </h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm text-gray-600">
         The curated dropdown parents and coaches pick from.
       </p>
 
@@ -29,13 +29,13 @@ export default async function AdminClubsPage() {
         {(clubs ?? []).map((club) => (
           <li
             key={club.id}
-            className="flex items-center justify-between rounded-lg border border-slate-200 p-3"
+            className="flex items-center justify-between rounded-lg border border-gray-200 p-3"
           >
             <div>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-sm font-medium text-gray-900">
                 {club.name}
               </p>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-gray-500">
                 {club.city} · {(club.age_groups ?? []).join(", ")}
               </p>
             </div>
@@ -51,13 +51,13 @@ export default async function AdminClubsPage() {
         ))}
       </ul>
 
-      <div className="mt-10 border-t border-slate-200 pt-6">
-        <h2 className="text-sm font-medium text-slate-900">Add a club</h2>
+      <div className="mt-10 border-t border-gray-200 pt-6">
+        <h2 className="text-sm font-medium text-gray-900">Add a club</h2>
         <form action={createClub} className="mt-3 space-y-4">
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-slate-900"
+              className="block text-sm font-medium text-gray-900"
             >
               Name
             </label>
@@ -66,13 +66,13 @@ export default async function AdminClubsPage() {
               name="name"
               type="text"
               required
-              className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
           </div>
           <div>
             <label
               htmlFor="city"
-              className="block text-sm font-medium text-slate-900"
+              className="block text-sm font-medium text-gray-900"
             >
               City
             </label>
@@ -81,18 +81,18 @@ export default async function AdminClubsPage() {
               name="city"
               type="text"
               required
-              className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
           </div>
           <fieldset>
-            <legend className="text-sm font-medium text-slate-900">
+            <legend className="text-sm font-medium text-gray-900">
               Age groups fielded
             </legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {ALL_AGE_GROUPS.map((group) => (
                 <label
                   key={group}
-                  className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
+                  className="flex items-center gap-1.5 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700"
                 >
                   <input
                     type="checkbox"

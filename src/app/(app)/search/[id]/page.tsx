@@ -67,7 +67,7 @@ export default async function SearchPlayerDetailPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/search" className="text-sm text-slate-500 underline">
+      <Link href="/search" className="text-sm text-gray-500 underline">
         ← Back to search
       </Link>
 
@@ -76,12 +76,12 @@ export default async function SearchPlayerDetailPage({
           <PlayerAvatar name={player.first_name} photoUrl={photoUrl} size={72} />
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <h1 className="truncate text-lg font-semibold text-slate-900">
+              <h1 className="truncate text-lg font-semibold text-gray-900">
                 {player.first_name} {player.last_initial}.
               </h1>
               <VerifiedMark />
             </div>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-gray-500">
               {club ? `${club.name} · ${club.city}` : player.city}
             </p>
           </div>
@@ -126,7 +126,7 @@ export default async function SearchPlayerDetailPage({
             <SocialLinkButton href={player.youtube_url} kind="youtube" />
           ) : null}
         </div>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-gray-500">
           Visible only to {player.first_name}&rsquo;s family — a lightweight
           way to flag interest alongside messaging them directly.
         </p>
@@ -134,10 +134,10 @@ export default async function SearchPlayerDetailPage({
 
       {player.bio ? (
         <Card className="mt-4">
-          <p className="text-sm italic leading-6 text-slate-700">
+          <p className="text-sm italic leading-6 text-gray-700">
             &ldquo;{player.bio}&rdquo;
           </p>
-          <p className="mt-2 text-xs font-medium text-slate-500">
+          <p className="mt-2 text-xs font-medium text-gray-500">
             — {player.first_name}
           </p>
         </Card>
@@ -145,7 +145,7 @@ export default async function SearchPlayerDetailPage({
 
       {highlights.length > 0 ? (
         <div className="mt-6">
-          <h2 className="text-sm font-semibold text-slate-900">Highlights</h2>
+          <h2 className="text-sm font-semibold text-gray-900">Highlights</h2>
           <div className="mt-2">
             <LinkGallery highlights={highlights} previews={previews} />
           </div>
@@ -153,7 +153,7 @@ export default async function SearchPlayerDetailPage({
       ) : null}
 
       <Card className="mt-6">
-        <h2 className="text-sm font-semibold text-slate-900">
+        <h2 className="text-sm font-semibold text-gray-900">
           Message the family
         </h2>
         <form
@@ -165,7 +165,7 @@ export default async function SearchPlayerDetailPage({
             rows={2}
             required
             placeholder={`Introduce yourself and the opportunity at your club...`}
-            className="block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="block w-full rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
           <button
             type="submit"

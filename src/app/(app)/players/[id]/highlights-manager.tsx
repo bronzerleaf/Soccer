@@ -70,8 +70,8 @@ export function HighlightsManager({
           ))}
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed border-slate-300 p-4 text-center">
-          <p className="text-sm text-slate-600">
+        <div className="rounded-lg border border-dashed border-gray-300 p-4 text-center">
+          <p className="text-sm text-gray-600">
             Add a Hudl, Veo, YouTube, or Instagram link below and it&rsquo;ll
             show up here as a gallery for coaches to see.
           </p>
@@ -80,26 +80,26 @@ export function HighlightsManager({
 
       <form
         onSubmit={handleSubmit}
-        className="mt-3 space-y-2 rounded-lg border border-slate-200 p-3"
+        className="mt-3 space-y-2 rounded-lg border border-gray-200 p-3"
       >
         <input
           name="url"
           type="url"
           required
           placeholder="Paste a link (Hudl, Veo, YouTube, Instagram...)"
-          className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         />
         <input
           name="caption"
           type="text"
           maxLength={200}
           placeholder="What's this clip? (optional)"
-          className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         />
         <select
           name="theme"
           defaultValue=""
-          className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         >
           <option value="">No theme</option>
           {HIGHLIGHT_THEMES.map((theme) => (
@@ -111,7 +111,7 @@ export function HighlightsManager({
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+          className="w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-60"
         >
           {submitting ? "Adding..." : "Add to gallery"}
         </button>

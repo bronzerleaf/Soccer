@@ -22,7 +22,7 @@ export function ClubCrest({
         height: size,
         fontSize: size * 0.34,
       }}
-      className="flex shrink-0 items-center justify-center rounded-xl bg-slate-900 font-bold text-white"
+      className="flex shrink-0 items-center justify-center rounded-xl bg-gray-900 font-bold text-white"
       aria-hidden="true"
     >
       {initials(name)}

@@ -29,7 +29,7 @@ export function VerifyForm({ clubs }: { clubs: Club[] }) {
 
   if (submitted) {
     return (
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-gray-600">
         Thanks — an admin will review this shortly. You&rsquo;ll be able to
         search players and message families once it&rsquo;s approved.
       </p>
@@ -41,7 +41,7 @@ export function VerifyForm({ clubs }: { clubs: Club[] }) {
       <div>
         <label
           htmlFor="claimed_club_id"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           Which club are you with?
         </label>
@@ -49,7 +49,7 @@ export function VerifyForm({ clubs }: { clubs: Club[] }) {
           id="claimed_club_id"
           name="claimed_club_id"
           required
-          className="mt-1.5 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         >
           <option value="">Select a club</option>
           {clubs.map((club) => (
@@ -63,7 +63,7 @@ export function VerifyForm({ clubs }: { clubs: Club[] }) {
       <div>
         <label
           htmlFor="evidence"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           How can we confirm your affiliation?
         </label>
@@ -73,7 +73,7 @@ export function VerifyForm({ clubs }: { clubs: Club[] }) {
           rows={3}
           required
           placeholder="Your club email address, your role, or a contact at the club who can confirm you coach there."
-          className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         />
       </div>
 
@@ -82,7 +82,7 @@ export function VerifyForm({ clubs }: { clubs: Club[] }) {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-md bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+        className="w-full rounded-md bg-gray-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-60"
       >
         {submitting ? "Submitting..." : "Submit for review"}
       </button>

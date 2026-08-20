@@ -139,7 +139,7 @@ export default async function FeedPostDetailPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/feed" className="text-sm text-slate-500 underline">
+      <Link href="/feed" className="text-sm text-gray-500 underline">
         ← Back to feed
       </Link>
       <div className="mt-4">
@@ -147,8 +147,8 @@ export default async function FeedPostDetailPage({
       </div>
 
       {messagePlayer ? (
-        <div className="mt-6 border-t border-slate-200 pt-6">
-          <h2 className="text-sm font-medium text-slate-900">
+        <div className="mt-6 border-t border-gray-200 pt-6">
+          <h2 className="text-sm font-medium text-gray-900">
             Message the family
           </h2>
           <form
@@ -160,11 +160,11 @@ export default async function FeedPostDetailPage({
               rows={2}
               required
               placeholder={`Introduce yourself and the opportunity at your club...`}
-              className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
             <button
               type="submit"
-              className="shrink-0 self-start rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              className="shrink-0 self-start rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800"
             >
               Send
             </button>
@@ -173,8 +173,8 @@ export default async function FeedPostDetailPage({
       ) : null}
 
       {canMessageFeedPostAuthor ? (
-        <div className="mt-6 border-t border-slate-200 pt-6">
-          <h2 className="text-sm font-medium text-slate-900">
+        <div className="mt-6 border-t border-gray-200 pt-6">
+          <h2 className="text-sm font-medium text-gray-900">
             Message {author?.full_name ?? "the coach"}
           </h2>
           <form
@@ -186,11 +186,11 @@ export default async function FeedPostDetailPage({
               rows={2}
               required
               placeholder="Ask for more information..."
-              className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
             <button
               type="submit"
-              className="shrink-0 self-start rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              className="shrink-0 self-start rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800"
             >
               Send
             </button>

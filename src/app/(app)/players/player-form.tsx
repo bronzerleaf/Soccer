@@ -63,7 +63,7 @@ export function PlayerForm<T>({
         <div>
           <label
             htmlFor="first_name"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             First name
           </label>
@@ -73,13 +73,13 @@ export function PlayerForm<T>({
             type="text"
             required
             defaultValue={defaultValues?.first_name}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
         <div>
           <label
             htmlFor="last_initial"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Last initial
           </label>
@@ -90,12 +90,12 @@ export function PlayerForm<T>({
             required
             maxLength={1}
             defaultValue={defaultValues?.last_initial}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
       </div>
 
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-gray-500">
         We only ever collect a first name and last initial — never a full
         legal name.
       </p>
@@ -104,7 +104,7 @@ export function PlayerForm<T>({
         <div>
           <label
             htmlFor="instagram_url"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Instagram (optional)
           </label>
@@ -114,13 +114,13 @@ export function PlayerForm<T>({
             type="url"
             placeholder="https://instagram.com/..."
             defaultValue={defaultValues?.instagram_url ?? ""}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
         <div>
           <label
             htmlFor="youtube_url"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             YouTube (optional)
           </label>
@@ -130,11 +130,11 @@ export function PlayerForm<T>({
             type="url"
             placeholder="https://youtube.com/@..."
             defaultValue={defaultValues?.youtube_url ?? ""}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
       </div>
-      <p className="-mt-3 text-xs text-slate-500">
+      <p className="-mt-3 text-xs text-gray-500">
         A recruiting or highlights account works best here — coaches can
         click straight through to it. Only ever shown to a verified
         coach, same as the rest of this profile.
@@ -144,7 +144,7 @@ export function PlayerForm<T>({
         <div>
           <label
             htmlFor="birth_year"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Birth year
           </label>
@@ -156,13 +156,13 @@ export function PlayerForm<T>({
             min={currentYear - 19}
             max={currentYear - 4}
             defaultValue={defaultValues?.birth_year}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
         <div>
           <label
             htmlFor="city"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             City
           </label>
@@ -172,20 +172,20 @@ export function PlayerForm<T>({
             type="text"
             required
             defaultValue={defaultValues?.city}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
       </div>
 
       <fieldset>
-        <legend className="text-sm font-medium text-slate-900">
+        <legend className="text-sm font-medium text-gray-900">
           Position(s)
         </legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {POSITIONS.map((position) => (
             <label
               key={position}
-              className="flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700"
+              className="flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700"
             >
               <input
                 type="checkbox"
@@ -201,14 +201,14 @@ export function PlayerForm<T>({
       </fieldset>
 
       <fieldset>
-        <legend className="text-sm font-medium text-slate-900">
+        <legend className="text-sm font-medium text-gray-900">
           Preferred foot
         </legend>
         <div className="mt-2 flex gap-2">
           {PREFERRED_FEET.map((foot) => (
             <label
               key={foot}
-              className="flex items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm capitalize text-slate-700"
+              className="flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm capitalize text-gray-700"
             >
               <input
                 type="radio"
@@ -226,7 +226,7 @@ export function PlayerForm<T>({
       <div>
         <label
           htmlFor="current_club_id"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           Current club/team
         </label>
@@ -234,7 +234,7 @@ export function PlayerForm<T>({
           id="current_club_id"
           name="current_club_id"
           defaultValue={defaultValues?.current_club_id ?? ""}
-          className="mt-1.5 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         >
           <option value="">Not listed yet</option>
           {clubs.map((club) => (
@@ -248,7 +248,7 @@ export function PlayerForm<T>({
       <div>
         <label
           htmlFor="team_name"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           Team
         </label>
@@ -259,14 +259,14 @@ export function PlayerForm<T>({
           list="team-suggestions"
           placeholder="e.g. Solar SC 2013 Boys"
           defaultValue={defaultValues?.team_name ?? ""}
-          className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         />
         <datalist id="team-suggestions">
           {teams.map((team) => (
             <option key={team.id} value={team.name} />
           ))}
         </datalist>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-gray-500">
           Type the team name. If it&rsquo;s not listed yet, just type it and
           we&rsquo;ll add it — a coach can later verify ownership of it.
         </p>
@@ -275,7 +275,7 @@ export function PlayerForm<T>({
       <div>
         <label
           htmlFor="bio"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           Short bio
         </label>
@@ -284,7 +284,7 @@ export function PlayerForm<T>({
           name="bio"
           rows={3}
           defaultValue={defaultValues?.bio ?? ""}
-          className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         />
       </div>
 
@@ -293,7 +293,7 @@ export function PlayerForm<T>({
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-md bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+        className="w-full rounded-md bg-gray-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-60"
       >
         {submitting ? "Saving..." : submitLabel}
       </button>

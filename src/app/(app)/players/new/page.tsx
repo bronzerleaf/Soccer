@@ -21,10 +21,10 @@ export default async function NewPlayerPage() {
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <h1 className="text-xl font-semibold text-slate-900">
+      <h1 className="text-xl font-semibold text-gray-900">
         Add a player profile
       </h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm text-gray-600">
         This profile stays private until you verify parental consent — it
         won&rsquo;t be visible to any coach until then.
       </p>

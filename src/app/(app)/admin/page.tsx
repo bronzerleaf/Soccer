@@ -84,19 +84,19 @@ export default async function AdminHomePage() {
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <h1 className="text-xl font-semibold text-slate-900">Admin</h1>
+      <h1 className="text-xl font-semibold text-gray-900">Admin</h1>
 
       <ul className="mt-8 space-y-3">
         {sections.map((section) => (
           <li key={section.href}>
             <Link
               href={section.href}
-              className="flex items-center justify-between rounded-lg border border-slate-200 p-4 hover:border-slate-300"
+              className="flex items-center justify-between rounded-lg border border-gray-200 p-4 hover:border-gray-300"
             >
-              <span className="text-sm font-medium text-slate-900">
+              <span className="text-sm font-medium text-gray-900">
                 {section.label}
               </span>
-              <span className="text-sm text-slate-500">
+              <span className="text-sm text-gray-500">
                 {section.count} {section.countLabel}
               </span>
             </Link>

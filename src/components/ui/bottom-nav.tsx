@@ -4,7 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-type Tab = { href: string; label: string; icon: ReactNode; matchPrefix?: string };
+type Tab = {
+  href: string;
+  label: string;
+  icon: ReactNode;
+  matchPrefix?: string;
+  // "Profile" currently shares a destination with "Home" (no dedicated
+  // account page exists yet — see bottom-nav.tsx's own tab-list comment).
+  // Without this, both would show active at once on /dashboard.
+  neverActive?: boolean;
+};
 
 const iconProps = {
   width: 22,
@@ -62,6 +71,12 @@ const icons = {
       <circle cx="12" cy="9.5" r="2.3" />
     </svg>
   ),
+  profile: (
+    <svg {...iconProps}>
+      <circle cx="12" cy="8.5" r="3.5" />
+      <path d="M4.5 20c1-4.2 3.9-6.5 7.5-6.5s6.5 2.3 7.5 6.5" />
+    </svg>
+  ),
 };
 
 // Centered floating soccer-ball mark that sits above the tab row —
@@ -91,26 +106,35 @@ export function BottomNav({
 }) {
   const pathname = usePathname();
 
+  // Fixed Home / Discover / (ball) / Messages / Profile shape per
+  // docs/design-handoff/NAVIGATION_SPEC.md — the two roles with enough
+  // surface area to fill all four side slots (parent, approved coach)
+  // get it; a pending coach/org or admin keep their current narrow
+  // single-purpose nav rather than pointing three tabs at nothing.
+  // Two real routes lose their direct tab this way (a parent's own
+  // /players, a coach's /roster-posts/mine) — both are now linked from
+  // Home (/dashboard) instead so neither becomes unreachable.
   let tabs: Tab[] = [];
 
   if (role === "parent") {
     tabs = [
-      { href: "/players", label: "Players", icon: icons.players },
-      { href: "/feed", label: "Feed", icon: icons.pin },
+      { href: "/dashboard", label: "Home", icon: icons.home },
+      { href: "/teams", label: "Discover", icon: icons.search },
       { href: "/messages", label: "Messages", icon: icons.message },
+      { href: "/dashboard", label: "Profile", icon: icons.profile, neverActive: true },
     ];
   } else if (role === "coach") {
     tabs = coachApproved
       ? [
-          { href: "/search", label: "Search", icon: icons.search },
-          { href: "/roster-posts/mine", label: "Roster Posts", icon: icons.clipboard, matchPrefix: "/roster-posts" },
-          { href: "/feed", label: "Feed", icon: icons.pin },
+          { href: "/dashboard", label: "Home", icon: icons.home },
+          { href: "/search", label: "Discover", icon: icons.search },
           { href: "/messages", label: "Messages", icon: icons.message },
+          { href: "/dashboard", label: "Profile", icon: icons.profile, neverActive: true },
         ]
       : [{ href: "/coach/verify", label: "Verify", icon: icons.shield }];
   } else if (role === "organization") {
     tabs = organizationApproved
-      ? [{ href: "/feed", label: "Feed", icon: icons.pin }]
+      ? [{ href: "/dashboard", label: "Home", icon: icons.home }]
       : [{ href: "/organization/verify", label: "Verify", icon: icons.shield }];
   } else if (role === "admin") {
     tabs = [{ href: "/admin", label: "Admin", icon: icons.shield }];
@@ -119,18 +143,20 @@ export function BottomNav({
   const half = Math.ceil(tabs.length / 2);
   const left = tabs.slice(0, half);
   const right = tabs.slice(half);
-  const homeActive = pathname === "/dashboard";
+
+  const ballActive = pathname === "/feed" || pathname.startsWith("/feed/");
 
   function renderTab(tab: Tab) {
     const active =
-      pathname === tab.href ||
-      (tab.matchPrefix ? pathname.startsWith(tab.matchPrefix) : pathname.startsWith(tab.href + "/"));
+      !tab.neverActive &&
+      (pathname === tab.href ||
+        (tab.matchPrefix ? pathname.startsWith(tab.matchPrefix) : pathname.startsWith(tab.href + "/")));
     return (
       <Link
-        key={tab.href}
+        key={tab.label}
         href={tab.href}
         className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-semibold transition-colors ${
-          active ? "text-green-600" : "text-slate-400 hover:text-slate-600"
+          active ? "text-green-600" : "text-gray-400 hover:text-gray-600"
         }`}
       >
         {tab.icon}
@@ -145,10 +171,10 @@ export function BottomNav({
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed inset-x-0 bottom-0 z-40"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 10px)" }}
     >
-      <div className="relative mx-auto flex max-w-lg items-stretch">
+      <div className="relative mx-auto flex max-w-lg items-stretch rounded-[24px] border border-gray-200 bg-white/95 px-1 shadow-[0_10px_28px_rgba(17,24,39,0.12)] backdrop-blur">
         {/* Left/right groups are equal-width so the gap between them —
             where the floating mark sits — is always the true horizontal
             center, regardless of how the tab count splits. */}
@@ -157,10 +183,10 @@ export function BottomNav({
         <div className="flex flex-1 items-stretch justify-around">{right.map(renderTab)}</div>
 
         <Link
-          href="/dashboard"
-          aria-label="Home"
-          className={`ball-mark absolute left-1/2 top-0 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white transition-transform ${
-            homeActive ? "scale-105" : "hover:scale-105"
+          href="/feed"
+          aria-label="Feed"
+          className={`ball-mark absolute left-1/2 top-0 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white transition-transform ${
+            ballActive ? "scale-105" : "hover:scale-105"
           }`}
         >
           <div className="h-full w-full overflow-hidden rounded-full">

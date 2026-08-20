@@ -128,15 +128,15 @@ export function FeedCard({ item }: { item: FeedItem }) {
 
   if (item.kind === "roster_spot") {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.08)]">
+      <div className="rounded-[18px] border border-gray-200 bg-white p-4 shadow-[0_3px_16px_rgba(17,24,39,0.07)]">
         <Link href={`/roster-posts/${item.id}`} className="block">
           <div className="flex items-center justify-between gap-2">
             {badge}
           </div>
-          <p className="mt-2 text-sm font-medium text-slate-900">
+          <p className="mt-2 text-sm font-medium text-gray-900">
             {item.clubName} — {item.clubCity}
           </p>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-gray-600">
             {item.birthYear} ·{" "}
             {(item.positions ?? []).join(", ") || "Any position"}
           </p>
@@ -159,7 +159,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
   const eventWhen = formatEventDate(item.eventDate, item.eventTime);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_12px_rgba(15,23,42,0.08)]">
+    <div className="rounded-[18px] border border-gray-200 bg-white p-4 shadow-[0_3px_16px_rgba(17,24,39,0.07)]">
       <div className="flex items-center justify-between gap-2">
         {badge}
         {item.canDelete ? (
@@ -177,15 +177,15 @@ export function FeedCard({ item }: { item: FeedItem }) {
 
       <Link href={`/feed/post/${item.id}`} className="block">
         {item.kind === "org_event" ? (
-          <p className="mt-2 text-sm font-medium text-slate-900">
+          <p className="mt-2 text-sm font-medium text-gray-900">
             {item.orgName} — {item.cityName}
           </p>
         ) : item.kind === "training" ? (
-          <p className="mt-2 text-sm font-medium text-slate-900">
+          <p className="mt-2 text-sm font-medium text-gray-900">
             {item.authorName} — {item.cityName}
           </p>
         ) : (
-          <p className="mt-2 text-sm font-medium text-slate-900">
+          <p className="mt-2 text-sm font-medium text-gray-900">
             {item.birthYear ?? "Any birth year"} ·{" "}
             {(item.positions ?? []).join(", ") || "Any position"} ·{" "}
             {item.cityName}
@@ -193,29 +193,29 @@ export function FeedCard({ item }: { item: FeedItem }) {
         )}
 
         {item.kind === "training" && (item.birthYear || item.positions.length > 0) ? (
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-gray-500">
             {item.birthYear ?? "Any birth year"} ·{" "}
             {item.positions.join(", ") || "Any position"}
           </p>
         ) : null}
 
         {(item.kind === "looking_for_team" || item.kind === "guest_play") && item.authorName ? (
-          <p className="mt-1 text-xs text-slate-500">Posted by {item.authorName}</p>
+          <p className="mt-1 text-xs text-gray-500">Posted by {item.authorName}</p>
         ) : null}
 
         {item.kind === "training" && (cost || duration) ? (
-          <p className="mt-1.5 text-sm font-medium text-slate-700">
+          <p className="mt-1.5 text-sm font-medium text-gray-700">
             {[cost, duration].filter(Boolean).join(" · ")}
           </p>
         ) : null}
 
         {eventWhen || item.location ? (
-          <p className="mt-1.5 text-xs font-medium text-slate-600">
+          <p className="mt-1.5 text-xs font-medium text-gray-600">
             {[eventWhen, item.location].filter(Boolean).join(" · ")}
           </p>
         ) : null}
 
-        <p className="mt-1.5 text-sm leading-6 text-slate-600">
+        <p className="mt-1.5 text-sm leading-6 text-gray-600">
           {item.description}
         </p>
       </Link>
@@ -232,7 +232,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
             href={item.signupUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-400"
+            className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:border-gray-400"
           >
             Sign up ↗
           </a>

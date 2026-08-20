@@ -92,7 +92,7 @@ export function PhotoUpload({
   return (
     <div className="flex items-center gap-4">
       <div className="relative h-[84px] w-[84px] shrink-0">
-        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 border-white bg-slate-200 shadow-[0_2px_8px_rgba(15,23,42,0.1)]">
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 border-white bg-gray-200 shadow-[0_2px_8px_rgba(15,23,42,0.1)]">
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={preview} alt="" className="h-full w-full object-cover" />
@@ -117,7 +117,7 @@ export function PhotoUpload({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400 disabled:opacity-60"
+          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:border-gray-400 disabled:opacity-60"
         >
           {uploading ? "Uploading..." : "Upload photo"}
         </button>

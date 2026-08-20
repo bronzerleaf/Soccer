@@ -45,7 +45,7 @@ export function TeamProfileForm({
       <div>
         <label
           htmlFor="name"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           Team name
         </label>
@@ -55,14 +55,14 @@ export function TeamProfileForm({
           type="text"
           required
           defaultValue={defaultValues.name}
-          className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         />
       </div>
 
       <div>
         <label
           htmlFor="city_id"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           City
         </label>
@@ -70,7 +70,7 @@ export function TeamProfileForm({
           id="city_id"
           name="city_id"
           defaultValue={defaultValues.city_id ?? ""}
-          className="mt-1.5 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         >
           <option value="">Not set</option>
           {cities.map((city) => (
@@ -84,7 +84,7 @@ export function TeamProfileForm({
       <div>
         <label
           htmlFor="leagues"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           Leagues
         </label>
@@ -94,9 +94,9 @@ export function TeamProfileForm({
           type="text"
           defaultValue={defaultValues.leagues.join(", ")}
           placeholder="NTX Fall League, ECNL Regional"
-          className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-gray-500">
           Separate multiple leagues with commas.
         </p>
       </div>
@@ -106,11 +106,11 @@ export function TeamProfileForm({
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-md bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+        className="w-full rounded-md bg-gray-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-60"
       >
         {submitting ? "Saving..." : "Save changes"}
       </button>
-      {saved ? <p className="text-sm text-slate-600">Saved.</p> : null}
+      {saved ? <p className="text-sm text-gray-600">Saved.</p> : null}
     </form>
   );
 }

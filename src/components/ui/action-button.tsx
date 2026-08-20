@@ -119,7 +119,7 @@ export function ToggleActionButton({
       onClick={handleClick}
       disabled={busy}
       className={`flex h-[25px] w-11 shrink-0 items-center rounded-full p-0.5 transition-colors disabled:opacity-60 ${
-        active ? "bg-green-600" : "bg-slate-300"
+        active ? "bg-green-600" : "bg-gray-300"
       }`}
     >
       <span

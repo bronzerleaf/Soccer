@@ -19,7 +19,7 @@ export function MergeTeamForm({
 
   if (candidates.length === 0) {
     return (
-      <p className="text-sm text-slate-500">No other teams to merge in.</p>
+      <p className="text-sm text-gray-500">No other teams to merge in.</p>
     );
   }
 
@@ -55,7 +55,7 @@ export function MergeTeamForm({
       <select
         value={sourceId}
         onChange={(event) => setSourceId(event.target.value)}
-        className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+        className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
       >
         <option value="">Select a duplicate team...</option>
         {candidates.map((team) => (
@@ -68,7 +68,7 @@ export function MergeTeamForm({
         type="button"
         onClick={handleMerge}
         disabled={!sourceId || submitting}
-        className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+        className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
       >
         {submitting ? "Merging..." : "Merge into this team"}
       </button>

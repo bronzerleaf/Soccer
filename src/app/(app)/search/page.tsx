@@ -58,10 +58,10 @@ export default async function SearchPage({
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="text-xl font-semibold text-slate-900">
+      <h1 className="text-xl font-semibold text-gray-900">
         Search players
       </h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm text-gray-600">
         Only players whose families have flagged them open to
         opportunities appear here.
       </p>
@@ -70,7 +70,7 @@ export default async function SearchPage({
         <div>
           <label
             htmlFor="birth_year"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Birth year
           </label>
@@ -78,7 +78,7 @@ export default async function SearchPage({
             id="birth_year"
             name="birth_year"
             defaultValue={birthYear}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           >
             <option value="">Any</option>
             {BIRTH_YEARS.map((year) => (
@@ -92,7 +92,7 @@ export default async function SearchPage({
         <div>
           <label
             htmlFor="city"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             City
           </label>
@@ -101,19 +101,19 @@ export default async function SearchPage({
             name="city"
             type="text"
             defaultValue={city}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
 
         <div className="col-span-2 sm:col-span-1">
-          <span className="block text-sm font-medium text-slate-900">
+          <span className="block text-sm font-medium text-gray-900">
             Position
           </span>
           <div className="mt-2 flex flex-wrap gap-2">
             {POSITIONS.map((position) => (
               <label
                 key={position}
-                className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
+                className="flex items-center gap-1.5 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700"
               >
                 <input
                   type="checkbox"
@@ -131,7 +131,7 @@ export default async function SearchPage({
         <div className="col-span-2 sm:col-span-3">
           <button
             type="submit"
-            className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+            className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800"
           >
             Search
           </button>
@@ -155,13 +155,13 @@ export default async function SearchPage({
                   <PlayerAvatar name={player.first_name} photoUrl={photoUrl} size={56} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-sm font-semibold text-gray-900">
                         {player.first_name} {player.last_initial}. ·{" "}
                         {player.birth_year}
                       </p>
                       <VerifiedMark />
                     </div>
-                    <p className="mt-0.5 text-sm text-slate-500">
+                    <p className="mt-0.5 text-sm text-gray-500">
                       {player.city}
                       {club ? ` · ${club.name}` : ""}
                     </p>
@@ -181,7 +181,7 @@ export default async function SearchPage({
           })}
         </ul>
       ) : (
-        <p className="mt-8 text-sm text-slate-600">
+        <p className="mt-8 text-sm text-gray-600">
           No players match these filters yet.
         </p>
       )}

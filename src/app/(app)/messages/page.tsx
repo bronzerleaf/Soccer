@@ -58,7 +58,7 @@ export default async function MessagesInboxPage() {
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <h1 className="text-xl font-semibold text-slate-900">Messages</h1>
+      <h1 className="text-xl font-semibold text-gray-900">Messages</h1>
 
       {conversations && conversations.length > 0 ? (
         <ul className="mt-8 space-y-3">
@@ -100,17 +100,17 @@ export default async function MessagesInboxPage() {
                   <PlayerAvatar name={other?.full_name ?? "?"} size={44} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="truncate text-sm font-semibold text-slate-900">
+                      <p className="truncate text-sm font-semibold text-gray-900">
                         {other?.full_name ?? "Someone"}
                       </p>
                       {contextLabel ? (
-                        <span className="shrink-0 text-xs text-slate-500">
+                        <span className="shrink-0 text-xs text-gray-500">
                           {contextLabel}
                         </span>
                       ) : null}
                     </div>
                     {latest ? (
-                      <p className="mt-1 truncate text-sm text-slate-600">
+                      <p className="mt-1 truncate text-sm text-gray-600">
                         {latest.body}
                       </p>
                     ) : null}
@@ -121,7 +121,7 @@ export default async function MessagesInboxPage() {
           })}
         </ul>
       ) : (
-        <p className="mt-8 text-sm text-slate-600">
+        <p className="mt-8 text-sm text-gray-600">
           No messages yet. Conversations with coaches and families will
           show up here.
         </p>

@@ -14,7 +14,7 @@ export function SocialLinkButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400"
+      className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm font-semibold text-gray-700 hover:border-gray-400"
     >
       {kind === "instagram" ? <InstagramGlyph /> : <YoutubeGlyph />}
       {kind === "instagram" ? "Instagram" : "YouTube"}

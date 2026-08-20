@@ -20,12 +20,12 @@ export default async function MyRosterPostsPage() {
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-slate-900">
+        <h1 className="text-xl font-semibold text-gray-900">
           Your roster posts
         </h1>
         <Link
           href="/roster-posts/new"
-          className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+          className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800"
         >
           New post
         </Link>
@@ -38,24 +38,24 @@ export default async function MyRosterPostsPage() {
             return (
               <li
                 key={post.id}
-                className="rounded-lg border border-slate-200 p-4"
+                className="rounded-lg border border-gray-200 p-4"
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-sm font-medium text-gray-900">
                     {post.birth_year} ·{" "}
                     {(post.positions ?? []).join(", ") || "Any position"}
                   </p>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       isExpired
-                        ? "bg-slate-100 text-slate-600"
+                        ? "bg-gray-100 text-gray-600"
                         : "bg-green-100 text-green-800"
                     }`}
                   >
                     {isExpired ? "Expired" : "Active"}
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-slate-600">
+                <p className="mt-2 text-sm text-gray-600">
                   {post.description}
                 </p>
                 <div className="mt-3 flex gap-2">
@@ -85,17 +85,17 @@ export default async function MyRosterPostsPage() {
           })}
         </ul>
       ) : (
-        <div className="mt-8 rounded-lg border border-dashed border-slate-300 p-6 text-center">
-          <p className="text-sm font-medium text-slate-900">
+        <div className="mt-8 rounded-lg border border-dashed border-gray-300 p-6 text-center">
+          <p className="text-sm font-medium text-gray-900">
             No roster posts yet
           </p>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-gray-600">
             Post an open spot and families with players in that age group
             will be able to find it.
           </p>
           <Link
             href="/roster-posts/new"
-            className="mt-4 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+            className="mt-4 inline-block rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800"
           >
             New post
           </Link>

@@ -322,8 +322,8 @@ export default async function FeedPage({
     <main className="mx-auto max-w-2xl px-6 py-12">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Local feed</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-xl font-semibold text-gray-900">Local feed</h1>
+          <p className="mt-1 text-sm text-gray-600">
             Roster spots, families looking for a team, and event listings
             near you.
           </p>
@@ -331,7 +331,7 @@ export default async function FeedPage({
         {postHref ? (
           <Link
             href={postHref}
-            className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+            className="shrink-0 rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800"
           >
             Post
           </Link>
@@ -349,7 +349,7 @@ export default async function FeedPage({
       <form method="get" className="mt-4">
         <div className="relative">
           <svg
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -365,13 +365,13 @@ export default async function FeedPage({
             name="q"
             defaultValue={searchQuery}
             placeholder="Search the feed"
-            className="w-full rounded-full border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="w-full rounded-full border border-gray-300 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
 
         <div className="mt-3 flex items-center gap-3">
           <details className="relative">
-            <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400 [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:border-gray-400 [&::-webkit-details-marker]:hidden">
               <svg
                 className="h-4 w-4"
                 viewBox="0 0 24 24"
@@ -385,17 +385,17 @@ export default async function FeedPage({
               </svg>
               Filters
               {activeFilterCount > 0 ? (
-                <span className="rounded-full bg-slate-900 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+                <span className="rounded-full bg-gray-900 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
                   {activeFilterCount}
                 </span>
               ) : null}
             </summary>
 
-            <div className="absolute z-10 mt-2 w-[min(90vw,20rem)] space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
+            <div className="absolute z-10 mt-2 w-[min(90vw,20rem)] space-y-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
               <div>
                 <label
                   htmlFor="birth_year"
-                  className="block text-sm font-medium text-slate-900"
+                  className="block text-sm font-medium text-gray-900"
                 >
                   Birth year
                 </label>
@@ -403,7 +403,7 @@ export default async function FeedPage({
                   id="birth_year"
                   name="birth_year"
                   defaultValue={birthYearFilter}
-                  className="mt-1.5 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                  className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
                 >
                   <option value="">Any</option>
                   {BIRTH_YEARS.map((year) => (
@@ -415,14 +415,14 @@ export default async function FeedPage({
               </div>
 
               <div>
-                <span className="block text-sm font-medium text-slate-900">
+                <span className="block text-sm font-medium text-gray-900">
                   Position
                 </span>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {POSITIONS.map((position) => (
                     <label
                       key={position}
-                      className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
+                      className="flex items-center gap-1.5 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700"
                     >
                       <input
                         type="checkbox"
@@ -438,14 +438,14 @@ export default async function FeedPage({
               </div>
 
               <div>
-                <span className="block text-sm font-medium text-slate-900">
+                <span className="block text-sm font-medium text-gray-900">
                   Post type
                 </span>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {POST_TYPE_OPTIONS.map((option) => (
                     <label
                       key={option.value}
-                      className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
+                      className="flex items-center gap-1.5 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700"
                     >
                       <input
                         type="checkbox"
@@ -462,7 +462,7 @@ export default async function FeedPage({
 
               <button
                 type="submit"
-                className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                className="w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800"
               >
                 Apply filters
               </button>
@@ -472,7 +472,7 @@ export default async function FeedPage({
           {hasActiveFilters ? (
             <Link
               href="/feed"
-              className="text-xs font-medium text-slate-500 underline"
+              className="text-xs font-medium text-gray-500 underline"
             >
               Clear all
             </Link>
@@ -510,11 +510,11 @@ export default async function FeedPage({
           ))}
         </div>
       ) : (
-        <div className="mt-8 rounded-lg border border-dashed border-slate-300 p-6 text-center">
-          <p className="text-sm font-medium text-slate-900">
+        <div className="mt-8 rounded-lg border border-dashed border-gray-300 p-6 text-center">
+          <p className="text-sm font-medium text-gray-900">
             Nothing in the feed yet
           </p>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-gray-600">
             {hasActiveFilters
               ? "Try widening your filters, or check back soon."
               : canFilterByRadius
@@ -531,7 +531,7 @@ function FilterChip({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-200"
+      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200"
     >
       {children}
       <span aria-hidden="true">×</span>

@@ -89,29 +89,29 @@ export default async function ConversationPage({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col px-6 py-12">
-      <Link href="/messages" className="text-sm text-slate-500 underline">
+      <Link href="/messages" className="text-sm text-gray-500 underline">
         ← Back to messages
       </Link>
 
       <div className="mt-3 flex items-center gap-3">
         <PlayerAvatar name={headerName} size={40} />
-        <h1 className="text-lg font-semibold text-slate-900">{headerName}</h1>
+        <h1 className="text-lg font-semibold text-gray-900">{headerName}</h1>
       </div>
       {player ? (
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-gray-500">
           About {player.first_name} {player.last_initial}.
         </p>
       ) : null}
       {rosterPost ? (
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-gray-500">
           Re: &ldquo;{rosterPost.description}&rdquo;
         </p>
       ) : null}
       {team ? (
-        <p className="mt-1 text-sm text-slate-500">About {team.name}</p>
+        <p className="mt-1 text-sm text-gray-500">About {team.name}</p>
       ) : null}
       {feedPost ? (
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-gray-500">
           Re: &ldquo;{feedPost.description}&rdquo;
         </p>
       ) : null}
@@ -125,12 +125,12 @@ export default async function ConversationPage({
                 className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${
                   isMine
                     ? "rounded-br-sm bg-green-600 text-white"
-                    : "rounded-bl-sm border border-slate-200 bg-white text-slate-900"
+                    : "rounded-bl-sm border border-gray-200 bg-white text-gray-900"
                 }`}
               >
                 {message.body}
               </div>
-              <p className={`mt-1 text-[11px] text-slate-400 ${isMine ? "text-right" : ""}`}>
+              <p className={`mt-1 text-[11px] text-gray-400 ${isMine ? "text-right" : ""}`}>
                 {formatTime(message.created_at)}
               </p>
               {!isMine && isParticipant ? (
@@ -144,14 +144,14 @@ export default async function ConversationPage({
       {isParticipant ? (
         <form
           action={sendMessage.bind(null, id)}
-          className="mt-6 flex gap-2 border-t border-slate-200 pt-4"
+          className="mt-6 flex gap-2 border-t border-gray-200 pt-4"
         >
           <textarea
             name="body"
             rows={2}
             required
             placeholder="Write a reply..."
-            className="block w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="block w-full rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
           <button
             type="submit"
