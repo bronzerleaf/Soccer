@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/pitchlink/back-link";
 import { ComposerForm } from "./composer-form";
 
 const FAMILY_TYPES = new Set(["looking_for_team", "guest_play"]);
@@ -99,9 +100,7 @@ export default async function NewFeedPostPage({
 
   return (
     <main className="mx-auto max-w-sm px-6 py-12">
-      <Link href="/feed/new" className="text-sm text-gray-500 underline">
-        ← Back
-      </Link>
+      <BackLink href="/feed/new" label="Back" />
       <h1 className="mt-3 text-xl font-semibold text-gray-900">
         {TITLE[type]}
       </h1>

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/pitchlink/back-link";
 import { FeedCard, type FeedItem } from "../../feed-card";
 import { fetchOEmbedPreview } from "@/lib/oembed/server";
 import {
@@ -161,9 +161,7 @@ export default async function FeedPostDetailPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/feed" className="text-sm text-gray-500 underline">
-        ← Back to feed
-      </Link>
+      <BackLink href="/feed" label="Back to feed" />
       <div className="mt-4">
         <FeedCard item={item} />
       </div>

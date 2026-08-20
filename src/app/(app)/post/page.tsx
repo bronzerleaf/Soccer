@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/pitchlink/back-link";
 
 // The bottom nav's single "Post" tab. A coach/org has exactly one thing
 // to post, so they skip straight to the existing /feed/new chooser
@@ -26,9 +27,7 @@ export default async function PostEntryPage() {
 
   return (
     <main className="mx-auto max-w-sm px-6 py-12">
-      <Link href="/feed" className="text-sm text-gray-500 underline">
-        ← Back to feed
-      </Link>
+      <BackLink href="/feed" label="Back to feed" />
       <h1 className="mt-3 text-xl font-semibold text-gray-900">Post</h1>
       <p className="mt-2 text-sm text-gray-600">What do you want to share?</p>
 

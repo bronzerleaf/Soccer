@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/pitchlink/back-link";
 import { HighlightComposerForm } from "./highlight-composer-form";
 
 export default async function PostHighlightPage() {
@@ -31,9 +32,7 @@ export default async function PostHighlightPage() {
 
   return (
     <main className="mx-auto max-w-sm px-6 py-12">
-      <Link href="/post" className="text-sm text-gray-500 underline">
-        ← Back
-      </Link>
+      <BackLink href="/post" label="Back to post options" />
       <h1 className="mt-3 text-xl font-semibold text-gray-900">Add a highlight clip</h1>
 
       {!players || players.length === 0 ? (

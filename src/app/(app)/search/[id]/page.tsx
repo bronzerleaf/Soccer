@@ -5,6 +5,7 @@ import { startConversationWithParent } from "@/app/(app)/messages/actions";
 import { fetchOEmbedPreview, type OEmbedPreview } from "@/lib/oembed/server";
 import { LinkGallery, type Highlight } from "@/components/ui/link-gallery";
 import { ActionButton } from "@/components/ui/action-button";
+import { BackLink } from "@/components/pitchlink/back-link";
 import { togglePlayerInterest } from "../actions";
 import { Badge, VerifiedMark } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -69,9 +70,7 @@ export default async function SearchPlayerDetailPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/search" className="text-sm text-gray-500 underline">
-        ← Back to search
-      </Link>
+      <BackLink href="/search" label="Back to search" />
 
       <Card className="mt-4">
         <div className="flex items-center gap-4">

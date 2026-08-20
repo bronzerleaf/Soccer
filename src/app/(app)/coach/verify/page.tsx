@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/pitchlink/back-link";
 import { VerifyForm } from "./verify-form";
 
 export default async function CoachVerifyPage() {
@@ -34,9 +34,7 @@ export default async function CoachVerifyPage() {
 
   return (
     <main className="mx-auto max-w-sm px-6 py-12">
-      <Link href="/dashboard" className="text-sm text-gray-500 underline">
-        ← Back to dashboard
-      </Link>
+      <BackLink href="/dashboard" label="Back to dashboard" />
 
       <h1 className="mt-3 text-xl font-semibold text-gray-900">
         Club verification

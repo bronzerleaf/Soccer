@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { startConversationWithCoach } from "@/app/(app)/messages/actions";
+import { BackLink } from "@/components/pitchlink/back-link";
 import { LikeButton } from "@/app/(app)/feed/like-button";
 import { formatTime } from "@/lib/format";
 import { toggleRosterPostLike } from "../actions";
@@ -48,9 +48,7 @@ export default async function RosterPostDetailPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/feed" className="text-sm text-gray-500 underline">
-        ← Back to feed
-      </Link>
+      <BackLink href="/feed" label="Back to feed" />
 
       <Card className="mt-4">
         <div className="flex items-center gap-3">

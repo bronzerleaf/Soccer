@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/pitchlink/back-link";
 
 export default async function NewFeedPostChooserPage() {
   const supabase = await createClient();
@@ -33,9 +34,7 @@ export default async function NewFeedPostChooserPage() {
 
     return (
       <main className="mx-auto max-w-sm px-6 py-12">
-        <Link href="/feed" className="text-sm text-gray-500 underline">
-          ← Back to feed
-        </Link>
+        <BackLink href="/feed" label="Back to feed" />
         <h1 className="mt-3 text-xl font-semibold text-gray-900">
           Post to the local feed
         </h1>
@@ -84,9 +83,7 @@ export default async function NewFeedPostChooserPage() {
 
   return (
     <main className="mx-auto max-w-sm px-6 py-12">
-      <Link href="/feed" className="text-sm text-gray-500 underline">
-        ← Back to feed
-      </Link>
+      <BackLink href="/feed" label="Back to feed" />
       <h1 className="mt-3 text-xl font-semibold text-gray-900">
         Post to the local feed
       </h1>

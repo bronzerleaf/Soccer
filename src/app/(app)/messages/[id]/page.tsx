@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { sendMessage } from "../actions";
 import { FlagMessageButton } from "./flag-message-button";
 import { PlayerAvatar } from "@/components/ui/player-avatar";
+import { BackLink } from "@/components/pitchlink/back-link";
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString(undefined, {
@@ -96,9 +96,7 @@ export default async function ConversationPage({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col px-6 py-12">
-      <Link href="/messages" className="text-sm text-gray-500 underline">
-        ← Back to messages
-      </Link>
+      <BackLink href="/messages" label="Back to messages" />
 
       <div className="mt-3 flex items-center gap-3">
         <PlayerAvatar name={headerName} size={40} />
