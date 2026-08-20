@@ -3,6 +3,8 @@ import { LikeButton } from "./like-button";
 import { ShareButton } from "./share-button";
 import { ActionButton } from "@/components/ui/action-button";
 import { ClubCrest } from "@/components/ui/club-crest";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { themeMeta } from "@/lib/highlight-themes";
 import { formatTime } from "@/lib/format";
 import { deleteFeedPost } from "./actions";
 import { toggleRosterPostLike } from "../roster-posts/actions";
@@ -94,6 +96,21 @@ export type FeedItem =
       likeCount: number;
       likedByMe: boolean;
       canDelete: boolean;
+    }
+  | {
+      kind: "highlight";
+      id: string;
+      playerFirstName: string;
+      playerLastInitial: string;
+      cityName: string;
+      caption: string | null;
+      theme: string | null;
+      thumbnailUrl: string | null;
+      linkUrl: string;
+      createdAt: string;
+      likeCount: number;
+      likedByMe: boolean;
+      canDelete: boolean;
     };
 
 const KIND_LABEL: Record<FeedItem["kind"], string> = {
@@ -102,6 +119,7 @@ const KIND_LABEL: Record<FeedItem["kind"], string> = {
   guest_play: "Guest play",
   org_event: "Tournament / event",
   training: "Training / event",
+  highlight: "Highlight clip",
 };
 
 const KIND_BADGE: Record<FeedItem["kind"], string> = {
@@ -110,6 +128,7 @@ const KIND_BADGE: Record<FeedItem["kind"], string> = {
   guest_play: "bg-amber-50 text-amber-800",
   org_event: "bg-purple-50 text-purple-700",
   training: "bg-teal-50 text-teal-700",
+  highlight: "bg-pink-50 text-pink-700",
 };
 
 function formatCost(costCents: number | null): string | null {
@@ -175,6 +194,69 @@ export function FeedCard({ item }: { item: FeedItem }) {
             toggleAction={toggleRosterPostLike}
           />
           <ShareButton href={`/roster-posts/${item.id}`} />
+        </div>
+      </div>
+    );
+  }
+
+  if (item.kind === "highlight") {
+    const theme = themeMeta(item.theme);
+    return (
+      <div className="overflow-hidden rounded-[18px] border border-gray-200 bg-white shadow-[0_3px_16px_rgba(17,24,39,0.07)]">
+        <Link href={item.linkUrl} target="_blank" rel="noopener noreferrer" className="block">
+          <div className="relative aspect-video w-full bg-gray-900">
+            {item.thumbnailUrl ? (
+              <ImageWithFallback
+                src={item.thumbnailUrl}
+                alt=""
+                className="h-full w-full object-cover"
+                fallback={<div className="flex h-full w-full items-center justify-center bg-gray-800" />}
+              />
+            ) : null}
+            <span className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm">
+              <svg viewBox="0 0 24 24" fill="#111827" className="h-3.5 w-3.5 translate-x-px">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+            {theme ? (
+              <span
+                className="absolute left-2 top-2 rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white shadow-sm"
+                style={{ background: theme.color }}
+              >
+                {theme.label}
+              </span>
+            ) : null}
+          </div>
+          <div className="p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-sm font-bold text-gray-900">
+                {item.playerFirstName} {item.playerLastInitial}.
+              </p>
+              {badge}
+            </div>
+            <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+              <PinIcon />
+              {item.cityName}
+            </p>
+            {item.caption ? (
+              <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-600">{item.caption}</p>
+            ) : null}
+          </div>
+        </Link>
+        <div className="flex gap-2 px-4 pb-4">
+          <LikeButton postId={item.id} likedByMe={item.likedByMe} likeCount={item.likeCount} />
+          <ShareButton href={`/feed/post/${item.id}`} />
+          {item.canDelete ? (
+            <ActionButton
+              action={deleteFeedPost.bind(null, item.id)}
+              label="Remove"
+              pendingLabel="..."
+              successMessage="Removed"
+              variant="ghost"
+              size="sm"
+              confirmMessage="Remove this from the feed? It'll stay on the player's profile."
+            />
+          ) : null}
         </div>
       </div>
     );

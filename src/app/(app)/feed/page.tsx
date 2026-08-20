@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { haversineMiles } from "@/lib/geo";
+import { fetchOEmbedPreview } from "@/lib/oembed/server";
 import { LocationSettings } from "./location-settings";
 import { FeedCard, type FeedItem } from "./feed-card";
 import { POSITIONS } from "@/app/(app)/players/constants";
@@ -19,6 +20,7 @@ const POST_TYPE_OPTIONS = [
   { value: "guest_play", label: "Guest play" },
   { value: "training", label: "Training / event" },
   { value: "org_event", label: "Tournament / event" },
+  { value: "highlight", label: "Highlight clip" },
 ] as const;
 
 function toArray(value: string | string[] | undefined): string[] {
@@ -26,16 +28,17 @@ function toArray(value: string | string[] | undefined): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-// org_event carries neither a birth year nor a position — it's an event
-// listing, not a player-specific post — so it's exempt from both filters
-// rather than being filtered out by fields it doesn't have. training does
-// carry both (a coach can optionally set an age group/position), so it
-// isn't exempted — a null value there already passes the filter as-is.
+// org_event/highlight carry neither a birth year nor a position — the
+// former is an event listing, the latter a clip about a player rather
+// than a roster ask — so both are exempt from those two filters rather
+// than being filtered out by fields they don't have. training does carry
+// both (a coach can optionally set an age group/position), so it isn't
+// exempted — a null value there already passes the filter as-is.
 function itemBirthYear(item: FeedItem): number | null {
-  return item.kind === "org_event" ? null : item.birthYear;
+  return item.kind === "org_event" || item.kind === "highlight" ? null : item.birthYear;
 }
 function itemPositions(item: FeedItem): string[] {
-  return item.kind === "org_event" ? [] : item.positions;
+  return item.kind === "org_event" || item.kind === "highlight" ? [] : item.positions;
 }
 
 // What the free-text search box matches against — the description plus
@@ -45,6 +48,9 @@ function itemSearchText(item: FeedItem): string {
   const parts: string[] = [];
   if (item.kind === "roster_spot") {
     parts.push(item.clubName, item.clubCity);
+  } else if (item.kind === "highlight") {
+    parts.push(item.playerFirstName, item.playerLastInitial, item.cityName);
+    if (item.caption) parts.push(item.caption);
   } else {
     parts.push(item.description);
     if (item.kind === "org_event") {
@@ -110,7 +116,7 @@ export default async function FeedPage({
       supabase
         .from("feed_posts")
         .select(
-          "id, post_type, author_id, city_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, event_date, event_time, location, signup_url, created_at, author:profiles(full_name)"
+          "id, post_type, author_id, city_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, event_date, event_time, location, signup_url, created_at, author:profiles(full_name), player:players(first_name, last_initial), highlight:player_highlights(url, caption, theme)"
         )
         .gt("expires_at", new Date().toISOString())
         .order("created_at", { ascending: false })
@@ -186,6 +192,27 @@ export default async function FeedPage({
         } satisfies FeedItem;
       }
 
+      if (post.post_type === "highlight") {
+        const player = post.player as unknown as { first_name: string; last_initial: string } | null;
+        const highlight = post.highlight as unknown as { url: string; caption: string | null; theme: string | null } | null;
+        if (!player || !highlight) return null;
+        return {
+          kind: "highlight",
+          id: post.id,
+          playerFirstName: player.first_name,
+          playerLastInitial: player.last_initial,
+          cityName: postCity?.name ?? "",
+          caption: highlight.caption,
+          theme: highlight.theme,
+          thumbnailUrl: null,
+          linkUrl: highlight.url,
+          createdAt: post.created_at,
+          likeCount,
+          likedByMe: likedPostIds.has(post.id),
+          canDelete,
+        } satisfies FeedItem;
+      }
+
       if (post.post_type === "training") {
         return {
           kind: "training",
@@ -226,7 +253,23 @@ export default async function FeedPage({
         likedByMe: likedPostIds.has(post.id),
         canDelete,
       } satisfies FeedItem;
+    })
+    .filter((item) => item !== null) as FeedItem[];
+
+  // Highlight cards want a thumbnail, same as the player profile's own
+  // gallery -- fetched here rather than in the map above since oEmbed is
+  // async and Array.prototype.map can't await per-item.
+  const highlightItems = feedItems.filter(
+    (item): item is Extract<FeedItem, { kind: "highlight" }> => item.kind === "highlight"
+  );
+  if (highlightItems.length > 0) {
+    const previews = await Promise.all(
+      highlightItems.map((item) => fetchOEmbedPreview(item.linkUrl))
+    );
+    highlightItems.forEach((item, i) => {
+      item.thumbnailUrl = previews[i]?.thumbnailUrl ?? null;
     });
+  }
 
   // Like counts, one grouped query per table rather than N+1 per card.
   const feedPostIds = feedItems.map((item) => item.id);

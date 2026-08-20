@@ -40,7 +40,7 @@ export default function SignUpPage() {
     }
 
     if (data.session) {
-      router.push("/dashboard");
+      router.push("/feed");
       return;
     }
 

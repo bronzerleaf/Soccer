@@ -24,7 +24,7 @@ export default async function SearchPlayerDetailPage({
   const { data: player } = await supabase
     .from("players")
     .select(
-      "id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, city, bio, photo_url, instagram_url, youtube_url, current_club:clubs(name, city), team:teams(id, name), player_highlights(id, url, caption, theme)"
+      "id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, city, bio, photo_url, instagram_url, youtube_url, current_club:clubs(name, city), team:teams(id, name, gotsport_url), player_highlights(id, url, caption, theme)"
     )
     .eq("id", id)
     .single();
@@ -56,7 +56,7 @@ export default async function SearchPlayerDetailPage({
     name: string;
     city: string;
   } | null;
-  const team = player.team as unknown as { id: string; name: string } | null;
+  const team = player.team as unknown as { id: string; name: string; gotsport_url: string | null } | null;
 
   const highlights: Highlight[] = player.player_highlights ?? [];
   const previewList = await Promise.all(
@@ -118,6 +118,17 @@ export default async function SearchPlayerDetailPage({
           <div className="mt-2">
             <Badge tone="neutral">{player.city}</Badge>
           </div>
+        ) : null}
+
+        {team?.gotsport_url ? (
+          <a
+            href={team.gotsport_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:border-gray-400"
+          >
+            GotSport team page ↗
+          </a>
         ) : null}
 
         <div className="mt-4 flex flex-wrap gap-2">

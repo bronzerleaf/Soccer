@@ -7,6 +7,8 @@ const KIND_LABEL: Record<string, string> = {
   looking_for_team: "Looking for a team",
   guest_play: "Guest play",
   org_event: "Tournament / event",
+  training: "Training / event",
+  highlight: "Highlight clip",
 };
 
 export default async function AdminFeedPostsPage() {
@@ -66,7 +68,7 @@ export default async function AdminFeedPostsPage() {
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-gray-600">
-                  {post.post_type === "org_event"
+                  {post.post_type === "org_event" || post.post_type === "highlight"
                     ? `posted by ${author?.full_name} (${author?.email})`
                     : `${post.birth_year ?? "Any birth year"} · ${
                         (post.positions ?? []).join(", ") || "Any position"

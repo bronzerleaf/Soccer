@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { FeedCard, type FeedItem } from "../../feed-card";
+import { fetchOEmbedPreview } from "@/lib/oembed/server";
 import {
   startConversationWithParent,
   startConversationWithFeedPostAuthor,
@@ -24,7 +25,7 @@ export default async function FeedPostDetailPage({
     supabase
       .from("feed_posts")
       .select(
-        "id, post_type, author_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, event_date, event_time, location, signup_url, created_at, city:cities(name), author:profiles(full_name)"
+        "id, post_type, author_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, event_date, event_time, location, signup_url, created_at, city:cities(name), author:profiles(full_name), player:players(first_name, last_initial), highlight:player_highlights(url, caption, theme)"
       )
       .eq("id", id)
       .single(),
@@ -40,7 +41,12 @@ export default async function FeedPostDetailPage({
 
   const city = post.city as unknown as { name: string } | null;
   const author = post.author as unknown as { full_name: string } | null;
+  const player = post.player as unknown as { first_name: string; last_initial: string } | null;
+  const highlight = post.highlight as unknown as { url: string; caption: string | null; theme: string | null } | null;
   const viewerRole = viewerProfile?.role ?? null;
+
+  const highlightPreview =
+    post.post_type === "highlight" && highlight ? await fetchOEmbedPreview(highlight.url) : null;
 
   // A coach messaging the family behind a looking_for_team/guest_play
   // post -- no new discovery context needed, this reuses the same
@@ -81,7 +87,23 @@ export default async function FeedPostDetailPage({
   const canDelete = post.author_id === userData.user.id;
 
   const item: FeedItem =
-    post.post_type === "org_event"
+    post.post_type === "highlight" && player && highlight
+      ? {
+          kind: "highlight",
+          id: post.id,
+          playerFirstName: player.first_name,
+          playerLastInitial: player.last_initial,
+          cityName: city?.name ?? "",
+          caption: highlight.caption,
+          theme: highlight.theme,
+          thumbnailUrl: highlightPreview?.thumbnailUrl ?? null,
+          linkUrl: highlight.url,
+          createdAt: post.created_at,
+          likeCount,
+          likedByMe,
+          canDelete,
+        }
+      : post.post_type === "org_event"
       ? {
           kind: "org_event",
           id: post.id,

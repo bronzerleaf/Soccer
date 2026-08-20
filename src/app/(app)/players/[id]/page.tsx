@@ -33,7 +33,7 @@ export default async function PlayerDetailPage({
     supabase
       .from("players")
       .select(
-        "id, parent_id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, team_id, team_membership_verified, instagram_url, youtube_url, current_club:clubs(name, city), team:teams(name), player_highlights(id, url, caption, theme)"
+        "id, parent_id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, team_id, team_membership_verified, instagram_url, youtube_url, current_club:clubs(name, city), team:teams(name, gotsport_url), player_highlights(id, url, caption, theme)"
       )
       .eq("id", id)
       .single(),
@@ -138,6 +138,17 @@ export default async function PlayerDetailPage({
         <div className="mt-2">
           <Badge tone="neutral">{player.city}</Badge>
         </div>
+      ) : null}
+
+      {(player.team as unknown as { gotsport_url: string | null } | null)?.gotsport_url ? (
+        <a
+          href={(player.team as unknown as { gotsport_url: string | null }).gotsport_url!}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:border-gray-400"
+        >
+          GotSport team page ↗
+        </a>
       ) : null}
 
       {player.bio ? (
