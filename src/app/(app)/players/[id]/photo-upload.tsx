@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { setPlayerPhoto } from "../actions";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const MAX_DIMENSION = 512;
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -94,14 +95,14 @@ export function PhotoUpload({
       <div className="relative h-[84px] w-[84px] shrink-0">
         <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 border-white bg-gray-200 shadow-[0_2px_8px_rgba(15,23,42,0.1)]">
           {preview ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="" className="h-full w-full object-cover" />
+            <ImageWithFallback
+              src={preview}
+              alt=""
+              className="h-full w-full object-cover"
+              fallback={<PhotoPlaceholderGlyph />}
+            />
           ) : (
-            <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" className="h-7 w-7">
-              <rect x="3" y="7" width="18" height="13" rx="2" />
-              <path d="M8 7 9.5 4h5L16 7" />
-              <circle cx="12" cy="13.5" r="3.5" />
-            </svg>
+            <PhotoPlaceholderGlyph />
           )}
         </div>
         {verified ? (
@@ -131,5 +132,15 @@ export function PhotoUpload({
         {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
       </div>
     </div>
+  );
+}
+
+function PhotoPlaceholderGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" className="h-7 w-7">
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M8 7 9.5 4h5L16 7" />
+      <circle cx="12" cy="13.5" r="3.5" />
+    </svg>
   );
 }

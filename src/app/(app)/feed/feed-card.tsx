@@ -252,7 +252,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
           </p>
         ) : null}
 
-        <p className="mt-1.5 text-sm leading-6 text-gray-600">
+        <p className="mt-1.5 line-clamp-3 text-sm leading-6 text-gray-600">
           {item.description}
         </p>
       </Link>

@@ -62,7 +62,7 @@ export default async function AdminRosterPostsPage() {
                   {(post.positions ?? []).join(", ") || "Any position"} ·
                   posted by {coach?.full_name} ({coach?.email})
                 </p>
-                <p className="mt-2 text-sm text-gray-700">
+                <p className="mt-2 line-clamp-2 text-sm text-gray-700">
                   {post.description}
                 </p>
                 <div className="mt-3">

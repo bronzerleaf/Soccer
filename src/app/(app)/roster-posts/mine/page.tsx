@@ -55,7 +55,7 @@ export default async function MyRosterPostsPage() {
                     {isExpired ? "Expired" : "Active"}
                   </span>
                 </div>
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 line-clamp-2 text-sm text-gray-600">
                   {post.description}
                 </p>
                 <div className="mt-3 flex gap-2">

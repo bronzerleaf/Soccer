@@ -156,7 +156,8 @@ export default async function ConversationPage({
       {isParticipant ? (
         <form
           action={sendMessage.bind(null, id)}
-          className="sticky bottom-24 mt-6 flex gap-2 border-t border-gray-200 bg-[var(--pl-cream)]/95 pt-4 backdrop-blur"
+          className="sticky mt-6 flex gap-2 border-t border-gray-200 bg-[var(--pl-cream)]/95 pt-4 backdrop-blur"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + 96px)" }}
         >
           <textarea
             name="body"
