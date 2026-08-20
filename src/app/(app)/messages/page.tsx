@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CardLink } from "@/components/ui/card";
 import { PlayerAvatar } from "@/components/ui/player-avatar";
+import { formatRelativeTime } from "@/lib/format";
 
 export default async function MessagesInboxPage() {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export default async function MessagesInboxPage() {
   const { data: conversations } = await supabase
     .from("conversations")
     .select(
-      "id, parent_id, coach_id, created_at, player:players(first_name, last_initial), roster_post:roster_posts(description), team:teams(name), feed_post:feed_posts(description)"
+      "id, parent_id, coach_id, created_at, parent_last_read_at, coach_last_read_at, player:players(first_name, last_initial), roster_post:roster_posts(description), team:teams(name), feed_post:feed_posts(description)"
     )
     .order("created_at", { ascending: false });
 
@@ -24,13 +25,13 @@ export default async function MessagesInboxPage() {
 
   const latestMessageByConversation = new Map<
     string,
-    { body: string; created_at: string }
+    { body: string; created_at: string; sender_id: string }
   >();
 
   if (conversationIds.length > 0) {
     const { data: recentMessages } = await supabase
       .from("messages")
-      .select("conversation_id, body, created_at")
+      .select("conversation_id, body, created_at, sender_id")
       .in("conversation_id", conversationIds)
       .order("created_at", { ascending: false });
 
@@ -93,24 +94,47 @@ export default async function MessagesInboxPage() {
                     ? `Re: "${feedPost.description.slice(0, 40)}${feedPost.description.length > 40 ? "…" : ""}"`
                     : null;
             const latest = latestMessageByConversation.get(conversation.id);
+            const myLastReadAt =
+              conversation.parent_id === userId
+                ? conversation.parent_last_read_at
+                : conversation.coach_last_read_at;
+            const isUnread =
+              !!latest &&
+              latest.sender_id !== userId &&
+              (!myLastReadAt || new Date(latest.created_at) > new Date(myLastReadAt));
 
             return (
               <li key={conversation.id}>
                 <CardLink href={`/messages/${conversation.id}`} className="flex items-center gap-3">
-                  <PlayerAvatar name={other?.full_name ?? "?"} size={44} />
+                  <div className="relative shrink-0">
+                    <PlayerAvatar name={other?.full_name ?? "?"} size={44} />
+                    {isUnread ? (
+                      <span
+                        className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-white bg-green-600"
+                        aria-hidden="true"
+                      />
+                    ) : null}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="truncate text-sm font-semibold text-gray-900">
+                      <p
+                        className={`truncate text-sm text-gray-900 ${isUnread ? "font-bold" : "font-semibold"}`}
+                      >
                         {other?.full_name ?? "Someone"}
                       </p>
-                      {contextLabel ? (
-                        <span className="shrink-0 text-xs text-gray-500">
-                          {contextLabel}
+                      {latest ? (
+                        <span className="shrink-0 text-[11px] text-gray-400">
+                          {formatRelativeTime(latest.created_at)}
                         </span>
                       ) : null}
                     </div>
+                    {contextLabel ? (
+                      <p className="truncate text-xs text-gray-500">{contextLabel}</p>
+                    ) : null}
                     {latest ? (
-                      <p className="mt-1 truncate text-sm text-gray-600">
+                      <p
+                        className={`mt-0.5 truncate text-sm ${isUnread ? "font-semibold text-gray-900" : "text-gray-600"}`}
+                      >
                         {latest.body}
                       </p>
                     ) : null}

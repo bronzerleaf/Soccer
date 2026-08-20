@@ -75,6 +75,13 @@ export default async function ConversationPage({
     .eq("conversation_id", id)
     .order("created_at", { ascending: true });
 
+  // Fire-and-forget-ish: viewing the thread is what "read" means here,
+  // same as any mainstream messenger. Narrow security-definer RPC, only
+  // ever touches the caller's own last-read column (migration 23).
+  if (isParticipant) {
+    await supabase.rpc("mark_conversation_read", { target_conversation_id: id });
+  }
+
   const player = conversation.player as unknown as {
     first_name: string;
     last_initial: string;
@@ -97,26 +104,31 @@ export default async function ConversationPage({
         <PlayerAvatar name={headerName} size={40} />
         <h1 className="text-lg font-semibold text-gray-900">{headerName}</h1>
       </div>
-      {player ? (
-        <p className="mt-1 text-sm text-gray-500">
-          About {player.first_name} {player.last_initial}.
-        </p>
-      ) : null}
-      {rosterPost ? (
-        <p className="mt-1 text-sm text-gray-500">
-          Re: &ldquo;{rosterPost.description}&rdquo;
-        </p>
-      ) : null}
-      {team ? (
-        <p className="mt-1 text-sm text-gray-500">About {team.name}</p>
-      ) : null}
-      {feedPost ? (
-        <p className="mt-1 text-sm text-gray-500">
-          Re: &ldquo;{feedPost.description}&rdquo;
-        </p>
+
+      {player || rosterPost || team || feedPost ? (
+        <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5">
+          <p className="text-xs font-semibold text-gray-500">
+            {player
+              ? "Player"
+              : rosterPost
+                ? "Opportunity"
+                : team
+                  ? "Team"
+                  : "Post"}
+          </p>
+          <p className="mt-0.5 truncate text-sm font-medium text-gray-900">
+            {player
+              ? `${player.first_name} ${player.last_initial}.`
+              : rosterPost
+                ? rosterPost.description
+                : team
+                  ? team.name
+                  : feedPost?.description}
+          </p>
+        </div>
       ) : null}
 
-      <div className="mt-6 flex-1 space-y-3">
+      <div className="mt-6 flex-1 space-y-3 pb-4">
         {(messages ?? []).map((message) => {
           const isMine = message.sender_id === userId;
           return (
@@ -144,7 +156,7 @@ export default async function ConversationPage({
       {isParticipant ? (
         <form
           action={sendMessage.bind(null, id)}
-          className="mt-6 flex gap-2 border-t border-gray-200 pt-4"
+          className="sticky bottom-24 mt-6 flex gap-2 border-t border-gray-200 bg-[var(--pl-cream)]/95 pt-4 backdrop-blur"
         >
           <textarea
             name="body"
