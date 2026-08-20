@@ -17,6 +17,7 @@ export async function updateTeamProfile(teamId: string, formData: FormData) {
     .split(",")
     .map((league) => league.trim())
     .filter(Boolean);
+  const gotsportUrl = String(formData.get("gotsport_url") ?? "").trim();
 
   if (!name) {
     throw new Error("Give the team a name.");
@@ -24,7 +25,7 @@ export async function updateTeamProfile(teamId: string, formData: FormData) {
 
   const { error } = await supabase
     .from("teams")
-    .update({ name, city_id: cityId, leagues })
+    .update({ name, city_id: cityId, leagues, gotsport_url: gotsportUrl || null })
     .eq("id", teamId);
 
   if (error) {

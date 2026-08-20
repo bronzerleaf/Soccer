@@ -30,7 +30,7 @@ export default async function SearchPage({
   let query = supabase
     .from("players")
     .select(
-      "id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, city, photo_url, current_club:clubs(name, city), team:teams(name)"
+      "id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, city, photo_url, current_club:clubs(name, city), team:teams(id, name)"
     )
     .order("created_at", { ascending: false });
 
@@ -145,7 +145,7 @@ export default async function SearchPage({
               name: string;
               city: string;
             } | null;
-            const team = player.team as unknown as { name: string } | null;
+            const team = player.team as unknown as { id: string; name: string } | null;
             const photoUrl = player.photo_url
               ? signedUrlByPath.get(player.photo_url)
               : null;

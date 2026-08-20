@@ -102,13 +102,13 @@ export default async function PlayerDetailPage({
               Verified Team Member
             </Badge>
           ) : null}
-          {player.team ? (
-            <div className="flex items-center gap-1.5">
+          {player.team && player.team_id ? (
+            <Link href={`/teams/${player.team_id}`} className="flex items-center gap-1.5">
               <div className="h-5 w-5 rounded-md bg-gray-900" aria-hidden="true" />
-              <span className="text-sm font-bold text-gray-900">
+              <span className="text-sm font-bold text-gray-900 underline">
                 {(player.team as unknown as { name: string }).name}
               </span>
-            </div>
+            </Link>
           ) : null}
           {club ? (
             <span className="text-xs font-medium text-gray-500">

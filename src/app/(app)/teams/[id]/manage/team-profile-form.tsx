@@ -13,7 +13,12 @@ export function TeamProfileForm({
 }: {
   teamId: string;
   cities: City[];
-  defaultValues: { name: string; city_id: string | null; leagues: string[] };
+  defaultValues: {
+    name: string;
+    city_id: string | null;
+    leagues: string[];
+    gotsport_url: string | null;
+  };
 }) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -98,6 +103,26 @@ export function TeamProfileForm({
         />
         <p className="mt-1 text-xs text-gray-500">
           Separate multiple leagues with commas.
+        </p>
+      </div>
+
+      <div>
+        <label
+          htmlFor="gotsport_url"
+          className="block text-sm font-medium text-gray-900"
+        >
+          GotSport team page (optional)
+        </label>
+        <input
+          id="gotsport_url"
+          name="gotsport_url"
+          type="url"
+          placeholder="https://system.gotsport.com/..."
+          defaultValue={defaultValues.gotsport_url ?? ""}
+          className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
+        />
+        <p className="mt-1 text-xs text-gray-500">
+          A link only — we never pull rosters or rankings from GotSport.
         </p>
       </div>
 

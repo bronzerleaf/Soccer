@@ -37,7 +37,7 @@ export default async function ManageTeamPage({
     await Promise.all([
       supabase
         .from("teams")
-        .select("id, name, city_id, leagues, city:cities(name)")
+        .select("id, name, city_id, leagues, gotsport_url, city:cities(name)")
         .eq("id", id)
         .single(),
       supabase
@@ -65,9 +65,14 @@ export default async function ManageTeamPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12 pb-24">
-      <Link href="/teams" className="text-sm text-gray-500 underline">
-        ← All teams
-      </Link>
+      <div className="flex items-center justify-between gap-2">
+        <Link href="/teams" className="text-sm text-gray-500 underline">
+          ← All teams
+        </Link>
+        <Link href={`/teams/${team.id}`} className="text-sm text-gray-500 underline">
+          View public profile
+        </Link>
+      </div>
 
       <div className="mt-4 flex items-center gap-3.5">
         <ClubCrest name={team.name} size={64} />
@@ -192,6 +197,7 @@ export default async function ManageTeamPage({
               name: team.name,
               city_id: team.city_id,
               leagues: team.leagues ?? [],
+              gotsport_url: team.gotsport_url,
             }}
           />
         </div>

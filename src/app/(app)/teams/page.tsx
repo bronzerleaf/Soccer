@@ -79,9 +79,12 @@ export default async function TeamsPage({
                 key={team.id}
                 className="rounded-lg border border-gray-200 p-4"
               >
-                <p className="text-sm font-medium text-gray-900">
+                <Link
+                  href={`/teams/${team.id}`}
+                  className="text-sm font-medium text-gray-900 underline"
+                >
                   {team.name}
-                </p>
+                </Link>
                 {city ? (
                   <p className="text-xs text-gray-500">{city.name}</p>
                 ) : null}
@@ -236,9 +239,12 @@ async function renderParentTeamBrowse(
                     <ClubCrest name={team.name} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <p className="truncate text-sm font-semibold text-gray-900">
+                        <Link
+                          href={`/teams/${team.id}`}
+                          className="truncate text-sm font-semibold text-gray-900 underline"
+                        >
                           {team.name}
-                        </p>
+                        </Link>
                         {coach ? <Badge tone="verified">Verified team</Badge> : null}
                       </div>
                       {city ? (

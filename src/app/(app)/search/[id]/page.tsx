@@ -24,7 +24,7 @@ export default async function SearchPlayerDetailPage({
   const { data: player } = await supabase
     .from("players")
     .select(
-      "id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, city, bio, photo_url, instagram_url, youtube_url, current_club:clubs(name, city), team:teams(name), player_highlights(id, url, caption, theme)"
+      "id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, city, bio, photo_url, instagram_url, youtube_url, current_club:clubs(name, city), team:teams(id, name), player_highlights(id, url, caption, theme)"
     )
     .eq("id", id)
     .single();
@@ -56,7 +56,7 @@ export default async function SearchPlayerDetailPage({
     name: string;
     city: string;
   } | null;
-  const team = player.team as unknown as { name: string } | null;
+  const team = player.team as unknown as { id: string; name: string } | null;
 
   const highlights: Highlight[] = player.player_highlights ?? [];
   const previewList = await Promise.all(
@@ -84,7 +84,15 @@ export default async function SearchPlayerDetailPage({
               <VerifiedMark />
             </div>
             <p className="text-sm text-gray-500">
-              {team ? team.name : club ? `${club.name} · ${club.city}` : player.city}
+              {team ? (
+                <Link href={`/teams/${team.id}`} className="underline">
+                  {team.name}
+                </Link>
+              ) : club ? (
+                `${club.name} · ${club.city}`
+              ) : (
+                player.city
+              )}
             </p>
             {team && club ? (
               <p className="text-xs text-gray-400">{club.name}</p>
