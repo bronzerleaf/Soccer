@@ -1,7 +1,7 @@
 type BadgeTone = "verified" | "pending" | "neutral" | "accent";
 
 const tones: Record<BadgeTone, string> = {
-  verified: "bg-emerald-50 text-emerald-700",
+  verified: "bg-green-50 text-green-700",
   pending: "bg-amber-50 text-amber-700",
   neutral: "bg-slate-100 text-slate-600",
   accent: "bg-slate-900 text-white",
@@ -33,7 +33,7 @@ export function VerifiedMark({ className = "" }: { className?: string }) {
     <svg
       viewBox="0 0 20 20"
       fill="none"
-      className={`inline-block h-4 w-4 shrink-0 text-emerald-600 ${className}`}
+      className={`inline-block h-4 w-4 shrink-0 text-green-600 ${className}`}
       aria-hidden="true"
     >
       <circle cx="10" cy="10" r="9" fill="currentColor" fillOpacity="0.12" />

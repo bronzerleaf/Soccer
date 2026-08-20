@@ -124,7 +124,7 @@ export default async function ConversationPage({
               <div
                 className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${
                   isMine
-                    ? "rounded-br-sm bg-emerald-600 text-white"
+                    ? "rounded-br-sm bg-green-600 text-white"
                     : "rounded-bl-sm border border-slate-200 bg-white text-slate-900"
                 }`}
               >
@@ -155,7 +155,7 @@ export default async function ConversationPage({
           />
           <button
             type="submit"
-            className="shrink-0 rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="shrink-0 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
           >
             Send
           </button>

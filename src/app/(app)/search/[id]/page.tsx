@@ -182,7 +182,7 @@ export default async function SearchPlayerDetailPage({
           />
           <button
             type="submit"
-            className="shrink-0 self-start rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="shrink-0 self-start rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
           >
             Send
           </button>

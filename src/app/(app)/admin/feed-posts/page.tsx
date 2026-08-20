@@ -59,7 +59,7 @@ export default async function AdminFeedPostsPage() {
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       isExpired
                         ? "bg-slate-100 text-slate-600"
-                        : "bg-emerald-100 text-emerald-800"
+                        : "bg-green-100 text-green-800"
                     }`}
                   >
                     {isExpired ? "Expired" : "Active"}

@@ -5,7 +5,7 @@ import { startConversationWithCoach } from "@/app/(app)/messages/actions";
 import { LikeButton } from "@/app/(app)/feed/like-button";
 import { formatTime } from "@/lib/format";
 import { toggleRosterPostLike } from "../actions";
-import { Badge } from "@/components/ui/badge";
+import { Badge, VerifiedMark } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ClubCrest } from "@/components/ui/club-crest";
 import { InfoTile, InfoTileRow } from "@/components/ui/info-tile";
@@ -59,7 +59,8 @@ export default async function RosterPostDetailPage({
               <h1 className="truncate text-lg font-semibold text-slate-900">
                 {club?.name}
               </h1>
-              <Badge tone="accent">Club</Badge>
+              <VerifiedMark />
+              <Badge tone="neutral">Club</Badge>
             </div>
             <p className="text-sm text-slate-500">{club?.city}</p>
           </div>
@@ -73,23 +74,24 @@ export default async function RosterPostDetailPage({
           </InfoTileRow>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex gap-2">
+          {profile?.role === "parent" ? (
+            <a
+              href="#message-club"
+              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-green-600 px-3 py-3 text-sm font-semibold text-white hover:bg-green-700"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                <path d="M2 12 21 3l-6 19-4-8-9-2Z" />
+              </svg>
+              Message the Club
+            </a>
+          ) : null}
           <LikeButton
             postId={post.id}
             likedByMe={likedByMe}
             likeCount={likeCount}
             toggleAction={toggleRosterPostLike}
           />
-          {post.signup_url ? (
-            <a
-              href={post.signup_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
-            >
-              Sign up ↗
-            </a>
-          ) : null}
         </div>
       </Card>
 
@@ -136,10 +138,20 @@ export default async function RosterPostDetailPage({
             </dd>
           </div>
         </dl>
+        {post.signup_url ? (
+          <a
+            href={post.signup_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 block rounded-xl border border-slate-900 px-3 py-2.5 text-center text-sm font-semibold text-slate-900 hover:bg-slate-50"
+          >
+            Sign Up ↗
+          </a>
+        ) : null}
       </Card>
 
       {profile?.role === "parent" ? (
-        <Card className="mt-4">
+        <Card id="message-club" className="mt-4 scroll-mt-6">
           <h2 className="text-sm font-semibold text-slate-900">
             Message the club
           </h2>
@@ -156,7 +168,7 @@ export default async function RosterPostDetailPage({
             />
             <button
               type="submit"
-              className="shrink-0 self-start rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+              className="shrink-0 self-start rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
             >
               Send
             </button>

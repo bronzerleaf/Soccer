@@ -86,8 +86,8 @@ const KIND_LABEL: Record<FeedItem["kind"], string> = {
 };
 
 const KIND_BADGE: Record<FeedItem["kind"], string> = {
-  roster_spot: "bg-blue-50 text-blue-700",
-  looking_for_team: "bg-emerald-50 text-emerald-700",
+  roster_spot: "bg-green-50 text-green-700",
+  looking_for_team: "bg-blue-50 text-blue-700",
   guest_play: "bg-amber-50 text-amber-800",
   org_event: "bg-purple-50 text-purple-700",
   training: "bg-teal-50 text-teal-700",

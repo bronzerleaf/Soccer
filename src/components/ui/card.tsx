@@ -4,13 +4,15 @@ const cardClass =
   "rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]";
 
 export function Card({
+  id,
   className = "",
   children,
 }: {
+  id?: string;
   className?: string;
   children: React.ReactNode;
 }) {
-  return <div className={`${cardClass} ${className}`}>{children}</div>;
+  return <div id={id} className={`${cardClass} ${className}`}>{children}</div>;
 }
 
 export function CardLink({

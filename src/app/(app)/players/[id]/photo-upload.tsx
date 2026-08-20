@@ -89,11 +89,17 @@ export function PhotoUpload({
 
   return (
     <div className="flex items-center gap-4">
-      <div className="h-16 w-16 overflow-hidden rounded-full bg-slate-100">
+      <div className="flex h-[84px] w-[84px] shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white bg-slate-200 shadow-[0_2px_8px_rgba(15,23,42,0.1)]">
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="" className="h-full w-full object-cover" />
-        ) : null}
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" className="h-7 w-7">
+            <rect x="3" y="7" width="18" height="13" rx="2" />
+            <path d="M8 7 9.5 4h5L16 7" />
+            <circle cx="12" cy="13.5" r="3.5" />
+          </svg>
+        )}
       </div>
       <div>
         <button

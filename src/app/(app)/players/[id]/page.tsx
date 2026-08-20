@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { deletePlayer, setOpenToOpportunities } from "../actions";
-import { ActionButton } from "@/components/ui/action-button";
+import { ToggleActionButton } from "@/components/ui/action-button";
+import { Badge, VerifiedMark } from "@/components/ui/badge";
+import { PlayerAvatar } from "@/components/ui/player-avatar";
 import { PhotoUpload } from "./photo-upload";
 import { EditPlayerForm } from "./edit-player-form";
 import { DeletePlayerButton } from "./delete-player-button";
@@ -94,69 +96,70 @@ export default async function PlayerDetailPage({
         {player.first_name} {player.last_initial}.
       </h1>
 
-      {player.instagram_url || player.youtube_url ? (
-        <div className="mt-3 flex gap-2">
-          {player.instagram_url ? (
-            <a
-              href={player.instagram_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
-            >
-              Instagram ↗
-            </a>
-          ) : null}
-          {player.youtube_url ? (
-            <a
-              href={player.youtube_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
-            >
-              YouTube ↗
-            </a>
-          ) : null}
-        </div>
-      ) : null}
-
-      <div className="mt-6">
+      <div className="mt-4 flex items-center gap-3.5">
         <PhotoUpload
           playerId={player.id}
           parentId={player.parent_id}
           currentPhotoUrl={signedPhotoUrl}
         />
+        <div className="flex flex-col gap-1.5">
+          {player.team_membership_verified ? (
+            <Badge tone="verified">
+              <VerifiedMark />
+              Verified Team Member
+            </Badge>
+          ) : null}
+          {player.team ? (
+            <div className="flex items-center gap-1.5">
+              <div className="h-5 w-5 rounded-md bg-slate-900" aria-hidden="true" />
+              <span className="text-sm font-bold text-slate-900">
+                {(player.team as unknown as { name: string }).name}
+              </span>
+            </div>
+          ) : null}
+        </div>
       </div>
 
-      <div className="mt-6 rounded-lg border border-slate-200 p-5">
+      <div className="mt-3.5 flex flex-wrap gap-1.5">
+        {(player.positions ?? []).map((position: string) => (
+          <Badge key={position} tone="neutral">
+            {position}
+          </Badge>
+        ))}
+        <Badge tone="neutral">Birth Year {player.birth_year}</Badge>
+        {player.preferred_foot ? (
+          <Badge tone="neutral">Strong Foot: {player.preferred_foot}</Badge>
+        ) : null}
+        {player.city ? <Badge tone="neutral">{player.city}</Badge> : null}
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
         {player.consent_completed ? (
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-medium text-slate-900">
+              <p className="text-sm font-bold text-slate-900">
                 {player.open_to_opportunities
                   ? "Open to opportunities"
                   : "Not currently open to opportunities"}
               </p>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-0.5 max-w-[220px] text-xs text-slate-500">
                 {player.open_to_opportunities
                   ? "Verified coaches can find and message you about this player."
                   : "Turn this on when you're ready for coaches to find this profile."}
               </p>
             </div>
-            <ActionButton
+            <ToggleActionButton
               action={setOpenToOpportunities.bind(
                 null,
                 player.id,
                 !player.open_to_opportunities
               )}
-              label={player.open_to_opportunities ? "Turn off" : "Turn on"}
-              pendingLabel="Saving..."
-              successMessage={
+              active={player.open_to_opportunities}
+              label={
                 player.open_to_opportunities
-                  ? "Turned off"
-                  : "Now open to opportunities"
+                  ? "Turn off open to opportunities"
+                  : "Turn on open to opportunities"
               }
-              variant="secondary"
-              size="sm"
             />
           </div>
         ) : (
@@ -179,8 +182,8 @@ export default async function PlayerDetailPage({
       </div>
 
       {interestedCoaches.length > 0 ? (
-        <div className="mt-6 rounded-lg border border-slate-200 p-5">
-          <p className="text-sm font-medium text-slate-900">
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          <p className="text-sm font-bold text-slate-900">
             {interestedCoaches.length} coach
             {interestedCoaches.length === 1 ? "" : "es"} interested
           </p>
@@ -206,24 +209,28 @@ export default async function PlayerDetailPage({
       ) : null}
 
       {teammates.length > 0 ? (
-        <div className="mt-6">
-          <h2 className="text-sm font-medium text-slate-900">Teammates</h2>
-          <p className="mt-1 text-xs text-slate-500">
+        <div className="mt-5">
+          <h2 className="text-sm font-bold text-slate-900">Teammates</h2>
+          <p className="mt-0.5 text-xs text-slate-400">
             Other verified players on {(player.team as unknown as { name: string } | null)?.name}.
           </p>
-          <ul className="mt-2 space-y-2">
+          <ul className="mt-2.5 space-y-2">
             {teammates.map((mate) => (
               <li
                 key={mate.id}
-                className="rounded-lg border border-slate-200 p-3 text-sm"
+                className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5"
               >
-                <span className="font-medium text-slate-900">
-                  {mate.first_name} {mate.last_initial}.
-                </span>{" "}
-                <span className="text-slate-500">
-                  {mate.birth_year} ·{" "}
-                  {(mate.positions ?? []).join(", ") || "No position listed"}
+                <PlayerAvatar name={mate.first_name} size={32} />
+                <span className="flex-1 text-sm">
+                  <span className="font-semibold text-slate-900">
+                    {mate.first_name} {mate.last_initial}.
+                  </span>{" "}
+                  <span className="text-slate-400">
+                    · {mate.birth_year} ·{" "}
+                    {(mate.positions ?? []).join(", ") || "No position listed"}
+                  </span>
                 </span>
+                <VerifiedMark />
               </li>
             ))}
           </ul>
@@ -240,6 +247,31 @@ export default async function PlayerDetailPage({
           />
         </div>
       </div>
+
+      {player.instagram_url || player.youtube_url ? (
+        <div className="mt-8 flex gap-2">
+          {player.instagram_url ? (
+            <a
+              href={player.instagram_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-center text-sm font-semibold text-slate-700 hover:border-slate-400"
+            >
+              Instagram ↗
+            </a>
+          ) : null}
+          {player.youtube_url ? (
+            <a
+              href={player.youtube_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-center text-sm font-semibold text-slate-700 hover:border-slate-400"
+            >
+              YouTube ↗
+            </a>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="mt-8">
         <EditPlayerForm
