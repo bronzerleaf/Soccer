@@ -1,5 +1,5 @@
 import { requireVerifiedCoach } from "@/lib/coach";
-import { POSITIONS } from "@/app/(app)/players/constants";
+import { POSITIONS, PLAYER_LEVEL_LABELS } from "@/app/(app)/players/constants";
 import { Badge, VerifiedMark } from "@/components/ui/badge";
 import { CardLink } from "@/components/ui/card";
 import { PlayerAvatar } from "@/components/ui/player-avatar";
@@ -30,7 +30,7 @@ export default async function SearchPage({
   let query = supabase
     .from("players")
     .select(
-      "id, first_name, last_initial, birth_year, positions, preferred_foot, city, photo_url, current_club:clubs(name, city)"
+      "id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, city, photo_url, current_club:clubs(name, city), team:teams(name)"
     )
     .order("created_at", { ascending: false });
 
@@ -145,8 +145,12 @@ export default async function SearchPage({
               name: string;
               city: string;
             } | null;
+            const team = player.team as unknown as { name: string } | null;
             const photoUrl = player.photo_url
               ? signedUrlByPath.get(player.photo_url)
+              : null;
+            const levelLabel = player.player_level
+              ? PLAYER_LEVEL_LABELS[player.player_level] ?? player.player_level
               : null;
 
             return (
@@ -162,8 +166,12 @@ export default async function SearchPage({
                       <VerifiedMark />
                     </div>
                     <p className="mt-0.5 text-sm text-gray-500">
-                      {player.city}
-                      {club ? ` · ${club.name}` : ""}
+                      {club ? club.name : player.city}
+                      {team ? ` · ${team.name}` : ""}
+                      {!team && club ? ` · ${club.city}` : ""}
+                    </p>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      {[player.city, levelLabel].filter(Boolean).join(" · ")}
                     </p>
                     {player.positions && player.positions.length > 0 ? (
                       <div className="mt-2 flex flex-wrap gap-1.5">

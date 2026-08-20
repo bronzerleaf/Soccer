@@ -9,8 +9,9 @@ import { togglePlayerInterest } from "../actions";
 import { Badge, VerifiedMark } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PlayerAvatar } from "@/components/ui/player-avatar";
-import { InfoTile, InfoTileRow } from "@/components/ui/info-tile";
+import { InfoTile } from "@/components/ui/info-tile";
 import { SocialLinkButton } from "@/components/ui/social-icons";
+import { PLAYER_LEVEL_LABELS } from "@/app/(app)/players/constants";
 
 export default async function SearchPlayerDetailPage({
   params,
@@ -23,7 +24,7 @@ export default async function SearchPlayerDetailPage({
   const { data: player } = await supabase
     .from("players")
     .select(
-      "id, first_name, last_initial, birth_year, positions, preferred_foot, city, bio, photo_url, instagram_url, youtube_url, current_club:clubs(name, city), player_highlights(id, url, caption, theme)"
+      "id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, city, bio, photo_url, instagram_url, youtube_url, current_club:clubs(name, city), team:teams(name), player_highlights(id, url, caption, theme)"
     )
     .eq("id", id)
     .single();
@@ -55,6 +56,7 @@ export default async function SearchPlayerDetailPage({
     name: string;
     city: string;
   } | null;
+  const team = player.team as unknown as { name: string } | null;
 
   const highlights: Highlight[] = player.player_highlights ?? [];
   const previewList = await Promise.all(
@@ -82,32 +84,33 @@ export default async function SearchPlayerDetailPage({
               <VerifiedMark />
             </div>
             <p className="text-sm text-gray-500">
-              {club ? `${club.name} · ${club.city}` : player.city}
+              {team ? team.name : club ? `${club.name} · ${club.city}` : player.city}
             </p>
+            {team && club ? (
+              <p className="text-xs text-gray-400">{club.name}</p>
+            ) : null}
           </div>
         </div>
 
-        <div className="mt-2">
-          <Badge tone="verified">Open to opportunities</Badge>
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <InfoTile value={player.positions?.[0] ?? "—"} label="Primary" />
+          <InfoTile value={player.positions?.[1] ?? "—"} label="Secondary" />
+          <InfoTile value={player.birth_year} label="Birth Year" />
+          <InfoTile value={player.years_playing ?? "—"} label="Years Playing" />
+          <InfoTile
+            value={player.player_level ? PLAYER_LEVEL_LABELS[player.player_level] ?? player.player_level : "—"}
+            label="Level"
+          />
+          <InfoTile
+            value={player.preferred_foot ? capitalize(player.preferred_foot) : "—"}
+            label="Preferred Foot"
+          />
         </div>
-
-        {(player.positions ?? []).length > 0 ? (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {(player.positions ?? []).map((position: string) => (
-              <Badge key={position} tone="neutral">
-                {position}
-              </Badge>
-            ))}
+        {player.city ? (
+          <div className="mt-2">
+            <Badge tone="neutral">{player.city}</Badge>
           </div>
         ) : null}
-
-        <div className="mt-4">
-          <InfoTileRow>
-            <InfoTile value={player.birth_year} label="Birth year" />
-            <InfoTile value={player.preferred_foot ? capitalize(player.preferred_foot) : "—"} label="Preferred foot" />
-            <InfoTile value={player.city ?? "—"} label="City" />
-          </InfoTileRow>
-        </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
           <ActionButton

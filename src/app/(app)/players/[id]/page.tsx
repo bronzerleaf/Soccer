@@ -4,10 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { deletePlayer, setOpenToOpportunities } from "../actions";
 import { ToggleActionButton } from "@/components/ui/action-button";
 import { Badge, VerifiedMark } from "@/components/ui/badge";
-import { PlayerAvatar } from "@/components/ui/player-avatar";
+import { InfoTile } from "@/components/ui/info-tile";
 import { SocialLinkButton } from "@/components/ui/social-icons";
 import { AppHeader } from "@/components/pitchlink/app-header";
 import { SectionHeader } from "@/components/pitchlink/section-header";
+import { PLAYER_LEVEL_LABELS } from "../constants";
 import { PhotoUpload } from "./photo-upload";
 import { EditPlayerForm } from "./edit-player-form";
 import { DeletePlayerButton } from "./delete-player-button";
@@ -32,7 +33,7 @@ export default async function PlayerDetailPage({
     supabase
       .from("players")
       .select(
-        "id, parent_id, first_name, last_initial, birth_year, positions, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, team_id, team_membership_verified, instagram_url, youtube_url, team:teams(name), player_highlights(id, url, caption, theme)"
+        "id, parent_id, first_name, last_initial, birth_year, positions, years_playing, player_level, preferred_foot, current_club_id, city, bio, photo_url, open_to_opportunities, consent_completed, team_id, team_membership_verified, instagram_url, youtube_url, current_club:clubs(name, city), team:teams(name), player_highlights(id, url, caption, theme)"
       )
       .eq("id", id)
       .single(),
@@ -60,17 +61,7 @@ export default async function PlayerDetailPage({
     (row) => (row.coach as unknown as { full_name: string } | null)?.full_name ?? "A coach"
   );
 
-  // Only returns rows at all once this exact player is a *verified* team
-  // member — get_team_roster() re-checks that itself, so this can't be
-  // fooled by requesting it for a team this player isn't confirmed on.
-  type Teammate = { id: string; first_name: string; last_initial: string; birth_year: number; positions: string[] };
-  let teammates: Teammate[] = [];
-  if (player.team_id && player.team_membership_verified) {
-    const { data: rosterRows } = await supabase.rpc("get_team_roster", {
-      target_team_id: player.team_id,
-    });
-    teammates = ((rosterRows ?? []) as Teammate[]).filter((row) => row.id !== player.id);
-  }
+  const club = player.current_club as unknown as { name: string; city: string } | null;
 
   let signedPhotoUrl: string | null = null;
   if (player.photo_url) {
@@ -119,21 +110,35 @@ export default async function PlayerDetailPage({
               </span>
             </div>
           ) : null}
+          {club ? (
+            <span className="text-xs font-medium text-gray-500">
+              {club.name}
+              {club.city ? ` · ${club.city}` : ""}
+            </span>
+          ) : null}
         </div>
       </div>
 
-      <div className="mt-3.5 flex flex-wrap gap-1.5">
-        {(player.positions ?? []).map((position: string) => (
-          <Badge key={position} tone="neutral">
-            {position}
-          </Badge>
-        ))}
-        <Badge tone="neutral">Birth Year {player.birth_year}</Badge>
-        {player.preferred_foot ? (
-          <Badge tone="neutral">Strong Foot: {player.preferred_foot}</Badge>
-        ) : null}
-        {player.city ? <Badge tone="neutral">{player.city}</Badge> : null}
+      <div className="mt-3.5 grid grid-cols-3 gap-2">
+        <InfoTile value={player.positions?.[0] ?? "—"} label="Primary" />
+        <InfoTile value={player.positions?.[1] ?? "—"} label="Secondary" />
+        <InfoTile value={player.birth_year} label="Birth Year" />
+        <InfoTile value={player.years_playing ?? "—"} label="Years Playing" />
+        <InfoTile
+          value={player.player_level ? PLAYER_LEVEL_LABELS[player.player_level] ?? player.player_level : "—"}
+          label="Level"
+        />
+        <InfoTile
+          value={player.preferred_foot ? capitalize(player.preferred_foot) : "—"}
+          label="Preferred Foot"
+        />
       </div>
+
+      {player.city ? (
+        <div className="mt-2">
+          <Badge tone="neutral">{player.city}</Badge>
+        </div>
+      ) : null}
 
       {player.bio ? (
         <div className="mt-4 rounded-[18px] border border-gray-200 bg-white p-4 shadow-[0_3px_16px_rgba(17,24,39,0.07)]">
@@ -156,7 +161,7 @@ export default async function PlayerDetailPage({
               </p>
               <p className="mt-0.5 max-w-[220px] text-xs text-gray-500">
                 {player.open_to_opportunities
-                  ? "Verified coaches can find and message you about this player."
+                  ? "Allow verified coaches to find and message you about this player."
                   : "Turn this on when you're ready for coaches to find this profile."}
               </p>
             </div>
@@ -220,39 +225,6 @@ export default async function PlayerDetailPage({
         </div>
       ) : null}
 
-      {teammates.length > 0 ? (
-        <div className="mt-5">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-900">Verified Teammates</h2>
-            <span className="text-xs font-semibold text-gray-400">{teammates.length}</span>
-          </div>
-          <p className="mt-0.5 text-xs text-gray-400">
-            Other verified players on {(player.team as unknown as { name: string } | null)?.name}.
-          </p>
-          <div className="mt-2.5 grid grid-cols-2 gap-2">
-            {teammates.map((mate) => (
-              <div
-                key={mate.id}
-                className="flex items-center gap-2.5 rounded-xl border border-gray-200 bg-white p-2.5"
-              >
-                <PlayerAvatar name={mate.first_name} size={36} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1">
-                    <p className="truncate text-xs font-semibold text-gray-900">
-                      {mate.first_name} {mate.last_initial}.
-                    </p>
-                    <VerifiedMark className="h-3.5 w-3.5" />
-                  </div>
-                  <p className="truncate text-[11px] text-gray-400">
-                    {(mate.positions ?? [])[0] ?? "No position"} · {mate.birth_year}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
       <div className="mt-8">
         <SectionHeader title="Highlights" />
         <div className="mt-2">
@@ -288,6 +260,8 @@ export default async function PlayerDetailPage({
             last_initial: player.last_initial,
             birth_year: player.birth_year,
             positions: player.positions ?? [],
+            years_playing: player.years_playing,
+            player_level: player.player_level,
             preferred_foot: player.preferred_foot,
             current_club_id: player.current_club_id,
             city: player.city,
@@ -306,4 +280,8 @@ export default async function PlayerDetailPage({
       </div>
     </main>
   );
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { POSITIONS, PREFERRED_FEET } from "./constants";
+import { POSITIONS, PREFERRED_FEET, PLAYER_LEVELS } from "./constants";
 
 type Club = { id: string; name: string; city: string };
 type Team = { id: string; name: string };
@@ -11,6 +11,8 @@ type PlayerFormValues = {
   last_initial: string;
   birth_year: number;
   positions: string[];
+  years_playing: number | null;
+  player_level: string | null;
   preferred_foot: string | null;
   current_club_id: string | null;
   city: string;
@@ -177,28 +179,94 @@ export function PlayerForm<T>({
         </div>
       </div>
 
-      <fieldset>
-        <legend className="text-sm font-medium text-gray-900">
-          Position(s)
-        </legend>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {POSITIONS.map((position) => (
-            <label
-              key={position}
-              className="flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700"
-            >
-              <input
-                type="checkbox"
-                name="positions"
-                value={position}
-                defaultChecked={defaultValues?.positions?.includes(position)}
-                className="h-4 w-4"
-              />
-              {position}
-            </label>
-          ))}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label
+            htmlFor="primary_position"
+            className="block text-sm font-medium text-gray-900"
+          >
+            Primary position
+          </label>
+          <select
+            id="primary_position"
+            name="primary_position"
+            required
+            defaultValue={defaultValues?.positions?.[0] ?? ""}
+            className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
+          >
+            <option value="" disabled>
+              Select one
+            </option>
+            {POSITIONS.map((position) => (
+              <option key={position} value={position}>
+                {position}
+              </option>
+            ))}
+          </select>
         </div>
-      </fieldset>
+        <div>
+          <label
+            htmlFor="secondary_position"
+            className="block text-sm font-medium text-gray-900"
+          >
+            Secondary position
+          </label>
+          <select
+            id="secondary_position"
+            name="secondary_position"
+            defaultValue={defaultValues?.positions?.[1] ?? ""}
+            className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
+          >
+            <option value="">None</option>
+            {POSITIONS.map((position) => (
+              <option key={position} value={position}>
+                {position}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label
+            htmlFor="years_playing"
+            className="block text-sm font-medium text-gray-900"
+          >
+            Years playing
+          </label>
+          <input
+            id="years_playing"
+            name="years_playing"
+            type="number"
+            min={0}
+            max={20}
+            defaultValue={defaultValues?.years_playing ?? ""}
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="player_level"
+            className="block text-sm font-medium text-gray-900"
+          >
+            Player level
+          </label>
+          <select
+            id="player_level"
+            name="player_level"
+            defaultValue={defaultValues?.player_level ?? ""}
+            className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
+          >
+            <option value="">Not specified</option>
+            {PLAYER_LEVELS.map((level) => (
+              <option key={level.value} value={level.value}>
+                {level.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       <fieldset>
         <legend className="text-sm font-medium text-gray-900">
