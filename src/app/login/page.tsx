@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { AuthShell } from "@/components/pitchlink/auth-shell";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 py-16">
+    <AuthShell>
       <h1 className="text-xl font-semibold text-gray-900">Log in</h1>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
@@ -93,6 +94,6 @@ export default function LoginPage() {
           Create an account
         </Link>
       </p>
-    </main>
+    </AuthShell>
   );
 }

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { AuthShell } from "@/components/pitchlink/auth-shell";
 
 type Role = "parent" | "coach" | "organization";
 
@@ -48,7 +49,7 @@ export default function SignUpPage() {
 
   if (status === "check-email") {
     return (
-      <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 py-16">
+      <AuthShell>
         <h1 className="text-xl font-semibold text-gray-900">
           Check your email
         </h1>
@@ -56,12 +57,12 @@ export default function SignUpPage() {
           We sent a confirmation link to {email}. Follow it to finish setting
           up your account.
         </p>
-      </main>
+      </AuthShell>
     );
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 py-16">
+    <AuthShell>
       <h1 className="text-xl font-semibold text-gray-900">
         Create your account
       </h1>
@@ -193,6 +194,6 @@ export default function SignUpPage() {
           Log in
         </Link>
       </p>
-    </main>
+    </AuthShell>
   );
 }
