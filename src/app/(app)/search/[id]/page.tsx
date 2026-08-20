@@ -10,6 +10,7 @@ import { Badge, VerifiedMark } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PlayerAvatar } from "@/components/ui/player-avatar";
 import { InfoTile, InfoTileRow } from "@/components/ui/info-tile";
+import { SocialLinkButton } from "@/components/ui/social-icons";
 
 export default async function SearchPlayerDetailPage({
   params,
@@ -119,24 +120,10 @@ export default async function SearchPlayerDetailPage({
             className="rounded-full"
           />
           {player.instagram_url ? (
-            <a
-              href={player.instagram_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
-            >
-              Instagram ↗
-            </a>
+            <SocialLinkButton href={player.instagram_url} kind="instagram" />
           ) : null}
           {player.youtube_url ? (
-            <a
-              href={player.youtube_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:border-slate-400"
-            >
-              YouTube ↗
-            </a>
+            <SocialLinkButton href={player.youtube_url} kind="youtube" />
           ) : null}
         </div>
         <p className="mt-2 text-xs text-slate-500">

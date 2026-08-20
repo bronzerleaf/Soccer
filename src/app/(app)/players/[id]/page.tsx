@@ -5,6 +5,7 @@ import { deletePlayer, setOpenToOpportunities } from "../actions";
 import { ToggleActionButton } from "@/components/ui/action-button";
 import { Badge, VerifiedMark } from "@/components/ui/badge";
 import { PlayerAvatar } from "@/components/ui/player-avatar";
+import { SocialLinkButton } from "@/components/ui/social-icons";
 import { PhotoUpload } from "./photo-upload";
 import { EditPlayerForm } from "./edit-player-form";
 import { DeletePlayerButton } from "./delete-player-button";
@@ -88,19 +89,34 @@ export default async function PlayerDetailPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/players" className="text-sm text-slate-500 underline">
-        ← Back to your players
-      </Link>
-
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
-        {player.first_name} {player.last_initial}.
-      </h1>
+      <div className="grid grid-cols-[36px_1fr_36px] items-center gap-2">
+        <Link
+          href="/players"
+          aria-label="Back to your players"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+        >
+          <svg width="9" height="15" viewBox="0 0 12 20" fill="none">
+            <path
+              d="M10 2L2 10l8 8"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+        <h1 className="truncate text-center text-lg font-bold text-slate-900">
+          {player.first_name} {player.last_initial}.
+        </h1>
+        <div aria-hidden="true" />
+      </div>
 
       <div className="mt-4 flex items-center gap-3.5">
         <PhotoUpload
           playerId={player.id}
           parentId={player.parent_id}
           currentPhotoUrl={signedPhotoUrl}
+          verified={player.team_membership_verified}
         />
         <div className="flex flex-col gap-1.5">
           {player.team_membership_verified ? (
@@ -263,27 +279,16 @@ export default async function PlayerDetailPage({
       </div>
 
       {player.instagram_url || player.youtube_url ? (
-        <div className="mt-8 flex gap-2">
-          {player.instagram_url ? (
-            <a
-              href={player.instagram_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-center text-sm font-semibold text-slate-700 hover:border-slate-400"
-            >
-              Instagram ↗
-            </a>
-          ) : null}
-          {player.youtube_url ? (
-            <a
-              href={player.youtube_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-center text-sm font-semibold text-slate-700 hover:border-slate-400"
-            >
-              YouTube ↗
-            </a>
-          ) : null}
+        <div className="mt-8">
+          <h2 className="text-sm font-bold text-slate-900">Connect</h2>
+          <div className="mt-2.5 grid grid-cols-2 gap-2">
+            {player.instagram_url ? (
+              <SocialLinkButton href={player.instagram_url} kind="instagram" />
+            ) : null}
+            {player.youtube_url ? (
+              <SocialLinkButton href={player.youtube_url} kind="youtube" />
+            ) : null}
+          </div>
         </div>
       ) : null}
 

@@ -127,12 +127,16 @@ export function BottomNav({
       <Link
         key={tab.href}
         href={tab.href}
-        className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors ${
-          active ? "text-slate-900" : "text-slate-400 hover:text-slate-600"
+        className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-semibold transition-colors ${
+          active ? "text-green-600" : "text-slate-400 hover:text-slate-600"
         }`}
       >
         {tab.icon}
         {tab.label}
+        <span
+          className={`h-1 w-1 rounded-full transition-colors ${active ? "bg-green-600" : "bg-transparent"}`}
+          aria-hidden="true"
+        />
       </Link>
     );
   }
