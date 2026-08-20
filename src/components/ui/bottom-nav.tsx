@@ -64,26 +64,19 @@ const icons = {
   ),
 };
 
-// Centered floating "Home" mark that sits above the tab row, echoing the
-// club-crest/ball mark pattern from the reference design. Kept flat and
-// monochrome (no gradient, no literal soccer ball graphic) to stay in
-// line with CLAUDE.md's "competent and calm, not sports-tech" direction.
-function HomeMark() {
+// Centered floating soccer-ball mark that sits above the tab row — the
+// literal ball glyph from the reference design (flat black/white panels,
+// no gradient), ringed in the app's green accent.
+function BallMark() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" fill="#fff" stroke="#0f172a" strokeWidth="1" />
+      <path d="M12 7.5 16 10.3 14.5 15 9.5 15 8 10.3Z" fill="#0f172a" />
       <path
-        d="M4 11.5 12 4l8 7.5"
-        stroke="white"
-        strokeWidth="2"
+        d="M12 7.5 12 2.2M16 10.3 20.8 8.7M14.5 15 17.5 19.5M9.5 15 6.5 19.5M8 10.3 3.2 8.7"
+        stroke="#0f172a"
+        strokeWidth="1.3"
         strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M6 10v9a1 1 0 0 0 1 1h3v-5.5h4V20h3a1 1 0 0 0 1-1v-9"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );
@@ -164,11 +157,11 @@ export function BottomNav({
         <Link
           href="/dashboard"
           aria-label="Home"
-          className={`absolute left-1/2 top-0 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-white shadow-md transition-colors ${
-            homeActive ? "bg-slate-900" : "bg-slate-700 hover:bg-slate-900"
+          className={`absolute left-1/2 top-0 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] bg-white shadow-md transition-colors ${
+            homeActive ? "border-green-600" : "border-green-500 hover:border-green-600"
           }`}
         >
-          <HomeMark />
+          <BallMark />
         </Link>
       </div>
     </nav>
