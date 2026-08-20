@@ -159,11 +159,13 @@ export function BottomNav({
         <Link
           href="/dashboard"
           aria-label="Home"
-          className={`absolute left-1/2 top-0 h-14 w-14 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full bg-white shadow-md transition-transform ${
+          className={`ball-mark absolute left-1/2 top-0 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white transition-transform ${
             homeActive ? "scale-105" : "hover:scale-105"
           }`}
         >
-          <BallMark />
+          <div className="h-full w-full overflow-hidden rounded-full">
+            <BallMark />
+          </div>
         </Link>
       </div>
     </nav>

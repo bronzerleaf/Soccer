@@ -24,3 +24,33 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Idle pulse + tap flash for the bottom-nav ball mark. A glow is a
+   lighting effect, not a pixel of the icon itself, so it's layered on
+   in CSS rather than baked into whatever image/SVG sits underneath —
+   that way it works the same regardless of what the ball asset is. */
+@keyframes ball-glow-idle {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.35), 0 4px 12px rgba(15, 23, 42, 0.18); }
+  50% { box-shadow: 0 0 0 7px rgba(22, 163, 74, 0), 0 4px 12px rgba(15, 23, 42, 0.18); }
+}
+
+.ball-mark {
+  animation: ball-glow-idle 2.6s ease-out infinite;
+}
+
+.ball-mark:hover,
+.ball-mark:focus-visible {
+  animation-play-state: paused;
+  box-shadow: 0 0 18px 4px rgba(22, 163, 74, 0.55), 0 4px 12px rgba(15, 23, 42, 0.18);
+}
+
+.ball-mark:active {
+  animation-play-state: paused;
+  box-shadow: 0 0 26px 8px rgba(22, 163, 74, 0.75), 0 4px 12px rgba(15, 23, 42, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ball-mark {
+    animation: none;
+  }
+}
