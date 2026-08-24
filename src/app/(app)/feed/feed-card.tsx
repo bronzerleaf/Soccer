@@ -2,9 +2,30 @@ import Link from "next/link";
 import { LikeButton } from "./like-button";
 import { ShareButton } from "./share-button";
 import { ActionButton } from "@/components/ui/action-button";
+import { ClubCrest } from "@/components/ui/club-crest";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
+import { themeMeta } from "@/lib/highlight-themes";
 import { formatTime } from "@/lib/format";
 import { deleteFeedPost } from "./actions";
 import { toggleRosterPostLike } from "../roster-posts/actions";
+
+function PinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5 shrink-0">
+      <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" />
+      <circle cx="12" cy="9.5" r="2.3" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5 shrink-0">
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M8 3v4M16 3v4M3 10h18" />
+    </svg>
+  );
+}
 
 export type FeedItem =
   | {
@@ -75,6 +96,21 @@ export type FeedItem =
       likeCount: number;
       likedByMe: boolean;
       canDelete: boolean;
+    }
+  | {
+      kind: "highlight";
+      id: string;
+      playerFirstName: string;
+      playerLastInitial: string;
+      cityName: string;
+      caption: string | null;
+      theme: string | null;
+      thumbnailUrl: string | null;
+      linkUrl: string;
+      createdAt: string;
+      likeCount: number;
+      likedByMe: boolean;
+      canDelete: boolean;
     };
 
 const KIND_LABEL: Record<FeedItem["kind"], string> = {
@@ -83,14 +119,16 @@ const KIND_LABEL: Record<FeedItem["kind"], string> = {
   guest_play: "Guest play",
   org_event: "Tournament / event",
   training: "Training / event",
+  highlight: "Highlight clip",
 };
 
 const KIND_BADGE: Record<FeedItem["kind"], string> = {
-  roster_spot: "bg-blue-50 text-blue-700",
-  looking_for_team: "bg-emerald-50 text-emerald-700",
+  roster_spot: "bg-green-50 text-green-700",
+  looking_for_team: "bg-blue-50 text-blue-700",
   guest_play: "bg-amber-50 text-amber-800",
   org_event: "bg-purple-50 text-purple-700",
   training: "bg-teal-50 text-teal-700",
+  highlight: "bg-pink-50 text-pink-700",
 };
 
 function formatCost(costCents: number | null): string | null {
@@ -128,15 +166,22 @@ export function FeedCard({ item }: { item: FeedItem }) {
 
   if (item.kind === "roster_spot") {
     return (
-      <div className="rounded-lg border border-slate-200 p-4">
+      <div className="rounded-[18px] border border-gray-200 bg-white p-4 shadow-[0_3px_16px_rgba(17,24,39,0.07)]">
         <Link href={`/roster-posts/${item.id}`} className="block">
-          <div className="flex items-center justify-between gap-2">
-            {badge}
+          <div className="flex items-start gap-3">
+            <ClubCrest name={item.clubName} size={40} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <p className="truncate text-sm font-bold text-gray-900">{item.clubName}</p>
+                {badge}
+              </div>
+              <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+                <PinIcon />
+                {item.clubCity}
+              </p>
+            </div>
           </div>
-          <p className="mt-2 text-sm font-medium text-slate-900">
-            {item.clubName} — {item.clubCity}
-          </p>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-2.5 text-sm text-gray-600">
             {item.birthYear} ·{" "}
             {(item.positions ?? []).join(", ") || "Any position"}
           </p>
@@ -154,12 +199,75 @@ export function FeedCard({ item }: { item: FeedItem }) {
     );
   }
 
+  if (item.kind === "highlight") {
+    const theme = themeMeta(item.theme);
+    return (
+      <div className="overflow-hidden rounded-[18px] border border-gray-200 bg-white shadow-[0_3px_16px_rgba(17,24,39,0.07)]">
+        <Link href={item.linkUrl} target="_blank" rel="noopener noreferrer" className="block">
+          <div className="relative aspect-video w-full bg-gray-900">
+            {item.thumbnailUrl ? (
+              <ImageWithFallback
+                src={item.thumbnailUrl}
+                alt=""
+                className="h-full w-full object-cover"
+                fallback={<div className="flex h-full w-full items-center justify-center bg-gray-800" />}
+              />
+            ) : null}
+            <span className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm">
+              <svg viewBox="0 0 24 24" fill="#111827" className="h-3.5 w-3.5 translate-x-px">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+            {theme ? (
+              <span
+                className="absolute left-2 top-2 rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white shadow-sm"
+                style={{ background: theme.color }}
+              >
+                {theme.label}
+              </span>
+            ) : null}
+          </div>
+          <div className="p-4">
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-sm font-bold text-gray-900">
+                {item.playerFirstName} {item.playerLastInitial}.
+              </p>
+              {badge}
+            </div>
+            <p className="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+              <PinIcon />
+              {item.cityName}
+            </p>
+            {item.caption ? (
+              <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-600">{item.caption}</p>
+            ) : null}
+          </div>
+        </Link>
+        <div className="flex gap-2 px-4 pb-4">
+          <LikeButton postId={item.id} likedByMe={item.likedByMe} likeCount={item.likeCount} />
+          <ShareButton href={`/feed/post/${item.id}`} />
+          {item.canDelete ? (
+            <ActionButton
+              action={deleteFeedPost.bind(null, item.id)}
+              label="Remove"
+              pendingLabel="..."
+              successMessage="Removed"
+              variant="ghost"
+              size="sm"
+              confirmMessage="Remove this from the feed? It'll stay on the player's profile."
+            />
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
   const cost = item.kind === "training" ? formatCost(item.costCents) : null;
   const duration = item.kind === "training" ? formatDuration(item.durationMinutes) : null;
   const eventWhen = formatEventDate(item.eventDate, item.eventTime);
 
   return (
-    <div className="rounded-lg border border-slate-200 p-4">
+    <div className="rounded-[18px] border border-gray-200 bg-white p-4 shadow-[0_3px_16px_rgba(17,24,39,0.07)]">
       <div className="flex items-center justify-between gap-2">
         {badge}
         {item.canDelete ? (
@@ -177,15 +285,15 @@ export function FeedCard({ item }: { item: FeedItem }) {
 
       <Link href={`/feed/post/${item.id}`} className="block">
         {item.kind === "org_event" ? (
-          <p className="mt-2 text-sm font-medium text-slate-900">
+          <p className="mt-2 text-sm font-medium text-gray-900">
             {item.orgName} — {item.cityName}
           </p>
         ) : item.kind === "training" ? (
-          <p className="mt-2 text-sm font-medium text-slate-900">
+          <p className="mt-2 text-sm font-medium text-gray-900">
             {item.authorName} — {item.cityName}
           </p>
         ) : (
-          <p className="mt-2 text-sm font-medium text-slate-900">
+          <p className="mt-2 text-sm font-medium text-gray-900">
             {item.birthYear ?? "Any birth year"} ·{" "}
             {(item.positions ?? []).join(", ") || "Any position"} ·{" "}
             {item.cityName}
@@ -193,29 +301,40 @@ export function FeedCard({ item }: { item: FeedItem }) {
         )}
 
         {item.kind === "training" && (item.birthYear || item.positions.length > 0) ? (
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-gray-500">
             {item.birthYear ?? "Any birth year"} ·{" "}
             {item.positions.join(", ") || "Any position"}
           </p>
         ) : null}
 
         {(item.kind === "looking_for_team" || item.kind === "guest_play") && item.authorName ? (
-          <p className="mt-1 text-xs text-slate-500">Posted by {item.authorName}</p>
+          <p className="mt-1 text-xs text-gray-500">Posted by {item.authorName}</p>
         ) : null}
 
         {item.kind === "training" && (cost || duration) ? (
-          <p className="mt-1.5 text-sm font-medium text-slate-700">
+          <p className="mt-1.5 text-sm font-medium text-gray-700">
             {[cost, duration].filter(Boolean).join(" · ")}
           </p>
         ) : null}
 
         {eventWhen || item.location ? (
-          <p className="mt-1.5 text-xs font-medium text-slate-600">
-            {[eventWhen, item.location].filter(Boolean).join(" · ")}
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-gray-600">
+            {eventWhen ? (
+              <span className="flex items-center gap-1">
+                <CalendarIcon />
+                {eventWhen}
+              </span>
+            ) : null}
+            {item.location ? (
+              <span className="flex items-center gap-1">
+                <PinIcon />
+                {item.location}
+              </span>
+            ) : null}
           </p>
         ) : null}
 
-        <p className="mt-1.5 text-sm leading-6 text-slate-600">
+        <p className="mt-1.5 line-clamp-3 text-sm leading-6 text-gray-600">
           {item.description}
         </p>
       </Link>
@@ -232,7 +351,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
             href={item.signupUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-slate-400"
+            className="inline-flex items-center gap-1.5 rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-600 transition-colors hover:border-gray-400"
           >
             Sign up ↗
           </a>

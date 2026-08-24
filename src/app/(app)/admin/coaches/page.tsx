@@ -16,13 +16,13 @@ export default async function AdminCoachesPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <Link href="/admin" className="text-sm text-slate-500 underline">
+      <Link href="/admin" className="text-sm text-gray-500 underline">
         ← Admin
       </Link>
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
+      <h1 className="mt-3 text-xl font-semibold text-gray-900">
         Coach verification queue
       </h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm text-gray-600">
         Approve a coach only once you can confirm their club affiliation.
       </p>
 
@@ -41,15 +41,15 @@ export default async function AdminCoachesPage() {
             return (
               <li
                 key={item.id}
-                className="rounded-lg border border-slate-200 p-4"
+                className="rounded-lg border border-gray-200 p-4"
               >
-                <p className="text-sm font-medium text-slate-900">
+                <p className="text-sm font-medium text-gray-900">
                   {coach?.full_name} · {coach?.email}
                 </p>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-gray-600">
                   Claims: {club?.name} — {club?.city}
                 </p>
-                <p className="mt-2 text-sm text-slate-700">{item.evidence}</p>
+                <p className="mt-2 text-sm text-gray-700">{item.evidence}</p>
 
                 <div className="mt-3 flex gap-2">
                   <ActionButton
@@ -73,7 +73,7 @@ export default async function AdminCoachesPage() {
           })}
         </ul>
       ) : (
-        <p className="mt-8 text-sm text-slate-600">
+        <p className="mt-8 text-sm text-gray-600">
           No pending verifications right now.
         </p>
       )}

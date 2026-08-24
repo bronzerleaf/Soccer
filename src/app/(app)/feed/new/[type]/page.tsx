@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/pitchlink/back-link";
 import { ComposerForm } from "./composer-form";
 
 const FAMILY_TYPES = new Set(["looking_for_team", "guest_play"]);
@@ -99,21 +100,19 @@ export default async function NewFeedPostPage({
 
   return (
     <main className="mx-auto max-w-sm px-6 py-12">
-      <Link href="/feed/new" className="text-sm text-slate-500 underline">
-        ← Back
-      </Link>
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
+      <BackLink href="/feed/new" label="Back" />
+      <h1 className="mt-3 text-xl font-semibold text-gray-900">
         {TITLE[type]}
       </h1>
 
       {mode === "parent" && players.length === 0 ? (
-        <div className="mt-6 rounded-lg border border-dashed border-slate-300 p-4 text-center">
-          <p className="text-sm text-slate-600">
+        <div className="mt-6 rounded-lg border border-dashed border-gray-300 p-4 text-center">
+          <p className="text-sm text-gray-600">
             You don&rsquo;t have any consent-verified players yet.
           </p>
           <Link
             href="/players"
-            className="mt-3 inline-block rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800"
+            className="mt-3 inline-block rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800"
           >
             Go to your players
           </Link>

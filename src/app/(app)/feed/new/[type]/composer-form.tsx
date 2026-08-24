@@ -69,7 +69,7 @@ export function ComposerForm({
         <div>
           <label
             htmlFor="player_id"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Which player?
           </label>
@@ -77,7 +77,7 @@ export function ComposerForm({
             id="player_id"
             name="player_id"
             required
-            className="mt-1.5 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           >
             <option value="">Select a player</option>
             {(players ?? []).map((p) => (
@@ -86,7 +86,7 @@ export function ComposerForm({
               </option>
             ))}
           </select>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-gray-500">
             Only consent-verified players can be posted. Birth year and
             position come from their profile — never a name or photo shows
             in the feed.
@@ -100,14 +100,14 @@ export function ComposerForm({
             <div>
               <label
                 htmlFor="birth_year"
-                className="block text-sm font-medium text-slate-900"
+                className="block text-sm font-medium text-gray-900"
               >
                 Birth year
               </label>
               <select
                 id="birth_year"
                 name="birth_year"
-                className="mt-1.5 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
               >
                 <option value="">Any</option>
                 {BIRTH_YEARS.map((year) => (
@@ -121,7 +121,7 @@ export function ComposerForm({
               <div>
                 <label
                   htmlFor="cost_dollars"
-                  className="block text-sm font-medium text-slate-900"
+                  className="block text-sm font-medium text-gray-900"
                 >
                   Cost (optional)
                 </label>
@@ -132,21 +132,21 @@ export function ComposerForm({
                   min="0"
                   step="0.01"
                   placeholder="25.00"
-                  className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                  className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
                 />
               </div>
             ) : null}
           </div>
 
           <fieldset>
-            <legend className="text-sm font-medium text-slate-900">
+            <legend className="text-sm font-medium text-gray-900">
               Position (optional)
             </legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {POSITIONS.map((position) => (
                 <label
                   key={position}
-                  className="flex items-center gap-1.5 rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-700"
+                  className="flex items-center gap-1.5 rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700"
                 >
                   <input
                     type="checkbox"
@@ -164,7 +164,7 @@ export function ComposerForm({
             <div>
               <label
                 htmlFor="duration_minutes"
-                className="block text-sm font-medium text-slate-900"
+                className="block text-sm font-medium text-gray-900"
               >
                 Duration in minutes (optional)
               </label>
@@ -174,9 +174,9 @@ export function ComposerForm({
                 type="number"
                 min="1"
                 placeholder="90"
-                className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
               />
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-gray-500">
                 Cost is shown as-is on the card — payment still happens off
                 the app, same as a tryout.
               </p>
@@ -188,7 +188,7 @@ export function ComposerForm({
       <div>
         <label
           htmlFor="city_id"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           City
         </label>
@@ -196,7 +196,7 @@ export function ComposerForm({
           id="city_id"
           name="city_id"
           required
-          className="mt-1.5 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         >
           <option value="">Select a city</option>
           {cities.map((c) => (
@@ -213,7 +213,7 @@ export function ComposerForm({
             <div>
               <label
                 htmlFor="event_date"
-                className="block text-sm font-medium text-slate-900"
+                className="block text-sm font-medium text-gray-900"
               >
                 Date (optional)
               </label>
@@ -221,13 +221,13 @@ export function ComposerForm({
                 id="event_date"
                 name="event_date"
                 type="date"
-                className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
               />
             </div>
             <div>
               <label
                 htmlFor="event_time"
-                className="block text-sm font-medium text-slate-900"
+                className="block text-sm font-medium text-gray-900"
               >
                 Time (optional)
               </label>
@@ -235,7 +235,7 @@ export function ComposerForm({
                 id="event_time"
                 name="event_time"
                 type="time"
-                className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+                className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
               />
             </div>
           </div>
@@ -243,7 +243,7 @@ export function ComposerForm({
           <div>
             <label
               htmlFor="location"
-              className="block text-sm font-medium text-slate-900"
+              className="block text-sm font-medium text-gray-900"
             >
               Location (optional)
             </label>
@@ -252,14 +252,14 @@ export function ComposerForm({
               name="location"
               type="text"
               placeholder="Field name and address"
-              className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
           </div>
 
           <div>
             <label
               htmlFor="signup_url"
-              className="block text-sm font-medium text-slate-900"
+              className="block text-sm font-medium text-gray-900"
             >
               Sign-up link (optional)
             </label>
@@ -268,9 +268,9 @@ export function ComposerForm({
               name="signup_url"
               type="url"
               placeholder="https://..."
-              className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-gray-500">
               Link to a sign-up sheet or registration form, if you have one.
             </p>
           </div>
@@ -280,7 +280,7 @@ export function ComposerForm({
       <div>
         <label
           htmlFor="description"
-          className="block text-sm font-medium text-slate-900"
+          className="block text-sm font-medium text-gray-900"
         >
           Description
         </label>
@@ -298,7 +298,7 @@ export function ComposerForm({
                   ? "What position, what game, and how can a parent reach you?"
                   : "What are you looking for?"
           }
-          className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+          className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
         />
       </div>
 
@@ -307,7 +307,7 @@ export function ComposerForm({
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-md bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+        className="w-full rounded-md bg-gray-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-60"
       >
         {submitting ? "Posting..." : "Post to the feed"}
       </button>

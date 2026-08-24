@@ -37,18 +37,18 @@ export function LocationSettings({
 
   if (!open) {
     return (
-      <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-        <p className="text-sm text-slate-700">
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+        <p className="text-sm text-gray-700">
           Showing posts within{" "}
-          <span className="font-medium text-slate-900">
+          <span className="font-medium text-gray-900">
             {radiusMiles} miles
           </span>{" "}
-          of <span className="font-medium text-slate-900">{cityName}</span>
+          of <span className="font-medium text-gray-900">{cityName}</span>
         </p>
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="text-sm font-medium text-slate-700 underline"
+          className="text-sm font-medium text-gray-700 underline"
         >
           Change
         </button>
@@ -59,12 +59,12 @@ export function LocationSettings({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-slate-200 p-4"
+      className="rounded-lg border border-gray-200 p-4"
     >
-      <p className="text-sm font-medium text-slate-900">
+      <p className="text-sm font-medium text-gray-900">
         Set your area to filter the feed
       </p>
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-xs text-gray-500">
         We only ever use the city you pick here, never your exact location.
         Traveling for a tournament? Just change this to wherever you are.
       </p>
@@ -72,7 +72,7 @@ export function LocationSettings({
         <div>
           <label
             htmlFor="home_city_id"
-            className="block text-xs font-medium text-slate-900"
+            className="block text-xs font-medium text-gray-900"
           >
             City
           </label>
@@ -80,7 +80,7 @@ export function LocationSettings({
             id="home_city_id"
             name="home_city_id"
             defaultValue={homeCityId ?? ""}
-            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           >
             <option value="">Not set</option>
             {cities.map((city) => (
@@ -93,7 +93,7 @@ export function LocationSettings({
         <div>
           <label
             htmlFor="radius_miles"
-            className="block text-xs font-medium text-slate-900"
+            className="block text-xs font-medium text-gray-900"
           >
             Radius
           </label>
@@ -101,7 +101,7 @@ export function LocationSettings({
             id="radius_miles"
             name="radius_miles"
             defaultValue={radiusMiles ?? ""}
-            className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           >
             <option value="">Any distance</option>
             {RADIUS_OPTIONS.map((mi) => (
@@ -115,7 +115,7 @@ export function LocationSettings({
       <button
         type="submit"
         disabled={submitting}
-        className="mt-3 w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+        className="mt-3 w-full rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
       >
         {submitting ? "Saving..." : "Save"}
       </button>

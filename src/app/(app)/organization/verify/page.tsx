@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/pitchlink/back-link";
 import { OrganizationVerifyForm } from "./verify-form";
 
 export default async function OrganizationVerifyPage() {
@@ -31,30 +31,28 @@ export default async function OrganizationVerifyPage() {
 
   return (
     <main className="mx-auto max-w-sm px-6 py-12">
-      <Link href="/dashboard" className="text-sm text-slate-500 underline">
-        ← Back to dashboard
-      </Link>
+      <BackLink href="/dashboard" label="Back to dashboard" />
 
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
+      <h1 className="mt-3 text-xl font-semibold text-gray-900">
         Organization verification
       </h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm text-gray-600">
         Before you can post tournament or event listings to the local feed,
         we confirm your organization. An admin reviews every request.
       </p>
 
       <div className="mt-8">
         {verification?.status === "pending" ? (
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-gray-600">
             Your request to verify{" "}
-            <span className="font-medium text-slate-900">
+            <span className="font-medium text-gray-900">
               {verification.org_name}
             </span>{" "}
             is under review.
           </p>
         ) : verification?.status === "approved" ? (
-          <p className="text-sm text-slate-600">
-            <span className="font-medium text-slate-900">
+          <p className="text-sm text-gray-600">
+            <span className="font-medium text-gray-900">
               {verification.org_name}
             </span>{" "}
             is verified. You can now post tournament and event listings to

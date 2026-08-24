@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BackLink } from "@/components/pitchlink/back-link";
 import { FeedCard, type FeedItem } from "../../feed-card";
+import { fetchOEmbedPreview } from "@/lib/oembed/server";
 import {
   startConversationWithParent,
   startConversationWithFeedPostAuthor,
@@ -24,7 +25,7 @@ export default async function FeedPostDetailPage({
     supabase
       .from("feed_posts")
       .select(
-        "id, post_type, author_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, event_date, event_time, location, signup_url, created_at, city:cities(name), author:profiles(full_name)"
+        "id, post_type, author_id, player_id, birth_year, positions, description, cost_cents, duration_minutes, event_date, event_time, location, signup_url, created_at, city:cities(name), author:profiles(full_name), player:players(first_name, last_initial), highlight:player_highlights(url, caption, theme)"
       )
       .eq("id", id)
       .single(),
@@ -40,7 +41,12 @@ export default async function FeedPostDetailPage({
 
   const city = post.city as unknown as { name: string } | null;
   const author = post.author as unknown as { full_name: string } | null;
+  const player = post.player as unknown as { first_name: string; last_initial: string } | null;
+  const highlight = post.highlight as unknown as { url: string; caption: string | null; theme: string | null } | null;
   const viewerRole = viewerProfile?.role ?? null;
+
+  const highlightPreview =
+    post.post_type === "highlight" && highlight ? await fetchOEmbedPreview(highlight.url) : null;
 
   // A coach messaging the family behind a looking_for_team/guest_play
   // post -- no new discovery context needed, this reuses the same
@@ -81,7 +87,23 @@ export default async function FeedPostDetailPage({
   const canDelete = post.author_id === userData.user.id;
 
   const item: FeedItem =
-    post.post_type === "org_event"
+    post.post_type === "highlight" && player && highlight
+      ? {
+          kind: "highlight",
+          id: post.id,
+          playerFirstName: player.first_name,
+          playerLastInitial: player.last_initial,
+          cityName: city?.name ?? "",
+          caption: highlight.caption,
+          theme: highlight.theme,
+          thumbnailUrl: highlightPreview?.thumbnailUrl ?? null,
+          linkUrl: highlight.url,
+          createdAt: post.created_at,
+          likeCount,
+          likedByMe,
+          canDelete,
+        }
+      : post.post_type === "org_event"
       ? {
           kind: "org_event",
           id: post.id,
@@ -139,16 +161,14 @@ export default async function FeedPostDetailPage({
 
   return (
     <main className="mx-auto max-w-lg px-6 py-12">
-      <Link href="/feed" className="text-sm text-slate-500 underline">
-        ← Back to feed
-      </Link>
+      <BackLink href="/feed" label="Back to feed" />
       <div className="mt-4">
         <FeedCard item={item} />
       </div>
 
       {messagePlayer ? (
-        <div className="mt-6 border-t border-slate-200 pt-6">
-          <h2 className="text-sm font-medium text-slate-900">
+        <div className="mt-6 border-t border-gray-200 pt-6">
+          <h2 className="text-sm font-medium text-gray-900">
             Message the family
           </h2>
           <form
@@ -160,11 +180,11 @@ export default async function FeedPostDetailPage({
               rows={2}
               required
               placeholder={`Introduce yourself and the opportunity at your club...`}
-              className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
             <button
               type="submit"
-              className="shrink-0 self-start rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              className="shrink-0 self-start rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800"
             >
               Send
             </button>
@@ -173,8 +193,8 @@ export default async function FeedPostDetailPage({
       ) : null}
 
       {canMessageFeedPostAuthor ? (
-        <div className="mt-6 border-t border-slate-200 pt-6">
-          <h2 className="text-sm font-medium text-slate-900">
+        <div className="mt-6 border-t border-gray-200 pt-6">
+          <h2 className="text-sm font-medium text-gray-900">
             Message {author?.full_name ?? "the coach"}
           </h2>
           <form
@@ -186,11 +206,11 @@ export default async function FeedPostDetailPage({
               rows={2}
               required
               placeholder="Ask for more information..."
-              className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+              className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
             <button
               type="submit"
-              className="shrink-0 self-start rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+              className="shrink-0 self-start rounded-md bg-gray-900 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-800"
             >
               Send
             </button>

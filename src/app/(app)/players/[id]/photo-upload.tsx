@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { setPlayerPhoto } from "../actions";
+import { ImageWithFallback } from "@/components/ui/image-with-fallback";
 
 const MAX_DIMENSION = 512;
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -35,10 +36,12 @@ export function PhotoUpload({
   playerId,
   parentId,
   currentPhotoUrl,
+  verified = false,
 }: {
   playerId: string;
   parentId: string;
   currentPhotoUrl: string | null;
+  verified?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(currentPhotoUrl);
@@ -89,10 +92,25 @@ export function PhotoUpload({
 
   return (
     <div className="flex items-center gap-4">
-      <div className="h-16 w-16 overflow-hidden rounded-full bg-slate-100">
-        {preview ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="" className="h-full w-full object-cover" />
+      <div className="relative h-[84px] w-[84px] shrink-0">
+        <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-2 border-white bg-gray-200 shadow-[0_2px_8px_rgba(15,23,42,0.1)]">
+          {preview ? (
+            <ImageWithFallback
+              src={preview}
+              alt=""
+              className="h-full w-full object-cover"
+              fallback={<PhotoPlaceholderGlyph />}
+            />
+          ) : (
+            <PhotoPlaceholderGlyph />
+          )}
+        </div>
+        {verified ? (
+          <span className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-green-600">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" className="h-3 w-3">
+              <path d="m5 12.5 4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
         ) : null}
       </div>
       <div>
@@ -100,7 +118,7 @@ export function PhotoUpload({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:border-slate-400 disabled:opacity-60"
+          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:border-gray-400 disabled:opacity-60"
         >
           {uploading ? "Uploading..." : "Upload photo"}
         </button>
@@ -114,5 +132,15 @@ export function PhotoUpload({
         {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}
       </div>
     </div>
+  );
+}
+
+function PhotoPlaceholderGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.6" className="h-7 w-7">
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M8 7 9.5 4h5L16 7" />
+      <circle cx="12" cy="13.5" r="3.5" />
+    </svg>
   );
 }

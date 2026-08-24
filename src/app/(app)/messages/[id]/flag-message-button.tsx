@@ -8,7 +8,7 @@ export function FlagMessageButton({ messageId }: { messageId: string }) {
   const [done, setDone] = useState(false);
 
   if (done) {
-    return <p className="mt-1 text-xs text-slate-400">Reported</p>;
+    return <p className="mt-1 text-xs text-gray-400">Reported</p>;
   }
 
   if (!open) {
@@ -16,7 +16,7 @@ export function FlagMessageButton({ messageId }: { messageId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-1 text-xs text-slate-400 underline"
+        className="mt-1 text-xs text-gray-400 underline"
       >
         Report
       </button>
@@ -35,11 +35,11 @@ export function FlagMessageButton({ messageId }: { messageId: string }) {
         name="reason"
         type="text"
         placeholder="What's wrong with this message? (optional)"
-        className="rounded border border-slate-300 px-1.5 py-0.5 text-xs text-slate-900 focus:border-slate-500 focus:outline-none"
+        className="rounded border border-gray-300 px-1.5 py-0.5 text-xs text-gray-900 focus:border-gray-500 focus:outline-none"
       />
       <button
         type="submit"
-        className="text-xs font-medium text-slate-600 underline"
+        className="text-xs font-medium text-gray-600 underline"
       >
         Submit
       </button>

@@ -32,7 +32,7 @@ export function EditPlayerForm({
         onSuccess={() => setSaved(true)}
       />
       {saved ? (
-        <p className="mt-3 text-sm text-slate-600">Saved.</p>
+        <p className="mt-3 text-sm text-gray-600">Saved.</p>
       ) : null}
     </div>
   );

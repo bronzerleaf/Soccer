@@ -1,8 +1,16 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { sendMessage } from "../actions";
 import { FlagMessageButton } from "./flag-message-button";
+import { PlayerAvatar } from "@/components/ui/player-avatar";
+import { BackLink } from "@/components/pitchlink/back-link";
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 export default async function ConversationPage({
   params,
@@ -67,6 +75,13 @@ export default async function ConversationPage({
     .eq("conversation_id", id)
     .order("created_at", { ascending: true });
 
+  // Fire-and-forget-ish: viewing the thread is what "read" means here,
+  // same as any mainstream messenger. Narrow security-definer RPC, only
+  // ever touches the caller's own last-read column (migration 23).
+  if (isParticipant) {
+    await supabase.rpc("mark_conversation_read", { target_conversation_id: id });
+  }
+
   const player = conversation.player as unknown as {
     first_name: string;
     last_initial: string;
@@ -81,46 +96,53 @@ export default async function ConversationPage({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col px-6 py-12">
-      <Link href="/messages" className="text-sm text-slate-500 underline">
-        ← Back to messages
-      </Link>
+      <BackLink href="/messages" label="Back to messages" />
 
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
-        {headerName}
-      </h1>
-      {player ? (
-        <p className="mt-1 text-sm text-slate-500">
-          About {player.first_name} {player.last_initial}.
-        </p>
-      ) : null}
-      {rosterPost ? (
-        <p className="mt-1 text-sm text-slate-500">
-          Re: &ldquo;{rosterPost.description}&rdquo;
-        </p>
-      ) : null}
-      {team ? (
-        <p className="mt-1 text-sm text-slate-500">About {team.name}</p>
-      ) : null}
-      {feedPost ? (
-        <p className="mt-1 text-sm text-slate-500">
-          Re: &ldquo;{feedPost.description}&rdquo;
-        </p>
+      <div className="mt-3 flex items-center gap-3">
+        <PlayerAvatar name={headerName} size={40} />
+        <h1 className="text-lg font-semibold text-gray-900">{headerName}</h1>
+      </div>
+
+      {player || rosterPost || team || feedPost ? (
+        <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5">
+          <p className="text-xs font-semibold text-gray-500">
+            {player
+              ? "Player"
+              : rosterPost
+                ? "Opportunity"
+                : team
+                  ? "Team"
+                  : "Post"}
+          </p>
+          <p className="mt-0.5 truncate text-sm font-medium text-gray-900">
+            {player
+              ? `${player.first_name} ${player.last_initial}.`
+              : rosterPost
+                ? rosterPost.description
+                : team
+                  ? team.name
+                  : feedPost?.description}
+          </p>
+        </div>
       ) : null}
 
-      <div className="mt-6 flex-1 space-y-3">
+      <div className="mt-6 flex-1 space-y-3 pb-4">
         {(messages ?? []).map((message) => {
           const isMine = message.sender_id === userId;
           return (
             <div key={message.id} className={isMine ? "ml-auto max-w-[80%]" : "max-w-[80%]"}>
               <div
-                className={`rounded-lg px-3 py-2 text-sm ${
+                className={`rounded-2xl px-3.5 py-2.5 text-sm leading-6 ${
                   isMine
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-900"
+                    ? "rounded-br-sm bg-green-600 text-white"
+                    : "rounded-bl-sm border border-gray-200 bg-white text-gray-900"
                 }`}
               >
                 {message.body}
               </div>
+              <p className={`mt-1 text-[11px] text-gray-400 ${isMine ? "text-right" : ""}`}>
+                {formatTime(message.created_at)}
+              </p>
               {!isMine && isParticipant ? (
                 <FlagMessageButton messageId={message.id} />
               ) : null}
@@ -132,18 +154,19 @@ export default async function ConversationPage({
       {isParticipant ? (
         <form
           action={sendMessage.bind(null, id)}
-          className="mt-6 flex gap-2 border-t border-slate-200 pt-4"
+          className="sticky mt-6 flex gap-2 border-t border-gray-200 bg-[var(--pl-cream)]/95 pt-4 backdrop-blur"
+          style={{ bottom: "calc(env(safe-area-inset-bottom) + 96px)" }}
         >
           <textarea
             name="body"
             rows={2}
             required
             placeholder="Write a reply..."
-            className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="block w-full rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
           <button
             type="submit"
-            className="shrink-0 rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+            className="shrink-0 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
           >
             Send
           </button>

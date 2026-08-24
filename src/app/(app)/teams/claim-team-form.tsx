@@ -34,7 +34,7 @@ export function ClaimTeamForm({ teamId }: { teamId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-sm font-medium text-slate-700 underline"
+        className="text-sm font-medium text-gray-700 underline"
       >
         Claim this team
       </button>
@@ -48,21 +48,21 @@ export function ClaimTeamForm({ teamId }: { teamId: string }) {
         rows={2}
         required
         placeholder="How can we confirm you coach this team? A club email, a team website, or a parent who can vouch for you."
-        className="block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+        className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
       />
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <div className="flex gap-2">
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+          className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
         >
           {submitting ? "Submitting..." : "Submit claim"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-md px-3 py-1.5 text-sm font-medium text-slate-500"
+          className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-500"
         >
           Cancel
         </button>

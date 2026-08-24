@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { OEmbedPreview } from "@/lib/oembed/server";
 import { detectPlatform, type PlatformKind } from "@/lib/oembed/platform";
 import { themeMeta } from "@/lib/highlight-themes";
+import { ImageWithFallback } from "./image-with-fallback";
 
 export type Highlight = {
   id: string;
@@ -60,7 +61,7 @@ export function HighlightTile({
     (platform.kind === "photo" ? `View on ${platform.name}` : `Open on ${platform.name}`);
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-slate-200 transition-shadow hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-xl border border-gray-200 transition-shadow hover:shadow-md">
       <a href={highlight.url} target="_blank" rel="noopener noreferrer" className="block">
         <div
           className="relative aspect-square w-full overflow-hidden"
@@ -68,11 +69,18 @@ export function HighlightTile({
         >
           {preview ? (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <ImageWithFallback
                 src={preview.thumbnailUrl}
                 alt=""
                 className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                fallback={
+                  <div
+                    className="flex h-full w-full items-center justify-center"
+                    style={{ background: platform.gradient }}
+                  >
+                    <PlatformGlyph kind={platform.kind} />
+                  </div>
+                }
               />
               <span className="absolute inset-0 bg-black/10 transition-colors group-hover:bg-black/20" />
             </>
@@ -96,8 +104,8 @@ export function HighlightTile({
           ) : null}
         </div>
         <div className="px-2.5 py-2">
-          <p className="truncate text-xs font-medium text-slate-900">{caption}</p>
-          <p className="mt-0.5 truncate text-[11px] text-slate-500">
+          <p className="truncate text-xs font-medium text-gray-900">{caption}</p>
+          <p className="mt-0.5 truncate text-[11px] text-gray-500">
             {preview?.providerName ?? platform.name}
           </p>
         </div>

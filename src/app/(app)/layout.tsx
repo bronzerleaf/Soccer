@@ -53,7 +53,7 @@ export default async function AppLayout({
 
   return (
     <>
-      <div className="pb-16">{children}</div>
+      <div className="pb-24">{children}</div>
       <BottomNav
         role={role}
         coachApproved={coachApproved}

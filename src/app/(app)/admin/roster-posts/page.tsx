@@ -18,10 +18,10 @@ export default async function AdminRosterPostsPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <Link href="/admin" className="text-sm text-slate-500 underline">
+      <Link href="/admin" className="text-sm text-gray-500 underline">
         ← Admin
       </Link>
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
+      <h1 className="mt-3 text-xl font-semibold text-gray-900">
         Roster posts
       </h1>
 
@@ -41,28 +41,28 @@ export default async function AdminRosterPostsPage() {
             return (
               <li
                 key={post.id}
-                className="rounded-lg border border-slate-200 p-4"
+                className="rounded-lg border border-gray-200 p-4"
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-sm font-medium text-gray-900">
                     {club?.name} — {club?.city}
                   </p>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       isExpired
-                        ? "bg-slate-100 text-slate-600"
-                        : "bg-emerald-100 text-emerald-800"
+                        ? "bg-gray-100 text-gray-600"
+                        : "bg-green-100 text-green-800"
                     }`}
                   >
                     {isExpired ? "Expired" : "Active"}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-gray-600">
                   {post.birth_year} ·{" "}
                   {(post.positions ?? []).join(", ") || "Any position"} ·
                   posted by {coach?.full_name} ({coach?.email})
                 </p>
-                <p className="mt-2 text-sm text-slate-700">
+                <p className="mt-2 line-clamp-2 text-sm text-gray-700">
                   {post.description}
                 </p>
                 <div className="mt-3">
@@ -80,7 +80,7 @@ export default async function AdminRosterPostsPage() {
           })}
         </ul>
       ) : (
-        <p className="mt-8 text-sm text-slate-600">No roster posts yet.</p>
+        <p className="mt-8 text-sm text-gray-600">No roster posts yet.</p>
       )}
     </main>
   );

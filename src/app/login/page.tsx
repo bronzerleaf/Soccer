@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { AuthShell } from "@/components/pitchlink/auth-shell";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,19 +30,19 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/feed");
     router.refresh();
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 py-16">
-      <h1 className="text-xl font-semibold text-slate-900">Log in</h1>
+    <AuthShell>
+      <h1 className="text-xl font-semibold text-gray-900">Log in</h1>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Email
           </label>
@@ -53,14 +54,14 @@ export default function LoginPage() {
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
 
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-slate-900"
+            className="block text-sm font-medium text-gray-900"
           >
             Password
           </label>
@@ -72,7 +73,7 @@ export default function LoginPage() {
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="mt-1.5 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-slate-500 focus:outline-none"
+            className="mt-1.5 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
           />
         </div>
 
@@ -81,18 +82,18 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-md bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-60"
+          className="w-full rounded-md bg-gray-900 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-60"
         >
           {submitting ? "Logging in..." : "Log in"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-600">
+      <p className="mt-6 text-center text-sm text-gray-600">
         New to OpenRoster?{" "}
-        <Link href="/signup" className="font-medium text-slate-900 underline">
+        <Link href="/signup" className="font-medium text-gray-900 underline">
           Create an account
         </Link>
       </p>
-    </main>
+    </AuthShell>
   );
 }

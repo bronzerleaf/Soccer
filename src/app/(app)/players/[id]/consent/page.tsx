@@ -38,10 +38,10 @@ export default async function ConsentPage({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 py-16">
-      <h1 className="text-xl font-semibold text-slate-900">
+      <h1 className="text-xl font-semibold text-gray-900">
         Confirm you&rsquo;re {player.first_name}&rsquo;s parent or guardian
       </h1>
-      <p className="mt-3 text-sm leading-6 text-slate-600">
+      <p className="mt-3 text-sm leading-6 text-gray-600">
         We ask every parent to verify with a card before a player profile
         goes live. Your card will be authorized for $0.50 and released
         immediately — you are never charged.

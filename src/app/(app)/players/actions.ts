@@ -11,6 +11,8 @@ export type PlayerFormInput = {
   lastInitial: string;
   birthYear: number;
   positions: string[];
+  yearsPlaying: number | null;
+  playerLevel: string | null;
   preferredFoot: string | null;
   currentClubId: string | null;
   city: string;
@@ -22,6 +24,9 @@ export type PlayerFormInput = {
 
 function parseFormInput(formData: FormData): PlayerFormInput {
   const birthYear = Number(formData.get("birth_year"));
+  const primaryPosition = String(formData.get("primary_position") ?? "").trim();
+  const secondaryPosition = String(formData.get("secondary_position") ?? "").trim();
+  const yearsPlayingRaw = String(formData.get("years_playing") ?? "").trim();
 
   return {
     firstName: String(formData.get("first_name") ?? "").trim(),
@@ -30,7 +35,11 @@ function parseFormInput(formData: FormData): PlayerFormInput {
       .slice(0, 1)
       .toUpperCase(),
     birthYear,
-    positions: formData.getAll("positions").map(String),
+    // index 0 = primary, index 1 = secondary (PLAYER_AND_TEAM_MODEL.md) --
+    // at most two values, secondary omitted entirely when not chosen.
+    positions: [primaryPosition, secondaryPosition].filter(Boolean),
+    yearsPlaying: yearsPlayingRaw ? Number(yearsPlayingRaw) : null,
+    playerLevel: (formData.get("player_level") as string) || null,
     preferredFoot: (formData.get("preferred_foot") as string) || null,
     currentClubId: (formData.get("current_club_id") as string) || null,
     city: String(formData.get("city") ?? "").trim(),
@@ -61,6 +70,8 @@ export async function createPlayer(formData: FormData) {
       last_initial: input.lastInitial,
       birth_year: input.birthYear,
       positions: input.positions,
+      years_playing: input.yearsPlaying,
+      player_level: input.playerLevel,
       preferred_foot: input.preferredFoot,
       current_club_id: input.currentClubId,
       city: input.city,
@@ -99,6 +110,8 @@ export async function updatePlayer(playerId: string, formData: FormData) {
       last_initial: input.lastInitial,
       birth_year: input.birthYear,
       positions: input.positions,
+      years_playing: input.yearsPlaying,
+      player_level: input.playerLevel,
       preferred_foot: input.preferredFoot,
       current_club_id: input.currentClubId,
       city: input.city,

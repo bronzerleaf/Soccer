@@ -33,10 +33,10 @@ export default async function AdminMessagesPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <Link href="/admin" className="text-sm text-slate-500 underline">
+      <Link href="/admin" className="text-sm text-gray-500 underline">
         ← Admin
       </Link>
-      <h1 className="mt-3 text-xl font-semibold text-slate-900">
+      <h1 className="mt-3 text-xl font-semibold text-gray-900">
         Flagged messages
       </h1>
 
@@ -57,13 +57,13 @@ export default async function AdminMessagesPage() {
             return (
               <li
                 key={flag.id}
-                className="rounded-lg border border-slate-200 p-4"
+                className="rounded-lg border border-gray-200 p-4"
               >
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-gray-500">
                   Reported by {reporter?.full_name ?? "someone"}
                   {flag.reason ? ` — "${flag.reason}"` : ""}
                 </p>
-                <p className="mt-2 text-sm text-slate-900">
+                <p className="mt-2 text-sm text-gray-900">
                   <span className="font-medium">
                     {sender?.full_name ?? "Someone"}:
                   </span>{" "}
@@ -73,7 +73,7 @@ export default async function AdminMessagesPage() {
                   {message ? (
                     <Link
                       href={`/messages/${message.conversation_id}`}
-                      className="text-sm text-slate-700 underline"
+                      className="text-sm text-gray-700 underline"
                     >
                       View conversation
                     </Link>
@@ -92,7 +92,7 @@ export default async function AdminMessagesPage() {
           })}
         </ul>
       ) : (
-        <p className="mt-8 text-sm text-slate-600">No flagged messages.</p>
+        <p className="mt-8 text-sm text-gray-600">No flagged messages.</p>
       )}
     </main>
   );
